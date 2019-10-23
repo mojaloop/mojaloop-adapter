@@ -1,0 +1,19 @@
+{
+  "name": "iso-openapi-adapter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ISOhandle.js",
+  "dependencies": {
+    "bcd": "^1.0.0",
+    "iso_8583": "^2.6.2",
+    "node-cache": "^4.2.1",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
