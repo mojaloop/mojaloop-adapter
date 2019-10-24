@@ -1,0 +1,45 @@
+{
+  "name": "iso-openapi-adapter",
+  "version": "0.1.0",
+  "description": "Typescript Mojaloop project template",
+  "main": "dist/index.js",
+  "license": "Apache-2.0",
+  "keywords": [
+    "iso8583",
+    "adapter"
+  ],
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "lint": "standardx ./src/**/*.ts",
+    "lint:fix": "standardx --fix ./src/**/*.ts",
+    "format": "prettier-eslint --write \"./src/**/*.ts\"",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@types/hapi": "^18.0.2",
+    "bcd": "^1.0.0",
+    "hapi": "^18.1.0",
+    "iso_8583": "^2.6.2",
+    "node-cache": "^4.2.1",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.19",
+    "@types/node": "^12.11.6",
+    "@typescript-eslint/eslint-plugin": "^2.5.0",
+    "@typescript-eslint/parser": "^2.5.0",
+    "eslint-config-prettier": "^6.4.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.1",
+    "jest": "^24.9.0",
+    "prettier-eslint-cli": "^5.0.0",
+    "standardx": "^5.0.0",
+    "ts-jest": "^24.1.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.4"
+  }
+}

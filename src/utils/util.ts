@@ -19,67 +19,63 @@
  - Renjith Palamattom  <renjith@coil.com>
  --------------
  ******/
-const guid = () => {
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-        s4() + '-' + s4() + s4() + s4();
+export const guid = () => {
+  function s4 () {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1)
+  }
+  return (
+    s4() +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    '-' +
+    s4() +
+    s4() +
+    s4()
+  )
 }
 
-//console.log(guid());
+// console.log(guid());
 
-function pad(num, size) {
-
-    var s = num + "";
-    while (s.length < size) s = "0" + s;
-    return s;
+export function pad (num: any, size: number) {
+  let s = num + ''
+  while (s.length < size) s = '0' + s
+  return s
 }
 
+export function guid1 (stan: any) {
+  console.log(`stan: ${stan}`)
 
-function guid1(stan) {
-    console.log(`stan: ${stan}`)
-
-    function _p8(s) {
-        var p = (stan.toString(16) + "000000000").substr(2, 8);
-        return s ? "-" + p.substr(0, 4) + "-" + p.substr(4, 4) : p;
-    }
-    return _p8() + _p8(true) + _p8(true) + _p8();
+  function _p8 (s?: any) {
+    const p = (stan.toString(16) + '000000000').substr(2, 8)
+    return s ? '-' + p.substr(0, 4) + '-' + p.substr(4, 4) : p
+  }
+  return _p8() + _p8(true) + _p8(true) + _p8()
 }
 
-//console.log(guid1(121212));
-function addMinutes(date, minutes){
-    return new Date(date.getTime() + minutes*60000);
-}
-function generateOTP() {
-
-    // Declare a digits variable
-    // which stores all digits
-    var digits = '0123456789';
-    let OTP = '';
-    for (let i = 0; i < 4; i++) {
-        OTP += digits[Math.floor(Math.random() * 10)];
-    }
-    if (OTP.length == 4) {
-        //console.log(`in utils otp: ${OTP}`)
-       return OTP;
-    }
-    else{
-        //console.log(`in utils generating new otp`)
-        generateOTP();
-    }s
-    //return +OTP;
-    //return {}
+// console.log(guid1(121212));
+export function addMinutes (date: Date, minutes: number) {
+  return new Date(date.getTime() + minutes * 60000)
 }
 
-module.exports = {
-    guid: guid1,
-    guidRandom: guid,
-    generateOTP,
-    addMinutes, 
-    pad 
-    
-
-};
+function getRandomInt (max: number) {
+  return Math.floor(Math.random() * Math.floor(max))
+}
+export function generateOTP () {
+  // Declare a digits variable
+  // which stores all digits
+  const digits = '0123456789'
+  let OTP = ''
+  for (let i = 0; i < 4; i++) {
+    OTP += getRandomInt(10).toString()
+  }
+  return OTP
+  // return +OTP;
+  // return {}
+}
