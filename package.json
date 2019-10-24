@@ -20,7 +20,9 @@
     "test": "jest"
   },
   "dependencies": {
+    "@types/hapi": "^18.0.2",
     "bcd": "^1.0.0",
+    "hapi": "^18.1.0",
     "iso_8583": "^2.6.2",
     "node-cache": "^4.2.1",
     "node-fetch": "^2.6.0"
