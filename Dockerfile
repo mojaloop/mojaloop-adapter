@@ -15,5 +15,7 @@ RUN npm install
 # Bundle app source
 COPY . .
 
+RUN npm run build
+
 EXPOSE 6969
-CMD [ "node", "TCPServer.js" ]
+CMD [ "node", "dist/TCPServer.js" ]
