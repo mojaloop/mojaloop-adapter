@@ -19,7 +19,8 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-var-requires': 'off',
-    'padded-blocks': 'off'
+    'padded-blocks': 'off',
+    'no-useless-constructor': 'off'
   },
   overrides: [
     {
