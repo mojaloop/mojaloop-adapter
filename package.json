@@ -17,15 +17,20 @@
     "lint": "standardx ./src/**/*.ts",
     "lint:fix": "standardx --fix ./src/**/*.ts",
     "format": "prettier-eslint --write \"./src/**/*.ts\"",
+    "migrate:make": "knex migrate:make",
     "test": "jest"
   },
   "dependencies": {
     "@types/hapi": "^18.0.2",
+    "@types/knex": "^0.16.1",
+    "axios": "^0.19.0",
     "bcd": "^1.0.0",
     "hapi": "^18.1.0",
     "iso_8583": "^2.6.2",
+    "knex": "^0.19.5",
     "node-cache": "^4.2.1",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "sqlite3": "^4.1.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.19",
