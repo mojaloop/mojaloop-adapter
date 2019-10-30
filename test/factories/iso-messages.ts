@@ -27,7 +27,7 @@ function generateField7 (): string {
   return pad(month, 2, '0') + pad(day, 2, '0') + pad(hours, 2, '0') + pad(seconds, 2, '0')
 }
 
-export const ISO0100Factory = Factory.define<Partial<ISO0100>>('UserInfoFactory').attrs({
+export const ISO0100Factory = Factory.define<Partial<ISO0100>>('Iso0100Factory').attrs({
   3: '012000',
   4: '000000010000',
   49: '820',

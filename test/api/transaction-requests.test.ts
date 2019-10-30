@@ -8,7 +8,9 @@ describe('Transaction Requests API', function () {
   // TODO: swap out for knexTransactionService once it's complete
   const mockTransactionRequestService: TransactionRequestService = {
     getById: jest.fn(),
-    create: jest.fn().mockResolvedValue({ id: '123' })
+    create: jest.fn().mockResolvedValue({ id: '123' }),
+    update: jest.fn(),
+    sendToMojaHub: jest.fn()
   }
 
   const mockAccountLookupService: AccountLookUpService = {

@@ -1,6 +1,7 @@
 import { Server } from 'hapi'
 import { TransactionRequestService } from './services/transaction-request-service'
 import * as TransactionRequestController from './controllers/transaction-requests-controller'
+import * as PartiesController from './controllers/parties-controller'
 import { AccountLookUpService } from 'services/account-lookup-service'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
@@ -46,6 +47,12 @@ export function createApp (services: AdaptorServices, config?: AdaptorConfig): S
     method: 'POST',
     path: '/transactionRequests',
     handler: TransactionRequestController.create
+  })
+
+  adaptor.route({
+    method: 'PUT',
+    path: '/parties/{type}/{msisdn}',
+    handler: PartiesController.update
   })
 
   adaptor.initialize()

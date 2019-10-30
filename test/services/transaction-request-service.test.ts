@@ -1,9 +1,12 @@
 import { KnexTransactionRequestService } from '../../src/services/transaction-request-service'
+import axios, { AxiosInstance } from 'axios'
 import Knex = require('knex')
 
 describe('Example test', function () {
   let knex: Knex
   let transactionRequestService: KnexTransactionRequestService
+  const fakeHttpClient: AxiosInstance = axios.create()
+  fakeHttpClient.post = jest.fn()
 
   beforeAll(async () => {
     knex = Knex({
@@ -14,7 +17,7 @@ describe('Example test', function () {
       }
     })
 
-    transactionRequestService = new KnexTransactionRequestService(knex)
+    transactionRequestService = new KnexTransactionRequestService(knex, fakeHttpClient)
   })
 
   beforeEach(async () => {
@@ -29,6 +32,6 @@ describe('Example test', function () {
     await knex.destroy()
   })
 
-  test.skip('can create a transaction request')
+  test.todo('can create a transaction request')
 
 })
