@@ -1,7 +1,10 @@
 import { createApp } from 'adaptor'
 import Knex from 'knex'
 import { KnexTransactionRequestService } from 'services/transaction-request-service'
+import { AccountLookupService } from 'services/account-lookup-service'
+import axios, { AxiosInstance } from 'axios'
 const PORT = process.env.PORT || 3000
+const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://localhost:3001'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
   client: 'mysql',
@@ -19,11 +22,16 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 })
 
 const transactionRequestService = new KnexTransactionRequestService(knex)
+const accountLookupClient: AxiosInstance = axios.create({
+  baseURL: ML_API_ADAPTOR_URL,
+  timeout: 3000
+})
+const accountLookupService = new AccountLookupService(accountLookupClient)
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
 
-  const server = createApp({ transactionRequestService }, { port: Number(PORT) })
+  const server = createApp({ transactionRequestService, accountLookupService, logger: console }, { port: PORT })
 
   await server.start()
 

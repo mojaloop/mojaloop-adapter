@@ -2,6 +2,7 @@ import Knex from 'knex'
 import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'
 export type TransactionRequest = {
   id: string;
+  transactionId: string;
   payee: Party;
   payer: PartyIdInfo;
   amount: Money;
