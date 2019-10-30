@@ -55,6 +55,12 @@ export function createApp (services: AdaptorServices, config?: AdaptorConfig): S
     handler: PartiesController.update
   })
 
+  adaptor.route({
+    method: 'GET',
+    path: '/health',
+    handler: () => { return { status: 'ok' } }
+  })
+
   adaptor.initialize()
 
   return adaptor

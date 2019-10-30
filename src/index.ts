@@ -21,7 +21,11 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
   }
 })
 
-const transactionRequestService = new KnexTransactionRequestService(knex)
+const transcationRequestClient = axios.create({
+  baseURL: ML_API_ADAPTOR_URL,
+  timeout: 3000
+})
+const transactionRequestService = new KnexTransactionRequestService(knex, transcationRequestClient)
 const accountLookupClient: AxiosInstance = axios.create({
   baseURL: ML_API_ADAPTOR_URL,
   timeout: 3000
