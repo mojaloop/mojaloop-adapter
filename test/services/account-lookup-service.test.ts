@@ -9,6 +9,6 @@ describe('Account Lookup Service', function () {
   test('gets party by msisdn and sets the ID header field to the traceId', async () => {
     await accountLookupService.requestFspIdFromMsisdn('test-id', '1234')
 
-    expect(fakeHttpClient.get).toHaveBeenCalledWith('/parties/msisdn/1234', { headers: { ID: 'test-id' } })
+    expect(fakeHttpClient.get).toHaveBeenCalledWith('/parties/msisdn/1234', { headers: { id: 'test-id' } })
   })
 })

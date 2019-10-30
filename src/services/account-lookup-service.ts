@@ -10,7 +10,7 @@ export class AccountLookupService implements AccountLookUpService {
   }
 
   async requestFspIdFromMsisdn (traceId: string, msisdn: string): Promise<void> {
-    await this._client.get(`/parties/msisdn/${msisdn}`, { headers: { ID: traceId } })
+    await this._client.get(`/parties/msisdn/${msisdn}`, { headers: { id: traceId } })
   }
 
 }
