@@ -1,0 +1,22 @@
+import { Socket } from 'net'
+import { TcpIsoMessagingClient } from '../../../src/services/iso-messaging-client'
+import { ISO0100Factory } from '../../factories/iso-messages'
+const IsoParser = require('iso_8583')
+
+describe('TCP Iso Messaging Client', function () {
+  const sock = new Socket()
+  sock.write = jest.fn()
+  const tcpIsoMessagingClient = new TcpIsoMessagingClient(sock)
+
+  describe('sendAuthorizationRequest', () => {
+    test('converts message to buffer and sends over socket', async () => {
+      const isoJsonMessage = ISO0100Factory.build()
+
+      await tcpIsoMessagingClient.sendAuthorizationRequest(isoJsonMessage)
+
+      const expectedBuffer = new IsoParser(isoJsonMessage).getBufferMessage()
+      expect(expectedBuffer).toBeInstanceOf(Buffer)
+      expect(sock.write).toHaveBeenCalledWith(expectedBuffer)
+    })
+  })
+})
