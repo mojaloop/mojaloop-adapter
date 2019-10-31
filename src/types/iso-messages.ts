@@ -1,4 +1,5 @@
 export type ISO0100 = {
+  0: string;
   3: string; // Processing code Transaction type – 01
   4: string; // Amount
   7: string; // Transmission date & time

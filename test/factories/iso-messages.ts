@@ -21,13 +21,15 @@ function generateField7 (): string {
   const now = new Date(Date.now())
   const month = (now.getUTCMonth() + 1).toString()
   const day = now.getUTCDate().toString()
+  const minutes = now.getUTCMinutes().toString()
   const hours = now.getUTCHours().toString()
   const seconds = now.getUTCSeconds().toString()
 
-  return pad(month, 2, '0') + pad(day, 2, '0') + pad(hours, 2, '0') + pad(seconds, 2, '0')
+  return pad(month, 2, '0') + pad(day, 2, '0') + pad(hours, 2, '0') + pad(minutes, 2, '0') + pad(seconds, 2, '0')
 }
 
 export const ISO0100Factory = Factory.define<Partial<ISO0100>>('Iso0100Factory').attrs({
+  0: '0100',
   3: '012000',
   4: '000000010000',
   49: '820',
