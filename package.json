@@ -18,10 +18,9 @@
     "lint:fix": "standardx --fix ./src/**/*.ts",
     "format": "prettier-eslint --write \"./src/**/*.ts\"",
     "migrate:make": "knex migrate:make",
-    "test": "LOG_LEVEL=error jest"
+    "test": "jest"
   },
   "dependencies": {
-    "@mojaloop/central-services-logger": "^8.1.2",
     "@types/hapi": "^18.0.2",
     "@types/knex": "^0.16.1",
     "axios": "^0.19.0",
@@ -34,19 +33,15 @@
     "sqlite3": "^4.1.0"
   },
   "devDependencies": {
-    "@types/faker": "^4.1.6",
     "@types/jest": "^24.0.19",
     "@types/node": "^12.11.6",
-    "@types/rosie": "0.0.36",
     "@typescript-eslint/eslint-plugin": "^2.5.0",
     "@typescript-eslint/parser": "^2.5.0",
     "eslint-config-prettier": "^6.4.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-prettier": "^3.1.1",
-    "faker": "^4.1.0",
     "jest": "^24.9.0",
     "prettier-eslint-cli": "^5.0.0",
-    "rosie": "^2.0.1",
     "standardx": "^5.0.0",
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",
