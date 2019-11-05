@@ -1,0 +1,19 @@
+WIP: Adaptor that accepts messages from legacy payment systems (ISO8583) over TCP and converts it to Mojaloop Open API requests.
+
+## Components
+### TCP Relay
+This accepts ISO8583 messages using a TCP connection and converts this into a JSON representation of the ISO8583 message. It then injects this into the Adaptor.
+
+### Adaptor
+This is an http server that exposes endpoints that accept a JSON representation of ISO8583 messages. It then maps this to appropriate Mojaloop messages and forwards them to the Mojaloop Hub. It also accepts Mojaloop Open API messages which it maps to ISO8583 messages and forwards it to the legacy payment system.
+
+### Configuration
+Some environment variables are required:
+ML_API_ADAPTOR
+INTEROP_SWITCH
+TCP_PORT
+HTTP_PORT
+KNEX_CLIENT
+
+### Running
+Run `npm start`

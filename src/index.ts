@@ -1,9 +1,11 @@
-import { createApp } from 'adaptor'
 import Knex from 'knex'
-import { KnexTransactionRequestService } from 'services/transaction-request-service'
-import { AccountLookupService } from 'services/account-lookup-service'
 import axios, { AxiosInstance } from 'axios'
-const PORT = process.env.PORT || 3000
+import { createApp } from './adaptor'
+import { KnexTransactionRequestService } from './services/transaction-request-service'
+import { AccountLookupService } from './services/account-lookup-service'
+import { createTcpRelay } from './tcp-relay'
+const HTTP_PORT = process.env.HTTP_PORT || 3000
+const TCP_PORT = process.env.TCP_PORT || 3001
 const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://localhost:3001'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
@@ -35,11 +37,13 @@ const accountLookupService = new AccountLookupService(accountLookupClient)
 const start = async (): Promise<void> => {
   let shuttingDown = false
 
-  const server = createApp({ transactionRequestService, accountLookupService, logger: console }, { port: PORT })
+  const adaptor = createApp({ transactionRequestService, accountLookupService }, { port: HTTP_PORT })
 
-  await server.start()
+  await adaptor.start()
+  adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
 
-  console.log(`Server listening on port:${PORT}`)
+  const relay = createTcpRelay(adaptor)
+  relay.listen(TCP_PORT, () => { adaptor.app.logger.info(`TCP Relay server listening on port:${TCP_PORT}`) })
 
   process.on(
     'SIGINT',
@@ -55,7 +59,8 @@ const start = async (): Promise<void> => {
         shuttingDown = true
 
         // Graceful shutdown
-        await server.stop()
+        await adaptor.stop()
+        relay.close()
         console.log('completed graceful shutdown.')
       } catch (err) {
         const errInfo =
