@@ -5,12 +5,33 @@ export interface IsoMessagingClient {
 }
 
 export class TcpIsoMessagingClient implements IsoMessagingClient {
-  constructor (private _sock: Socket) {
+
+  private _socket?: Socket
+  constructor (socket?: Socket) {
     // assumes the socket is already connected to the TCP server
+    if (socket) {
+      this._socket = socket
+    }
+  }
+
+  get socket (): Socket | undefined {
+    return this._socket
+  }
+
+  set socket (socket: Socket | undefined) {
+    this._socket = socket
+  }
+
+  send (data: Buffer): void {
+    if (!this._socket) {
+      throw new Error('Cannot send ISO message. No socket registered.')
+    }
+
+    this._socket.write(data)
   }
 
   async sendAuthorizationRequest (data: { [k: string]: any }): Promise<void> {
     const buffer: Buffer = new IsoParser(data).getBufferMessage()
-    this._sock.write(buffer)
+    this.send(buffer)
   }
 }

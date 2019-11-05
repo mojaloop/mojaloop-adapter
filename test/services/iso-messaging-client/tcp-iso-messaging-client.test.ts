@@ -19,4 +19,9 @@ describe('TCP Iso Messaging Client', function () {
       expect(sock.write).toHaveBeenCalledWith(expectedBuffer)
     })
   })
+
+  test('send throws an error if there no socket registered', async () => {
+    const noSocketClient = new TcpIsoMessagingClient()
+    await expect(() => { noSocketClient.send(Buffer.alloc(0)) }).toThrowError('Cannot send ISO message. No socket registered.')
+  })
 })
