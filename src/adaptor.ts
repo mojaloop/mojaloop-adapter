@@ -3,6 +3,7 @@ import { TransactionRequestService } from './services/transaction-request-servic
 import * as TransactionRequestController from './controllers/transaction-requests-controller'
 import * as PartiesController from './controllers/parties-controller'
 import { AccountLookUpService } from 'services/account-lookup-service'
+import { IsoMessagingClient } from 'services/iso-messaging-client'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {
@@ -28,6 +29,7 @@ declare module 'hapi' {
     transactionRequestService: TransactionRequestService;
     accountLookupService: AccountLookUpService;
     logger: Logger;
+    isoMessagingClient?: IsoMessagingClient;
   }
 }
 
@@ -60,8 +62,6 @@ export function createApp (services: AdaptorServices, config?: AdaptorConfig): S
     path: '/health',
     handler: () => { return { status: 'ok' } }
   })
-
-  adaptor.initialize()
 
   return adaptor
 }
