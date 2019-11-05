@@ -1,6 +1,6 @@
 import net from 'net'
 import { Server } from 'hapi'
-import { TcpIsoMessagingClient } from 'services/iso-messaging-client'
+import { TcpIsoMessagingClient } from './services/iso-messaging-client'
 const IsoParser = require('iso_8583')
 
 export function handleIsoMessage (data: Buffer, adaptor: Server): void {
