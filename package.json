@@ -30,6 +30,7 @@
     "knex": "^0.19.5",
     "node-cache": "^4.2.1",
     "node-fetch": "^2.6.0",
+    "pg": "^7.12.1",
     "sqlite3": "^4.1.0"
   },
   "devDependencies": {
