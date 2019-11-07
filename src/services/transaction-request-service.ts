@@ -1,13 +1,25 @@
 import Knex from 'knex'
 import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'
 export type TransactionRequest = {
-   id: number;
-  payee: string;
-  payer: string;
-  amount: string;
-  transactionType: string;
-  authenticationType?: 'OTP' | 'QRCODE' | undefined;
-  expiration?: string;
+
+  //  id: string;
+  // payee: string;
+  // payer: string;
+  // amount: string;
+  // transactionType: string;
+  // authenticationType?: 'OTP' | 'QRCODE' | undefined;
+  // expiration?: string;
+
+      id: string,
+      transactionId: string ,
+      stan: string ,
+      amount: string ,
+      currency: string ,
+      expiration: number ,
+      createdAt: number ,
+      updatedAt: number 
+
+
 }
 
 export interface TransactionRequestService {
@@ -31,10 +43,25 @@ export class KnexTransactionRequestService implements TransactionRequestService 
 
   async create (request: Partial<TransactionRequest>): Promise<TransactionRequest> {
 
-    const insertedAccountId = await this._knex<TransactionRequest>('transactionRequests').insert({
-      ...request
-    }).then(result => result[0])
+    console.log('creating transaction request..................');
 
+    const insertedAccountId = await this._knex<TransactionRequest>('transactionRequests').insert({
+      ...request,
+
+      id: '1',
+      transactionId: '456' ,
+      stan: '123456' ,
+      amount: '200' ,
+      currency: 'INR' ,
+      expiration: 1 ,
+      createdAt: 1 ,
+      updatedAt: 1 
+
+    }).then(result => result[0])
+  //   .then(result => console.log(result))
+
+  // console.log(this._knex.select().table('transactionRequests'));
+    //console.log('insertdata' + insertdata )
     const transactionRequest = await this._knex<TransactionRequest>('transactionRequests').where('id', insertedAccountId).first()
 
     if (!transactionRequest) {
