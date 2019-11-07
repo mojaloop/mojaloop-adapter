@@ -6,7 +6,8 @@ import { AccountLookupService } from './services/account-lookup-service'
 import { createTcpRelay } from './tcp-relay'
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
-const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://localhost:3001'
+const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://ml-api-adaptor.local'
+const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
   client: 'mysql',
@@ -24,7 +25,7 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 })
 
 const transcationRequestClient = axios.create({
-  baseURL: ML_API_ADAPTOR_URL,
+  baseURL: TRANSACTION_REQUESTS_URL,
   timeout: 3000
 })
 const transactionRequestService = new KnexTransactionRequestService(knex, transcationRequestClient)
