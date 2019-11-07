@@ -35,35 +35,52 @@ describe('Example test', function () {
   
     const data : Partial<TransactionRequest> = {
       
-    amount:'100',
-    expiration: 'test',
-    payee:'payee',
-    payer: 'payer',
-    transactionType: '10'  
+      id: '1' ,
+      transactionId: '456' ,
+      stan: '123456' ,
+      amount: '200' ,
+      currency: 'INR' ,
+      expiration: 1 ,
+      createdAt: 1,
+      updatedAt: 1 
+
     }
     
-   const response = await transactionRequestService.create(data)
-   expect(response).toEqual({
-    amount:'100',
-    expiration: 'test',
-    id:1,
-    payee:'payee',
-    payer: 'payer',
-   transactionType: '10'  
+  //  const response = await transactionRequestService.create(data)
+  //  expect(response).toEqual({
+  //   amount:'100',
+  //   expiration: 'test',
+  //   id:1,
+  //   payee:'payee',
+  //   payer: 'payer',
+  //  transactionType: '10'  
     
-   })
-   const response1 = await transactionRequestService.getById(1)
-    console.log('response1'+response1)
-     expect(response1).toEqual({
-      amount:'100',
-      expiration: 'test',
-      id:1,
-      payee:'payee',
-      payer: 'payer',
-     transactionType: '10' 
-    })
+  //  })
+  //**************** */
+  const response = await transactionRequestService.create(data)
+  
+  expect(response).toEqual({
+   id: '1' ,
+   transactionId: '456' ,
+   stan: '123456' ,
+   amount: '200' ,
+   currency: 'INR' ,
+   expiration: 1 ,
+   createdAt: 1 ,
+   updatedAt: 1
+})
+  //**************** */
+
+    const response1 = await transactionRequestService.getById(1)
+    console.log('response' + response1)
+  //    expect(response).toEqual({
+  //     amount:'100',
+  //     expiration: 'test',
+  //     id:1,
+  //     payee:'payee',
+  //     payer: 'payer',
+  //    transactionType: '10' 
+  //   })
 
   })
-
-
 })
