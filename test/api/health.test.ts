@@ -1,6 +1,7 @@
 import { TransactionRequestService } from '../../src/services/transaction-request-service'
 import { AccountLookUpService } from '../../src/services/account-lookup-service'
 import { createApp } from '../../src/adaptor'
+import { Server } from 'hapi'
 
 describe('Health endpoint', function () {
 
@@ -16,10 +17,14 @@ describe('Health endpoint', function () {
   const mockAccountLookupService: AccountLookUpService = {
     requestFspIdFromMsisdn: jest.fn().mockResolvedValue(undefined)
   }
-  const adaptor = createApp({
-    transactionRequestService: mockTransactionRequestService,
-    accountLookupService: mockAccountLookupService
-  }, {})
+
+  let adaptor: Server
+  beforeAll(async () => {
+    adaptor = await createApp({
+      transactionRequestService: mockTransactionRequestService,
+      accountLookupService: mockAccountLookupService
+    })
+  })
 
   test('returns status ok', async () => {
     const response = await adaptor.inject({

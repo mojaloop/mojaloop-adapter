@@ -2,6 +2,7 @@ import { ISO0100Factory } from '../factories/iso-messages'
 import { TransactionRequestService } from '../../src/services/transaction-request-service'
 import { AccountLookUpService } from '../../src/services/account-lookup-service'
 import { createApp } from '../../src/adaptor'
+import { Server } from 'hapi'
 
 describe('Transaction Requests API', function () {
 
@@ -16,10 +17,14 @@ describe('Transaction Requests API', function () {
   const mockAccountLookupService: AccountLookUpService = {
     requestFspIdFromMsisdn: jest.fn().mockResolvedValue(undefined)
   }
-  const adaptor = createApp({
-    transactionRequestService: mockTransactionRequestService,
-    accountLookupService: mockAccountLookupService
-  }, {})
+
+  let adaptor: Server
+  beforeAll(async () => {
+    adaptor = await createApp({
+      transactionRequestService: mockTransactionRequestService,
+      accountLookupService: mockAccountLookupService
+    })
+  })
 
   test('creates a transaction request from the ISO0100 message', async () => {
     const iso0100 = ISO0100Factory.build()

@@ -2,6 +2,7 @@ import { Server } from 'hapi'
 import { TransactionRequestService } from './services/transaction-request-service'
 import * as TransactionRequestController from './controllers/transaction-requests-controller'
 import * as PartiesController from './controllers/parties-controller'
+import swagger from './interface/swagger.json'
 import { AccountLookUpService } from 'services/account-lookup-service'
 import { IsoMessagingClient } from 'services/iso-messaging-client'
 const CentralLogger = require('@mojaloop/central-services-logger')
@@ -33,7 +34,7 @@ declare module 'hapi' {
   }
 }
 
-export function createApp (services: AdaptorServices, config?: AdaptorConfig): Server {
+export async function createApp (services: AdaptorServices, config?: AdaptorConfig): Promise<Server> {
 
   const adaptor = new Server(config)
 
@@ -44,23 +45,26 @@ export function createApp (services: AdaptorServices, config?: AdaptorConfig): S
     adaptor.app.logger = CentralLogger
   }
 
-  // register routes
-  adaptor.route({
-    method: 'POST',
-    path: '/transactionRequests',
-    handler: TransactionRequestController.create
-  })
-
-  adaptor.route({
-    method: 'PUT',
-    path: '/parties/{type}/{msisdn}',
-    handler: PartiesController.update
-  })
-
-  adaptor.route({
-    method: 'GET',
-    path: '/health',
-    handler: () => { return { status: 'ok' } }
+  await adaptor.register({
+    plugin: require('hapi-openapi'),
+    options: {
+      api: swagger,
+      handlers: {
+        health: {
+          get: () => ({ status: 'ok' })
+        },
+        transactionRequests: {
+          post: TransactionRequestController.create
+        },
+        parties: {
+          '{Type}': {
+            '{ID}': {
+              put: PartiesController.update
+            }
+          }
+        }
+      }
+    }
   })
 
   return adaptor

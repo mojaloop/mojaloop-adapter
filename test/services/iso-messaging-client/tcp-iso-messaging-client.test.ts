@@ -11,7 +11,7 @@ describe('TCP Iso Messaging Client', function () {
   describe('sendAuthorizationRequest', () => {
     test('converts message to buffer and sends over socket', async () => {
       const isoJsonMessage = ISO0100Factory.build()
-
+      isoJsonMessage[0] = '0100'
       await tcpIsoMessagingClient.sendAuthorizationRequest(isoJsonMessage)
 
       const expectedBuffer = new IsoParser(isoJsonMessage).getBufferMessage()

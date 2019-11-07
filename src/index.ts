@@ -38,7 +38,7 @@ const accountLookupService = new AccountLookupService(accountLookupClient)
 const start = async (): Promise<void> => {
   let shuttingDown = false
 
-  const adaptor = createApp({ transactionRequestService, accountLookupService }, { port: HTTP_PORT })
+  const adaptor = await createApp({ transactionRequestService, accountLookupService }, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)

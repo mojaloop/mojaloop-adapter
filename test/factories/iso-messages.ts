@@ -29,7 +29,6 @@ function generateField7 (): string {
 }
 
 export const ISO0100Factory = Factory.define<Partial<ISO0100>>('Iso0100Factory').attrs({
-  0: '0100',
   3: '012000',
   4: '000000010000',
   49: '820',
