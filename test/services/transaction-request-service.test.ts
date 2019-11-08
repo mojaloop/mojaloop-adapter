@@ -13,7 +13,6 @@ describe('Example test', function () {
         supportBigNumbers: true
       },
       useNullAsDefault: true
-
     })
 
     transactionRequestService = new KnexTransactionRequestService(knex)
