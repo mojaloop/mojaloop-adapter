@@ -19,4 +19,6 @@ KNEX_CLIENT
 Run `npm start`
 
 ### Flow
-<img src="./media/flow-diagram.svg" style="background: white"/>
+<img src="./media/flow-diagram-1.svg" style="background: white"/>
+<img src="./media/flow-diagram-2.svg" style="background: white"/>
+<img src="./media/flow-diagram-3.svg" style="background: white"/>
