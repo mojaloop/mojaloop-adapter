@@ -4,27 +4,16 @@ import { TransactionRequestService } from '../src/services/transaction-request-s
 import { AccountLookUpService } from '../src/services/account-lookup-service'
 import { ISO0100Factory } from './factories/iso-messages'
 import { Server } from 'hapi'
+import { AdaptorServicesFactory } from './factories/adaptor-services'
 const IsoParser = require('iso_8583')
 
 describe('TCP relay', function () {
 
-  const mockTransactionRequestService: TransactionRequestService = {
-    getById: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    sendToMojaHub: jest.fn()
-  }
-
-  const mockAccountLookupService: AccountLookUpService = {
-    requestFspIdFromMsisdn: jest.fn().mockResolvedValue(undefined)
-  }
+  const services = AdaptorServicesFactory.build()
 
   let adaptor: Server
   beforeAll(async () => {
-    adaptor = await createApp({
-      transactionRequestService: mockTransactionRequestService,
-      accountLookupService: mockAccountLookupService
-    })
+    adaptor = await createApp(services)
     adaptor.inject = jest.fn()
   })
 

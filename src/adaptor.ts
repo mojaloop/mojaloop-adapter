@@ -5,6 +5,7 @@ import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
 import { AccountLookUpService } from 'services/account-lookup-service'
 import { IsoMessagingClient } from 'services/iso-messaging-client'
+import { IsoMessageService } from 'services/iso-message-service'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {
@@ -15,6 +16,7 @@ export type AdaptorConfig = {
 export type AdaptorServices = {
   transactionRequestService: TransactionRequestService;
   accountLookupService: AccountLookUpService;
+  isoMessagesService: IsoMessageService;
   logger?: Logger;
 }
 
@@ -29,6 +31,7 @@ declare module 'hapi' {
   interface ApplicationState {
     transactionRequestService: TransactionRequestService;
     accountLookupService: AccountLookUpService;
+    isoMessagesService: IsoMessageService;
     logger: Logger;
     isoMessagingClient?: IsoMessagingClient;
   }
@@ -41,6 +44,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   // register services
   adaptor.app.transactionRequestService = services.transactionRequestService
   adaptor.app.accountLookupService = services.accountLookupService
+  adaptor.app.isoMessagesService = services.isoMessagesService
   if (!services.logger) {
     adaptor.app.logger = CentralLogger
   }

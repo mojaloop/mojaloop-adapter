@@ -1,30 +1,24 @@
 import { createApp } from '../../src/adaptor'
-import { TransactionRequestService } from '../../src/services/transaction-request-service'
-import { AccountLookUpService } from '../../src/services/account-lookup-service'
 import { PartiesPutResponseFactory } from '../factories/mojaloop-messages'
 import { Server } from 'hapi'
+import { AdaptorServicesFactory } from '../factories/adaptor-services'
 
 describe('Parties API', function () {
 
-  const mockTransactionRequestService: TransactionRequestService = {
-    getById: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn().mockImplementation((id: string, request: { [k: string]: any }) => {
-      return { id, payer: { fspId: request.payer.fspId } }
-    }),
-    sendToMojaHub: jest.fn()
-  }
-
-  const mockAccountLookupService: AccountLookUpService = {
-    requestFspIdFromMsisdn: jest.fn().mockResolvedValue(undefined)
-  }
+  const services = AdaptorServicesFactory.build({
+    transactionRequestService: {
+      getById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn().mockImplementation((id: string, request: { [k: string]: any }) => {
+        return { id, payer: { fspId: request.payer.fspId } }
+      }),
+      sendToMojaHub: jest.fn().mockResolvedValue(undefined)
+    }
+  })
 
   let adaptor: Server
   beforeAll(async () => {
-    adaptor = await createApp({
-      transactionRequestService: mockTransactionRequestService,
-      accountLookupService: mockAccountLookupService
-    })
+    adaptor = await createApp(services)
   })
 
   test('updates the fspId of the payer in the transaction request', async () => {
@@ -38,7 +32,7 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(mockTransactionRequestService.update).toHaveBeenCalledWith('123', { payer: { fspId: putPartiesResponse.party.partyIdInfo.fspId } })
+    expect(services.transactionRequestService.update).toHaveBeenCalledWith('123', { payer: { fspId: putPartiesResponse.party.partyIdInfo.fspId } })
   })
 
   test('makes a transaction request to the Moja switch', async () => {
@@ -52,6 +46,6 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(mockTransactionRequestService.sendToMojaHub).toHaveBeenCalledWith({ id: '123', payer: { fspId: putPartiesResponse.party.partyIdInfo.fspId } })
+    expect(services.transactionRequestService.sendToMojaHub).toHaveBeenCalledWith({ id: '123', payer: { fspId: putPartiesResponse.party.partyIdInfo.fspId } })
   })
 })
