@@ -1,6 +1,4 @@
 import { ISO0100Factory } from '../factories/iso-messages'
-import { TransactionRequestService } from '../../src/services/transaction-request-service'
-import { AccountLookUpService } from '../../src/services/account-lookup-service'
 import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
@@ -30,6 +28,9 @@ describe('Transaction Requests API', function () {
       url: '/transactionRequests',
       payload: iso0100
     })
+
+    expect(response.statusCode).toBe(200)
+    expect(services.isoMessagesService.create).toHaveBeenCalledWith({ transactionRequestId: '123', ...iso0100 })
   })
 
   test('creates a transaction request from the ISO0100 message', async () => {
