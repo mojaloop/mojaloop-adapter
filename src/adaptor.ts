@@ -3,9 +3,9 @@ import { TransactionRequestService } from './services/transaction-request-servic
 import * as TransactionRequestController from './controllers/transaction-requests-controller'
 import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
-import { AccountLookUpService } from 'services/account-lookup-service'
-import { IsoMessagingClient } from 'services/iso-messaging-client'
-import { IsoMessageService } from 'services/iso-message-service'
+import { AccountLookUpService } from './services/account-lookup-service'
+import { IsoMessagingClient } from './services/iso-messaging-client'
+import { IsoMessageService } from './services/iso-message-service'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {
