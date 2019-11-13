@@ -1,10 +1,14 @@
-import { createApp } from 'adaptor'
 import Knex from 'knex'
-import { KnexTransactionRequestService } from 'services/transaction-request-service'
-import { AccountLookupService } from 'services/account-lookup-service'
 import axios, { AxiosInstance } from 'axios'
-const PORT = process.env.PORT || 3000
-const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://localhost:3001'
+import { createApp } from './adaptor'
+import { KnexTransactionRequestService } from './services/transaction-request-service'
+import { AccountLookupService } from './services/account-lookup-service'
+import { createTcpRelay } from './tcp-relay'
+import { KnexIsoMessageService } from 'services/iso-message-service'
+const HTTP_PORT = process.env.HTTP_PORT || 3000
+const TCP_PORT = process.env.TCP_PORT || 3001
+const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://ml-api-adaptor.local'
+const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
   client: 'mysql',
@@ -22,7 +26,7 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 })
 
 const transcationRequestClient = axios.create({
-  baseURL: ML_API_ADAPTOR_URL,
+  baseURL: TRANSACTION_REQUESTS_URL,
   timeout: 3000
 })
 const transactionRequestService = new KnexTransactionRequestService(knex, transcationRequestClient)
@@ -31,15 +35,18 @@ const accountLookupClient: AxiosInstance = axios.create({
   timeout: 3000
 })
 const accountLookupService = new AccountLookupService(accountLookupClient)
+const isoMessagesService = new KnexIsoMessageService(knex)
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
 
-  const server = createApp({ transactionRequestService, accountLookupService, logger: console }, { port: PORT })
+  const adaptor = await createApp({ transactionRequestService, accountLookupService, isoMessagesService }, { port: HTTP_PORT })
 
-  await server.start()
+  await adaptor.start()
+  adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
 
-  console.log(`Server listening on port:${PORT}`)
+  const relay = createTcpRelay(adaptor)
+  relay.listen(TCP_PORT, () => { adaptor.app.logger.info(`TCP Relay server listening on port:${TCP_PORT}`) })
 
   process.on(
     'SIGINT',
@@ -55,7 +62,8 @@ const start = async (): Promise<void> => {
         shuttingDown = true
 
         // Graceful shutdown
-        await server.stop()
+        await adaptor.stop()
+        relay.close()
         console.log('completed graceful shutdown.')
       } catch (err) {
         const errInfo =

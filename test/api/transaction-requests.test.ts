@@ -1,25 +1,37 @@
 import { ISO0100Factory } from '../factories/iso-messages'
-import { TransactionRequestService } from '../../src/services/transaction-request-service'
-import { AccountLookUpService } from '../../src/services/account-lookup-service'
 import { createApp } from '../../src/adaptor'
+import { Server } from 'hapi'
+import { AdaptorServicesFactory } from '../factories/adaptor-services'
 
 describe('Transaction Requests API', function () {
 
   // TODO: swap out for knexTransactionService once it's complete
-  const mockTransactionRequestService: TransactionRequestService = {
-    getById: jest.fn(),
-    create: jest.fn().mockResolvedValue({ id: '123' }),
-    update: jest.fn(),
-    sendToMojaHub: jest.fn()
-  }
+  const services = AdaptorServicesFactory.build({
+    transactionRequestService: {
+      getById: jest.fn(),
+      create: jest.fn().mockResolvedValue({ id: '123' }),
+      update: jest.fn(),
+      sendToMojaHub: jest.fn()
+    }
+  })
 
-  const mockAccountLookupService: AccountLookUpService = {
-    requestFspIdFromMsisdn: jest.fn().mockResolvedValue(undefined)
-  }
-  const adaptor = createApp({
-    transactionRequestService: mockTransactionRequestService,
-    accountLookupService: mockAccountLookupService
-  }, {})
+  let adaptor: Server
+  beforeAll(async () => {
+    adaptor = await createApp(services)
+  })
+
+  test('stores the ISO0100 message', async () => {
+    const iso0100 = ISO0100Factory.build()
+
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/transactionRequests',
+      payload: iso0100
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(services.isoMessagesService.create).toHaveBeenCalledWith({ transactionRequestId: '123', ...iso0100 })
+  })
 
   test('creates a transaction request from the ISO0100 message', async () => {
     const iso0100 = ISO0100Factory.build()
@@ -31,7 +43,7 @@ describe('Transaction Requests API', function () {
     })
 
     expect(response.statusCode).toEqual(200)
-    expect(mockTransactionRequestService.create).toBeCalledWith({
+    expect(services.transactionRequestService.create).toBeCalledWith({
       payer: {
         partyIdType: 'MSISDN',
         partyIdentifier: iso0100[102]
@@ -67,7 +79,7 @@ describe('Transaction Requests API', function () {
     })
 
     expect(response.statusCode).toEqual(200)
-    expect(mockAccountLookupService.requestFspIdFromMsisdn).toHaveBeenCalledWith('123', iso0100[102])
+    expect(services.accountLookupService.requestFspIdFromMsisdn).toHaveBeenCalledWith('123', iso0100[102])
   })
 
 })

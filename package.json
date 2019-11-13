@@ -18,7 +18,12 @@
     "lint:fix": "standardx --fix ./src/**/*.ts",
     "format": "prettier-eslint --write \"./src/**/*.ts\"",
     "migrate:make": "knex migrate:make",
+<<<<<<< HEAD
     "test": "jest"
+=======
+    "start": "npm run build && node dist/index.js",
+    "test": "LOG_LEVEL=error jest"
+>>>>>>> origin/master
   },
   "dependencies": {
     "@types/hapi": "^18.0.2",
@@ -26,6 +31,7 @@
     "axios": "^0.19.0",
     "bcd": "^1.0.0",
     "hapi": "^18.1.0",
+    "hapi-openapi": "^1.2.4",
     "iso_8583": "^2.6.2",
     "knex": "^0.19.5",
     "node-cache": "^4.2.1",
