@@ -12,6 +12,7 @@ export class KnexIsoMessageService implements IsoMessageService {
   async create (request: Partial<ISOMessage>): Promise<ISOMessage> {
 
     const result = await this._knex('isoMessages').insert({
+      transactionRequestId: request.transactionRequestId,
       mti: request[0],
       stan: request[11],
       content: JSON.stringify(request)

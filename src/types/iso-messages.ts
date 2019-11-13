@@ -1,5 +1,6 @@
 export type ISO0100 = {
   id: number;
+  transactionRequestId: string;
   0: string; // MTI
   3: string; // Processing code Transaction type – 01
   4: string; // Amount
@@ -16,6 +17,7 @@ export type ISO0100 = {
 
 export type ISO0110 = {
   id: number;
+  transactionRequestId: string;
   0: string; // MTI
   3: string; // Processing code Transaction type – 01
   7: string; // Transmission date & time
