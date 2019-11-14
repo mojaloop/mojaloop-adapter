@@ -7,15 +7,14 @@ exports.up = function(knex) {
             table.string('stan')
             table.string('amount')
             table.string('currency',3)
-            table.integer('expiration')
-            table.integer('createdAt')
-            table.integer('updatedAt')
+            table.string('expiration')
+            table.timestamps(true, true)
            })
         };
 
 exports.down = function(knex) {
     return knex.schema.dropTableIfExists('transactionRequests')                             
-  
+   
 };
 
 

@@ -34,7 +34,8 @@
     "knex": "^0.19.5",
     "node-cache": "^4.2.1",
     "node-fetch": "^2.6.0",
-    "sqlite3": "^4.1.0"
+    "sqlite3": "^4.1.0",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "@types/faker": "^4.1.6",

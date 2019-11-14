@@ -1,9 +1,30 @@
 import Knex from 'knex'
-import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'
-export type TransactionRequest = {
+import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'  
+import { AxiosInstance } from 'axios'
+const uuidv4 = require('uuid/v4')
+  
+  export type DBTransactionParty = {
+    fspid: string;
+    transactionRequestId: string;
+    type: string;
+    identifierType: string;
+    identifier: string;
+    subIdorType: string;
+  }
 
-  id: string;
-  transactionId: string;
+  export type DBTransactionRequest = {
+      id: string
+      transactionId: string
+      stan: string
+      amount: string
+      currency: string
+      expiration?: string
+    }
+
+export type TransactionRequest = {
+  id?: string;
+  transactionId?: string;
+  stan:string;
   payee: Party;
   payer: PartyIdInfo;
   amount: Money;
@@ -11,6 +32,7 @@ export type TransactionRequest = {
   authenticationType?: 'OTP' | 'QRCODE' | undefined;
   expiration?: string;
 }
+
 
 export interface TransactionRequestService {
   getById (id: string): Promise<TransactionRequest>;
@@ -29,77 +51,53 @@ export class KnexTransactionRequestService implements TransactionRequestService 
     if (!transactionRequest) {
       throw new Error('Error inserting transaction request into database')
     }
-
     return transactionRequest
   }
-
-  async create (request: Partial<TransactionRequest>): Promise<TransactionRequest> {
-
-    console.log('creating transaction request..................');
-
+  async create (request: TransactionRequest): Promise<TransactionRequest> {
+    
     // create payer in parties table
-    const payee = await this._knex('transactionParties').insert({
-      
-      id : request.id ,
-      transactionRequestId:request.transactionRequestId,
+      const transactionRequestId = uuidv4()
+      const payee = await this._knex<DBTransactionParty>('transactionParties').insert({
+      transactionRequestId: transactionRequestId,
       type: 'payee',
-      identifierType:request.identifierType,
-      identifier:request.identifier,
-      fspid:request.fspid,
-      subIdorType:request.subIdorType,
-      createdAt:request.createdAt,
-      updatedAt:request.updatedAt
+      identifierType:request.payee.partyIdInfo.partyIdType,
+      identifier:request.payee.partyIdInfo.partyIdentifier,
+      fspid: request.payee.partyIdInfo.fspId,
+      subIdorType:request.payee.partyIdInfo.partySubIdOrType,
 
     }).then(result => result[0])
 
-    const transactionRequesttopayee = await this._knex<TransactionRequest>('transactionParties').where('id', payee).first()
-0
-    console.log('transactionRequesttopayee')
-    console.log(transactionRequesttopayee)
-
-    const payer = await this._knex('transactionParties').insert({
-      id : request.id ,
-      transactionRequestId:request.transactionRequestId,
+    const transactionRequesttopayee = await this._knex<DBTransactionParty>('transactionParties').where('id', payee).first()
+    
+    const payer = await this._knex<DBTransactionParty>('transactionParties').insert({
+      transactionRequestId: transactionRequestId,
       type: 'payer',
-      identifierType:request.identifierType,
-      identifier:request.identifier,
-      fspid:request.fspid,
-      subIdorType:request.subIdorType,
-      createdAt:request.createdAt,
-      updatedAt:request.updatedAt      
+      identifierType:request.payer.partyIdType,
+      identifier:request.payer.partyIdentifier,
+      fspid:request.payer.fspId,
+      subIdorType:request.payer.partySubIdOrType
     }).then(result => result[0])
 
-    const transactionRequesttopayer = await this._knex<TransactionRequest>('transactionParties').where('id', payer).first()
+    const transactionRequesttopayer = await this._knex<DBTransactionParty>('transactionParties').where('id', payer).first()
+    const insertedAccountId = await this._knex<DBTransactionRequest>('transactionRequests').insert({
 
-    console.log('transactionRequesttopayer')
-    console.log(transactionRequesttopayer)
-
-    const insertedAccountId = await this._knex<TransactionRequest>('transactionRequests').insert({
-
-      id:request.id,
-      transactionId : request.transactionId,
-      stan : request.stan,
-      amount:request.amount,
-      currency : request.currency,
-      expiration:request.expiration,
-      createdAt:request.createdAt,
-      updatedAt:request.updatedAt
+      id: transactionRequestId,
+      stan: request.stan,
+      amount:request.amount.amount,
+      currency:request.amount.currency,
+      expiration:request.expiration
       
     }).then(result => result[0])
+    
+  const dbTransactionRequest = await this._knex<DBTransactionRequest>('transactionRequests').where('id', insertedAccountId).first()
+  const transactionRequest: TransactionRequest = Object.assign({}, request)
+  transactionRequest.id = transactionRequestId
 
-
-    const transactionRequest = await this._knex<TransactionRequest>('transactionRequests').where('id', insertedAccountId).first()
-
-    if (!transactionRequest) {
-      throw new Error('Error inserting transaction request into database')
-    }
-
-    return transactionRequest
+  return transactionRequest
   }
-
   async update (id: string, request: { [k: string]: any }): Promise<TransactionRequest> {
     // TODO: update transaction request
-
+    id;
     const transactionRequest = this.getById(request.id!)
 
     return transactionRequest

@@ -1,9 +1,12 @@
 import { KnexTransactionRequestService, TransactionRequest } from '../../src/services/transaction-request-service'
 import Knex = require('knex')
+import Axios, { AxiosInstance } from 'axios'
 
 describe('Example test', function () {
   let knex: Knex
   let transactionRequestService: KnexTransactionRequestService
+  const fakeHttpClient: AxiosInstance = Axios.create()
+  fakeHttpClient.get = jest.fn()
 
   beforeAll(async () => {
     knex = Knex({
@@ -15,7 +18,7 @@ describe('Example test', function () {
       useNullAsDefault: true
     })
 
-    transactionRequestService = new KnexTransactionRequestService(knex)
+    transactionRequestService = new KnexTransactionRequestService(knex, fakeHttpClient)
   })
 
   beforeEach(async () => {
@@ -30,9 +33,9 @@ describe('Example test', function () {
     await knex.destroy()
   })
 
-  test('can create a transaction request',async () => {
+  test('can create a transaction request', async () => {
   
-    const data : Partial<TransactionRequest> = {
+    const data : TransactionRequest = {
       
       payer: {
         partyIdType: 'MSISDN',
@@ -45,6 +48,7 @@ describe('Example test', function () {
           partySubIdOrType: '123450000067890'
         }
       },
+      stan : '123456',
       amount: {
         amount: '000000010000',
         currency: '840'
@@ -61,7 +65,9 @@ describe('Example test', function () {
 
   const response = await transactionRequestService.create(data)
   
-  expect(response).toEqual({
+  expect(typeof response.id).toEqual('string')
+
+  expect(response).toMatchObject({
     payer: {
       partyIdType: 'MSISDN',
       partyIdentifier: '9605968739'
@@ -73,6 +79,7 @@ describe('Example test', function () {
         partySubIdOrType: '123450000067890'
       }
     },
+    stan : '123456',
     amount: {
       amount: '000000010000',
       currency: '840'
