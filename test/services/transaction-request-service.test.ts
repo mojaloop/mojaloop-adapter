@@ -34,44 +34,61 @@ describe('Example test', function () {
   
     const data : Partial<TransactionRequest> = {
       
-      id: '1' ,
-      transactionId: '456' ,
-      stan: '123456' ,
-      amount: '200' ,
-      currency: 'INR' ,
-      expiration: 1 ,
-      createdAt: 1,
-      updatedAt: 1 
+      payer: {
+        partyIdType: 'MSISDN',
+        partyIdentifier: '9605968739'
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType: 'DEVICE',
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
+        }
+      },
+      amount: {
+        amount: '000000010000',
+        currency: '840'
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: '20180328'
 
     }
-    
-  //  const response = await transactionRequestService.create(data)
-  //  expect(response).toEqual({
-  //   amount:'100',
-  //   expiration: 'test',
-  //   id:1,
-  //   payee:'payee',
-  //   payer: 'payer',
-  //  transactionType: '10'  
-    
-  //  })
-  //**************** */
+
   const response = await transactionRequestService.create(data)
   
   expect(response).toEqual({
-   id: '1' ,
-   transactionId: '456' ,
-   stan: '123456' ,
-   amount: '200' ,
-   currency: 'INR' ,
-   expiration: 1 ,
-   createdAt: 1 ,
-   updatedAt: 1
+    payer: {
+      partyIdType: 'MSISDN',
+      partyIdentifier: '9605968739'
+    },
+    payee: {
+      partyIdInfo: {
+        partyIdType: 'DEVICE',
+        partyIdentifier: '12345678',
+        partySubIdOrType: '123450000067890'
+      }
+    },
+    amount: {
+      amount: '000000010000',
+      currency: '840'
+    },
+    transactionType: {
+      initiator: 'PAYEE',
+      initiatorType: 'DEVICE',
+      scenario: 'WITHDRAWAL'
+    },
+    authenticationType: 'OTP',
+    expiration: '20180328'
 })
   //**************** */
 
-    const response1 = await transactionRequestService.getById(1)
-    console.log('response' + response1)
+   // const response1 = await transactionRequestService.getById(1)
+  //  console.log('response' + response1)
   //    expect(response).toEqual({
   //     amount:'100',
   //     expiration: 'test',
