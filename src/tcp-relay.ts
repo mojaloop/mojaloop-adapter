@@ -11,7 +11,7 @@ export function handleIsoMessage (data: Buffer, adaptor: Server): void {
     case '0100':
       adaptor.inject({
         method: 'POST',
-        url: '/transactionRequests',
+        url: '/iso8583/transactionRequests',
         payload: isoMessage
       })
       break

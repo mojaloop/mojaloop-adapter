@@ -5,10 +5,12 @@ import { KnexTransactionRequestService } from './services/transaction-request-se
 import { AccountLookupService } from './services/account-lookup-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from 'services/iso-message-service'
+import { MojaloopQuotesService } from 'services/quotes-service'
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
 const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://ml-api-adaptor.local'
 const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
+const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
   client: 'mysql',
@@ -37,10 +39,16 @@ const accountLookupClient: AxiosInstance = axios.create({
 const accountLookupService = new AccountLookupService(accountLookupClient)
 const isoMessagesService = new KnexIsoMessageService(knex)
 
+const quotesClient: AxiosInstance = axios.create({
+  baseURL: QUOTE_REQUESTS_URL,
+  timeout: 3000
+})
+const quotesService = new MojaloopQuotesService(quotesClient)
+
 const start = async (): Promise<void> => {
   let shuttingDown = false
 
-  const adaptor = await createApp({ transactionRequestService, accountLookupService, isoMessagesService }, { port: HTTP_PORT })
+  const adaptor = await createApp({ transactionRequestService, accountLookupService, isoMessagesService, quotesService }, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
