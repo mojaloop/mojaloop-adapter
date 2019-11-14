@@ -1,10 +1,9 @@
 import { createApp } from '../src/adaptor'
 import { handleIsoMessage } from '../src/tcp-relay'
-import { TransactionRequestService } from '../src/services/transaction-request-service'
-import { AccountLookUpService } from '../src/services/account-lookup-service'
-import { ISO0100Factory } from './factories/iso-messages'
+import { iso0100BinaryMessage } from './factories/iso-messages'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from './factories/adaptor-services'
+
 const IsoParser = require('iso_8583')
 
 describe('TCP relay', function () {
@@ -18,16 +17,15 @@ describe('TCP relay', function () {
   })
 
   test('maps 0100 message to the transactionRequests endpoint', async () => {
-    const iso0100Json = ISO0100Factory.build()
-    iso0100Json[0] = '0100'
-    const iso0100: Buffer = new IsoParser(iso0100Json).getBufferMessage()
+    const iso0100 = iso0100BinaryMessage
+    const isoMessage = new IsoParser().getIsoJSON(iso0100)
 
     handleIsoMessage(iso0100, adaptor)
 
     expect(adaptor.inject).toHaveBeenCalledWith({
       method: 'POST',
       url: '/transactionRequests',
-      payload: iso0100Json
+      payload: isoMessage
     })
   })
 })
