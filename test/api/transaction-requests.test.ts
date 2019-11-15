@@ -67,6 +67,33 @@ describe('Transaction Requests API', function () {
       authenticationType: 'OTP',
       expiration: '20180328'
     })
+    expect(services.transactionRequestService.getById).toBeCalledWith({
+      payer: {
+        partyIdType: 'MSISDN',
+        partyIdentifier: '9605968739'
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType: 'DEVICE',
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
+        }
+      },
+      amount: {
+        amount: '000000010000',
+        currency: '840'
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: '20180328'
+    })
+
+    })
+
   })
 
   test('Requests an account lookup and uses the transactionRequestId as the traceId', async () => {

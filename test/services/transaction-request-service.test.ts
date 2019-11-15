@@ -64,46 +64,35 @@ describe('Example test', function () {
     }
 
   const response = await transactionRequestService.create(data)
-  
-  expect(typeof response.id).toEqual('string')
 
-  expect(response).toMatchObject({
-    payer: {
-      partyIdType: 'MSISDN',
-      partyIdentifier: '9605968739'
-    },
-    payee: {
-      partyIdInfo: {
-        partyIdType: 'DEVICE',
-        partyIdentifier: '12345678',
-        partySubIdOrType: '123450000067890'
-      }
-    },
-    stan : '123456',
-    amount: {
-      amount: '000000010000',
-      currency: '840'
-    },
-    transactionType: {
-      initiator: 'PAYEE',
-      initiatorType: 'DEVICE',
-      scenario: 'WITHDRAWAL'
-    },
-    authenticationType: 'OTP',
-    expiration: '20180328'
+const response1 = await transactionRequestService.getById(response.id!)
+
+expect(response1).toMatchObject({
+  payer: {
+    partyIdType: 'MSISDN',
+    partyIdentifier: '9605968739'
+  },
+  payee: {
+    partyIdInfo: {
+      partyIdType: 'DEVICE',
+      partyIdentifier: '12345678',
+      partySubIdOrType: '123450000067890'
+    }
+  },
+  stan : '123456',
+  amount: {
+    amount: '000000010000',
+    currency: '840'
+  },
+  transactionType: {
+    initiator: 'PAYEE',
+    initiatorType: 'DEVICE',
+    scenario: 'WITHDRAWAL'
+  },
+  authenticationType: 'OTP',
+  expiration: '20180328'
+
 })
-  //**************** */
+})
 
-   // const response1 = await transactionRequestService.getById(1)
-  //  console.log('response' + response1)
-  //    expect(response).toEqual({
-  //     amount:'100',
-  //     expiration: 'test',
-  //     id:1,
-  //     payee:'payee',
-  //     payer: 'payer',
-  //    transactionType: '10' 
-  //   })
-
-  })
 })

@@ -18,7 +18,7 @@ const uuidv4 = require('uuid/v4')
       stan: string
       amount: string
       currency: string
-      expiration?: string
+      expiration: string
     }
 
 export type TransactionRequest = {
@@ -33,30 +33,63 @@ export type TransactionRequest = {
   expiration?: string;
 }
 
-
 export type  TransactactionParty={
 fspid:string;
 transactionRequestId:String;
 type:string
 identifier:string;
 subIDosType:string;
-
 }
-
 export interface TransactionRequestService {
   getById (id: string): Promise<TransactionRequest>;
   create (request: Partial<TransactionRequest>): Promise<TransactionRequest>;
   update (id: string, request: { [k: string]: any }): Promise<TransactionRequest>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
 }
-
 export class KnexTransactionRequestService implements TransactionRequestService {
   constructor (private _knex: Knex, private _client: AxiosInstance) {
   }
-
   async getById (id: string): Promise<TransactionRequest> {
-    const transactionRequest = await this._knex<TransactionRequest>('transactionRequests').where('id', id).first()
+    const transactionRequestFromPartyPayee : DBTransactionParty | undefined = await this._knex<DBTransactionParty>('transactionParties').where('transactionRequestId', id).where('type','payee').first();
+    const transactionRequestFromPartyPayer : DBTransactionParty | undefined = await this._knex<DBTransactionParty>('transactionParties').where('transactionRequestId', id).where('type','payer').first();
+    const transactionRequestResponse : DBTransactionRequest | undefined  = await this._knex<DBTransactionRequest>('transactionRequests').where('id', id).first();
+    
+    if (!transactionRequestResponse) {
+      throw new Error('Error inserting transaction request into database')
+    }
+    if (!transactionRequestFromPartyPayee) {
+      throw new Error('Error inserting transaction request into database')
+    }
+    if (!transactionRequestFromPartyPayer) {
+      throw new Error('Error inserting transaction request into database')
+    }
+    
 
+    const transactionRequest: TransactionRequest = {
+      payer: {
+        partyIdType:transactionRequestFromPartyPayer.identifierType,
+        partyIdentifier: transactionRequestFromPartyPayer.identifier
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType:  transactionRequestFromPartyPayee.identifierType,
+          partyIdentifier: transactionRequestFromPartyPayee.identifier,
+          partySubIdOrType: transactionRequestFromPartyPayee.subIdorType
+        }
+      },
+      stan:transactionRequestResponse.stan,
+      amount: {
+        amount: transactionRequestResponse.amount,
+        currency:transactionRequestResponse.currency
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: transactionRequestResponse.expiration.toString()
+    }
     if (!transactionRequest) {
       throw new Error('Error inserting transaction request into database')
     }
