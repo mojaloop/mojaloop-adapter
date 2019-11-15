@@ -13,6 +13,16 @@ export type TransactionRequest = {
   expiration?: string;
 }
 
+
+export type  TransactactionParty={
+fspid:string;
+transactionRequestId:String;
+type:string
+identifier:string;
+subIDosType:string;
+
+}
+
 export interface TransactionRequestService {
   getById (id: string): Promise<TransactionRequest>;
   create (request: Partial<TransactionRequest>): Promise<TransactionRequest>;
