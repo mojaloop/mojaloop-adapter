@@ -1,9 +1,12 @@
 import { KnexTransactionRequestService, TransactionRequest } from '../../src/services/transaction-request-service'
 import Knex = require('knex')
+import Axios, { AxiosInstance } from 'axios'
 
 describe('Example test', function () {
   let knex: Knex
   let transactionRequestService: KnexTransactionRequestService
+  const fakeHttpClient: AxiosInstance = Axios.create()
+  fakeHttpClient.get = jest.fn()
 
   beforeAll(async () => {
     knex = Knex({
@@ -15,7 +18,7 @@ describe('Example test', function () {
       useNullAsDefault: true
     })
 
-    transactionRequestService = new KnexTransactionRequestService(knex)
+    transactionRequestService = new KnexTransactionRequestService(knex, fakeHttpClient)
   })
 
   beforeEach(async () => {
@@ -30,48 +33,69 @@ describe('Example test', function () {
     await knex.destroy()
   })
 
-  test('can create a transaction request',async () => {
+  test('can create a transaction request', async () => {
   
-    const data : Partial<TransactionRequest> = {
+    const data : TransactionRequest = {
       
-      id: '1' ,
-      transactionId: '456' ,
-      stan: '123456' ,
-      amount: '200' ,
-      currency: 'INR' ,
-      expiration: 1 ,
-      createdAt: 1,
-      updatedAt: 1 
+      payer: {
+        partyIdType: 'MSISDN',
+        partyIdentifier: '9605968739'
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType: 'DEVICE',
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
+        }
+      },
+      stan : '123456',
+      amount: {
+        amount: '000000010000',
+        currency: '840'
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: '20180328'
 
     }
-    
-  //  const response = await transactionRequestService.create(data)
-  //  expect(response).toEqual({
-  //   amount:'100',
-  //   expiration: 'test',
-  //   id:1,
-  //   payee:'payee',
-  //   payer: 'payer',
-  //  transactionType: '10'  
-    
-  //  })
-  //**************** */
+
   const response = await transactionRequestService.create(data)
   
-  expect(response).toEqual({
-   id: '1' ,
-   transactionId: '456' ,
-   stan: '123456' ,
-   amount: '200' ,
-   currency: 'INR' ,
-   expiration: 1 ,
-   createdAt: 1 ,
-   updatedAt: 1
+  expect(typeof response.id).toEqual('string')
+
+  expect(response).toMatchObject({
+    payer: {
+      partyIdType: 'MSISDN',
+      partyIdentifier: '9605968739'
+    },
+    payee: {
+      partyIdInfo: {
+        partyIdType: 'DEVICE',
+        partyIdentifier: '12345678',
+        partySubIdOrType: '123450000067890'
+      }
+    },
+    stan : '123456',
+    amount: {
+      amount: '000000010000',
+      currency: '840'
+    },
+    transactionType: {
+      initiator: 'PAYEE',
+      initiatorType: 'DEVICE',
+      scenario: 'WITHDRAWAL'
+    },
+    authenticationType: 'OTP',
+    expiration: '20180328'
 })
   //**************** */
 
-    const response1 = await transactionRequestService.getById(1)
-    console.log('response' + response1)
+   // const response1 = await transactionRequestService.getById(1)
+  //  console.log('response' + response1)
   //    expect(response).toEqual({
   //     amount:'100',
   //     expiration: 'test',

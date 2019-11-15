@@ -46,18 +46,18 @@ describe('Transaction Requests API', function () {
     expect(services.transactionRequestService.create).toBeCalledWith({
       payer: {
         partyIdType: 'MSISDN',
-        partyIdentifier: iso0100[102]
+        partyIdentifier: '9605968739'
       },
       payee: {
         partyIdInfo: {
           partyIdType: 'DEVICE',
-          partyIdentifier: iso0100[41],
-          partySubIdOrType: iso0100[42]
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
         }
       },
       amount: {
-        amount: iso0100[4],
-        currency: iso0100[49]
+        amount: '000000010000',
+        currency: '840'
       },
       transactionType: {
         initiator: 'PAYEE',
@@ -65,7 +65,7 @@ describe('Transaction Requests API', function () {
         scenario: 'WITHDRAWAL'
       },
       authenticationType: 'OTP',
-      expiration: iso0100[7]
+      expiration: '20180328'
     })
   })
 
