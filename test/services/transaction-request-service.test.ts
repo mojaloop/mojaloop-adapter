@@ -39,7 +39,8 @@ describe('Example test', function () {
       
       payer: {
         partyIdType: 'MSISDN',
-        partyIdentifier: '9605968739'
+        partyIdentifier: '9605968739',
+        fspId:'BankNrone'
       },
       payee: {
         partyIdInfo: {
@@ -101,7 +102,8 @@ test('can test a getById request', async () => {
     
     payer: {
       partyIdType: 'MSISDN',
-      partyIdentifier: '9605968739'
+      partyIdentifier: '9605968739',
+      fspId:'BankNrone'
     },
     payee: {
       partyIdInfo: {
@@ -132,7 +134,8 @@ test('can test a getById request', async () => {
   expect(response1).toMatchObject({
     payer: {
       partyIdType: 'MSISDN',
-      partyIdentifier: '9605968739'
+      partyIdentifier: '9605968739',
+      fspId:'BankNrone'
     },
     payee: {
       partyIdInfo: {
@@ -156,4 +159,68 @@ test('can test a getById request', async () => {
 
     })
   })
+  test('can test a Update Payer FspId request', async () => {
+    //
+    const data : TransactionRequest = {
+      
+      payer: {
+        partyIdType: 'MSISDN',
+        partyIdentifier: '9605968739',
+        fspId:'BankNrone'
+
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType: 'DEVICE',
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
+        }
+      },
+      stan : '123456',
+      amount: {
+        amount: '000000010000',
+        currency: '840'
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: '20180328'
+  
+    }
+    //TODO: changes inserting with knex
+    const response = await transactionRequestService.create(data)
+    const fspId='New_bank';
+    const response1 = await transactionRequestService.updatePayerFspId(response.id!,fspId)
+  
+    expect(response1).toMatchObject({
+      payer: {
+        partyIdType: 'MSISDN',
+        partyIdentifier: '9605968739',
+        fspId:'New_bank'
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType: 'DEVICE',
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
+        }
+      },
+      stan : '123456',
+      amount: {
+        amount: '000000010000',
+        currency: '840'
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: '20180328'
+  
+      })
+    })
 })

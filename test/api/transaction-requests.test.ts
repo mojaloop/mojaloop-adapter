@@ -10,7 +10,7 @@ describe('Transaction Requests API', function () {
     transactionRequestService: {
       getById: jest.fn(),
       create: jest.fn().mockResolvedValue({ id: '123' }),
-      update: jest.fn(),
+      updatePayerFspId: jest.fn(),
       sendToMojaHub: jest.fn()
     }
   })

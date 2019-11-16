@@ -43,7 +43,7 @@ subIDosType:string;
 export interface TransactionRequestService {
   getById (id: string): Promise<TransactionRequest>;
   create (request: Partial<TransactionRequest>): Promise<TransactionRequest>;
-  update (id: string, request: { [k: string]: any }): Promise<TransactionRequest>;
+ updatePayerFspId(id: string, fspId:string): Promise<TransactionRequest>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
 }
 export class KnexTransactionRequestService implements TransactionRequestService {
@@ -68,7 +68,8 @@ export class KnexTransactionRequestService implements TransactionRequestService 
     const transactionRequest: TransactionRequest = {
       payer: {
         partyIdType:transactionRequestFromPartyPayer.identifierType,
-        partyIdentifier: transactionRequestFromPartyPayer.identifier
+        partyIdentifier: transactionRequestFromPartyPayer.identifier,
+        fspId:transactionRequestFromPartyPayer.fspid
       },
       payee: {
         partyIdInfo: {
@@ -137,12 +138,20 @@ export class KnexTransactionRequestService implements TransactionRequestService 
 
   return transactionRequest
   }
-  async update (id: string, request: { [k: string]: any }): Promise<TransactionRequest> {
-    // TODO: update transaction request
-    id;
-    const transactionRequest = this.getById(request.id!)
+  async updatePayerFspId (id: string,fspId: string): Promise<TransactionRequest> {
+      
+    const test = fspId;
+    const insertedAccountId = await this._knex('transactionParties').where('transactionRequestId',id).where('type','payer').first().update('fspid', fspId)
+    const transactionRequestResponse1= this.getById(id);
+ 
+    if (!insertedAccountId) {
+      throw new Error('Error inserting transaction request into database')
+    }
 
-    return transactionRequest
+    if (!transactionRequestResponse1){
+        throw new Error('Error Updating transaction request into database')
+    }  
+    return transactionRequestResponse1
   }
 
   async sendToMojaHub (request: TransactionRequest): Promise<void> {
