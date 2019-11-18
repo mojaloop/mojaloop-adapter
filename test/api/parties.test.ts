@@ -1,24 +1,53 @@
+import Axios from 'axios'
 import { createApp } from '../../src/adaptor'
 import { PartiesPutResponseFactory } from '../factories/mojaloop-messages'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
+import Knex from 'knex'
+import { KnexTransactionRequestService } from '../../src/services/transaction-request-service'
+import { ISO0100Factory } from '../factories/iso-messages'
+
+jest.mock('uuid/v4', () => () => '123')
 
 describe('Parties API', function () {
 
-  const services = AdaptorServicesFactory.build({
-    transactionRequestService: {
-      getById: jest.fn(),
-      create: jest.fn(),
-      updatePayerFspId: jest.fn().mockImplementation((id: string, request: { [k: string]: any }) => {
-        return { id, payer: { fspId: request.payer.fspId } }
-      }),
-      sendToMojaHub: jest.fn().mockResolvedValue(undefined)
-    }
+  let knex: Knex
+  let adaptor: Server
+  const services = AdaptorServicesFactory.build()
+
+  beforeAll(async () => {
+    knex = Knex({
+      client: 'sqlite3',
+      connection: {
+        filename: ':memory:',
+        supportBigNumbers: true
+      },
+      useNullAsDefault: true
+    })
+    const httpClient = Axios.create()
+    services.transactionRequestService = new KnexTransactionRequestService(knex, httpClient)
+    services.transactionRequestService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    adaptor = await createApp(services)
   })
 
-  let adaptor: Server
-  beforeAll(async () => {
-    adaptor = await createApp(services)
+  beforeEach(async () => {
+    await knex.migrate.latest()
+    // this is the iso0100 message first being sent
+    const iso0100 = ISO0100Factory.build()
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/iso8583/transactionRequests',
+      payload: iso0100
+    })
+    expect(response.statusCode).toBe(200)
+  })
+
+  afterEach(async () => {
+    await knex.migrate.rollback()
+  })
+
+  afterAll(async () => {
+    await knex.destroy()
   })
 
   test('updates the fspId of the payer in the transaction request', async () => {
@@ -32,7 +61,8 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(services.transactionRequestService.updatePayerFspId).toHaveBeenCalledWith('123', { payer: { fspId: putPartiesResponse.party.partyIdInfo.fspId } })
+    const transactionRequest = await services.transactionRequestService.getById('123')
+    expect(transactionRequest.payer.fspId).toBe(putPartiesResponse.party.partyIdInfo.fspId)
   })
 
   test('makes a transaction request to the Moja switch', async () => {
@@ -46,6 +76,7 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(services.transactionRequestService.sendToMojaHub).toHaveBeenCalledWith({ id: '123', payer: { fspId: putPartiesResponse.party.partyIdInfo.fspId } })
+    const transactionRequest = await services.transactionRequestService.getById('123')
+    expect(services.transactionRequestService.sendToMojaHub).toHaveBeenCalledWith(transactionRequest)
   })
 })

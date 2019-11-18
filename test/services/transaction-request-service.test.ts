@@ -1,6 +1,6 @@
 import { KnexTransactionRequestService, TransactionRequest } from '../../src/services/transaction-request-service'
-import Knex = require('knex')
 import Axios, { AxiosInstance } from 'axios'
+import Knex = require('knex')
 
 describe('Example test', function () {
   let knex: Knex
@@ -34,9 +34,8 @@ describe('Example test', function () {
   })
 
   test('can create a transaction request', async () => {
-  
-    const data : TransactionRequest = {
-      
+
+    const data: TransactionRequest = {
       payer: {
         partyIdType: 'MSISDN',
         partyIdentifier: '9605968739',
@@ -49,7 +48,7 @@ describe('Example test', function () {
           partySubIdOrType: '123450000067890'
         }
       },
-      stan : '123456',
+      stan: '123456',
       amount: {
         amount: '000000010000',
         currency: '840'
@@ -64,110 +63,44 @@ describe('Example test', function () {
 
     }
 
-  const response = await transactionRequestService.create(data)
+    const response = await transactionRequestService.create(data)
 
-  const response1 = await transactionRequestService.getById(response.id!)
+    const response1 = await transactionRequestService.getById(response.id!)
 
-  expect(response1).toMatchObject({
-    payer: {
-      partyIdType: 'MSISDN',
-      partyIdentifier: '9605968739'
-    },
-    payee: {
-      partyIdInfo: {
-        partyIdType: 'DEVICE',
-        partyIdentifier: '12345678',
-        partySubIdOrType: '123450000067890'
-      }
-    },
-    stan : '123456',
-    amount: {
-      amount: '000000010000',
-      currency: '840'
-    },
-    transactionType: {
-      initiator: 'PAYEE',
-      initiatorType: 'DEVICE',
-      scenario: 'WITHDRAWAL'
-    },
-    authenticationType: 'OTP',
-    expiration: '20180328'
-
-  })
-})
-
-test('can test a getById request', async () => {
-  //
-  const data : TransactionRequest = {
-    
-    payer: {
-      partyIdType: 'MSISDN',
-      partyIdentifier: '9605968739',
-      fspId:'BankNrone'
-    },
-    payee: {
-      partyIdInfo: {
-        partyIdType: 'DEVICE',
-        partyIdentifier: '12345678',
-        partySubIdOrType: '123450000067890'
-      }
-    },
-    stan : '123456',
-    amount: {
-      amount: '000000010000',
-      currency: '840'
-    },
-    transactionType: {
-      initiator: 'PAYEE',
-      initiatorType: 'DEVICE',
-      scenario: 'WITHDRAWAL'
-    },
-    authenticationType: 'OTP',
-    expiration: '20180328'
-
-  }
-  //TODO: changes inserting with knex
-  const response = await transactionRequestService.create(data)
-
-  const response1 = await transactionRequestService.getById(response.id!)
-
-  expect(response1).toMatchObject({
-    payer: {
-      partyIdType: 'MSISDN',
-      partyIdentifier: '9605968739',
-      fspId:'BankNrone'
-    },
-    payee: {
-      partyIdInfo: {
-        partyIdType: 'DEVICE',
-        partyIdentifier: '12345678',
-        partySubIdOrType: '123450000067890'
-      }
-    },
-    stan : '123456',
-    amount: {
-      amount: '000000010000',
-      currency: '840'
-    },
-    transactionType: {
-      initiator: 'PAYEE',
-      initiatorType: 'DEVICE',
-      scenario: 'WITHDRAWAL'
-    },
-    authenticationType: 'OTP',
-    expiration: '20180328'
+    expect(response1).toMatchObject({
+      payer: {
+        partyIdType: 'MSISDN',
+        partyIdentifier: '9605968739'
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType: 'DEVICE',
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
+        }
+      },
+      stan: '123456',
+      amount: {
+        amount: '000000010000',
+        currency: '840'
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: '20180328'
 
     })
   })
-  test('can test a Update Payer FspId request', async () => {
-    //
-    const data : TransactionRequest = {
-      
+
+  test('can test a getById request', async () => {
+    const data: TransactionRequest = {
       payer: {
         partyIdType: 'MSISDN',
         partyIdentifier: '9605968739',
-        fspId:'BankNrone'
-
+        fspId: 'BankNrone'
       },
       payee: {
         partyIdInfo: {
@@ -176,7 +109,7 @@ test('can test a getById request', async () => {
           partySubIdOrType: '123450000067890'
         }
       },
-      stan : '123456',
+      stan: '123456',
       amount: {
         amount: '000000010000',
         currency: '840'
@@ -188,18 +121,17 @@ test('can test a getById request', async () => {
       },
       authenticationType: 'OTP',
       expiration: '20180328'
-  
     }
-    //TODO: changes inserting with knex
+
     const response = await transactionRequestService.create(data)
-    const fspId='New_bank';
-    const response1 = await transactionRequestService.updatePayerFspId(response.id!,fspId)
-  
+
+    const response1 = await transactionRequestService.getById(response.id!)
+
     expect(response1).toMatchObject({
       payer: {
         partyIdType: 'MSISDN',
         partyIdentifier: '9605968739',
-        fspId:'New_bank'
+        fspId: 'BankNrone'
       },
       payee: {
         partyIdInfo: {
@@ -208,7 +140,7 @@ test('can test a getById request', async () => {
           partySubIdOrType: '123450000067890'
         }
       },
-      stan : '123456',
+      stan: '123456',
       amount: {
         amount: '000000010000',
         currency: '840'
@@ -220,7 +152,66 @@ test('can test a getById request', async () => {
       },
       authenticationType: 'OTP',
       expiration: '20180328'
-  
-      })
+
     })
+  })
+  test('can update Payer FspId request', async () => {
+    const data: TransactionRequest = {
+      payer: {
+        partyIdType: 'MSISDN',
+        partyIdentifier: '9605968739',
+        fspId: 'BankNrone'
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType: 'DEVICE',
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
+        }
+      },
+      stan: '123456',
+      amount: {
+        amount: '000000010000',
+        currency: '840'
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: '20180328'
+    }
+
+    const response = await transactionRequestService.create(data)
+    const fspId = 'New_bank'
+    const response1 = await transactionRequestService.updatePayerFspId(response.id!,fspId)
+
+    expect(response1).toMatchObject({
+      payer: {
+        partyIdType: 'MSISDN',
+        partyIdentifier: '9605968739',
+        fspId: 'New_bank'
+      },
+      payee: {
+        partyIdInfo: {
+          partyIdType: 'DEVICE',
+          partyIdentifier: '12345678',
+          partySubIdOrType: '123450000067890'
+        }
+      },
+      stan: '123456',
+      amount: {
+        amount: '000000010000',
+        currency: '840'
+      },
+      transactionType: {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      },
+      authenticationType: 'OTP',
+      expiration: '20180328'
+    })
+  })
 })

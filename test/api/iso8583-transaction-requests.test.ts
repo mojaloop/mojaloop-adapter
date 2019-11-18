@@ -1,23 +1,44 @@
+import Knex from 'knex'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
+import { KnexTransactionRequestService } from '../../src/services/transaction-request-service'
+import Axios from 'axios'
+
+jest.mock('uuid/v4', () => () => '123')
 
 describe('Transaction Requests API', function () {
 
-  // TODO: swap out for knexTransactionService once it's complete
-  const services = AdaptorServicesFactory.build({
-    transactionRequestService: {
-      getById: jest.fn(),
-      create: jest.fn().mockResolvedValue({ id: '123' }),
-      updatePayerFspId: jest.fn(),
-      sendToMojaHub: jest.fn()
-    }
+  let knex: Knex
+  let adaptor: Server
+  const services = AdaptorServicesFactory.build()
+
+  beforeAll(async () => {
+    knex = Knex({
+      client: 'sqlite3',
+      connection: {
+        filename: ':memory:',
+        supportBigNumbers: true
+      },
+      useNullAsDefault: true
+    })
+    const httpClient = Axios.create()
+    services.transactionRequestService = new KnexTransactionRequestService(knex, httpClient)
+    services.transactionRequestService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    adaptor = await createApp(services)
   })
 
-  let adaptor: Server
-  beforeAll(async () => {
-    adaptor = await createApp(services)
+  beforeEach(async () => {
+    await knex.migrate.latest()
+  })
+
+  afterEach(async () => {
+    await knex.migrate.rollback()
+  })
+
+  afterAll(async () => {
+    await knex.destroy()
   })
 
   test('stores the ISO0100 message', async () => {
@@ -43,21 +64,22 @@ describe('Transaction Requests API', function () {
     })
 
     expect(response.statusCode).toEqual(200)
-    expect(services.transactionRequestService.create).toBeCalledWith({
+    const transactionRequest = await services.transactionRequestService.getById('123')
+    expect(transactionRequest).toMatchObject({
       payer: {
         partyIdType: 'MSISDN',
-        partyIdentifier: '9605968739'
+        partyIdentifier: iso0100[102]
       },
       payee: {
         partyIdInfo: {
           partyIdType: 'DEVICE',
-          partyIdentifier: '12345678',
-          partySubIdOrType: '123450000067890'
+          partyIdentifier: iso0100[41],
+          partySubIdOrType: iso0100[42]
         }
       },
       amount: {
-        amount: '000000010000',
-        currency: '840'
+        amount: iso0100[4],
+        currency: iso0100[49]
       },
       transactionType: {
         initiator: 'PAYEE',
@@ -65,33 +87,8 @@ describe('Transaction Requests API', function () {
         scenario: 'WITHDRAWAL'
       },
       authenticationType: 'OTP',
-      expiration: '20180328'
+      expiration: iso0100[7]
     })
-    expect(services.transactionRequestService.getById).toBeCalledWith({
-      payer: {
-        partyIdType: 'MSISDN',
-        partyIdentifier: '2628529378534082744782193084'
-      },
-      payee: {
-        partyIdInfo: {
-          partyIdType: 'DEVICE',
-          partyIdentifier: 'wd1sbexj',
-          partySubIdOrType: '5d8wu7jyldfxl1y'
-        }
-      },
-      amount: {
-        amount: '000000010000',
-        currency: '820'
-      },
-      transactionType: {
-        initiator: 'PAYEE',
-        initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
-      },
-      authenticationType: 'OTP',
-      expiration: '1118042914'
-    })
-
   })
 
   test('Requests an account lookup and uses the transactionRequestId as the traceId', async () => {
