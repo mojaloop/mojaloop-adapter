@@ -6,7 +6,10 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     request.server.app.logger.info('Received PUT parties. headers: ' + JSON.stringify(request.headers) + ' payload: ' + JSON.stringify(request.payload))
     const transactionRequestId = request.headers.id
     const fspId = (request.payload as PartiesTypeIDPutResponse).party.partyIdInfo.fspId
-    const transactionRequest = await request.server.app.transactionRequestService.update(transactionRequestId, { payer: { fspId } })
+    if (!fspId) {
+      throw new Error('No fspId')
+    }
+    const transactionRequest = await request.server.app.transactionRequestService.updatePayerFspId(transactionRequestId, fspId)
 
     await request.server.app.transactionRequestService.sendToMojaHub(transactionRequest)
 

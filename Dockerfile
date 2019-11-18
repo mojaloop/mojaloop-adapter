@@ -18,4 +18,4 @@ COPY . .
 RUN npm run build
 
 EXPOSE 6969
-CMD [ "node", "dist/TCPServer.js" ]
+CMD [ "npm", "start" ]

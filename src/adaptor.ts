@@ -4,10 +4,10 @@ import * as Iso8583TransactionRequestController from './controllers/iso8583-tran
 import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
-import { AccountLookUpService } from 'services/account-lookup-service'
-import { IsoMessagingClient } from 'services/iso-messaging-client'
-import { IsoMessageService } from 'services/iso-message-service'
-import { QuotesService } from 'services/quotes-service'
+import { AccountLookUpService } from './services/account-lookup-service'
+import { IsoMessagingClient } from './services/iso-messaging-client'
+import { IsoMessageService } from './services/iso-message-service'
+import { QuotesService } from './services/quotes-service'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {

@@ -4,8 +4,8 @@ import { createApp } from './adaptor'
 import { KnexTransactionRequestService } from './services/transaction-request-service'
 import { AccountLookupService } from './services/account-lookup-service'
 import { createTcpRelay } from './tcp-relay'
-import { KnexIsoMessageService } from 'services/iso-message-service'
-import { MojaloopQuotesService } from 'services/quotes-service'
+import { KnexIsoMessageService } from './services/iso-message-service'
+import { MojaloopQuotesService } from './services/quotes-service'
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
 const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://ml-api-adaptor.local'
