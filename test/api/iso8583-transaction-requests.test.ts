@@ -70,7 +70,8 @@ describe('Transaction Requests API', function () {
     expect(services.transactionRequestService.getById).toBeCalledWith({
       payer: {
         partyIdType: 'MSISDN',
-        partyIdentifier: '2628529378534082744782193084'
+        partyIdentifier: '2628529378534082744782193084',
+        fspId:'BankNrone'
       },
       payee: {
         partyIdInfo: {
