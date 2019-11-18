@@ -25,7 +25,7 @@ describe('TCP relay', function () {
     expect(adaptor.inject).toHaveBeenCalledWith({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: iso0100Json
+      payload: isoMessage
     })
   })
 })
