@@ -25,7 +25,7 @@ describe('Transaction Requests API', function () {
 
     const response = await adaptor.inject({
       method: 'POST',
-      url: '/transactionRequests',
+      url: '/iso8583/transactionRequests',
       payload: iso0100
     })
 
@@ -38,7 +38,7 @@ describe('Transaction Requests API', function () {
 
     const response = await adaptor.inject({
       method: 'POST',
-      url: '/transactionRequests',
+      url: '/iso8583/transactionRequests',
       payload: iso0100
     })
 
@@ -101,7 +101,7 @@ describe('Transaction Requests API', function () {
 
     const response = await adaptor.inject({
       method: 'POST',
-      url: '/transactionRequests',
+      url: '/iso8583/transactionRequests',
       payload: iso0100
     })
 

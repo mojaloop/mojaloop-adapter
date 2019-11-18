@@ -1,11 +1,13 @@
 import { Server } from 'hapi'
 import { TransactionRequestService } from './services/transaction-request-service'
-import * as TransactionRequestController from './controllers/transaction-requests-controller'
+import * as Iso8583TransactionRequestController from './controllers/iso8583-transaction-requests-controller'
+import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
-import { AccountLookUpService } from './services/account-lookup-service'
-import { IsoMessagingClient } from './services/iso-messaging-client'
-import { IsoMessageService } from './services/iso-message-service'
+import { AccountLookUpService } from 'services/account-lookup-service'
+import { IsoMessagingClient } from 'services/iso-messaging-client'
+import { IsoMessageService } from 'services/iso-message-service'
+import { QuotesService } from 'services/quotes-service'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {
@@ -17,6 +19,7 @@ export type AdaptorServices = {
   transactionRequestService: TransactionRequestService;
   accountLookupService: AccountLookUpService;
   isoMessagesService: IsoMessageService;
+  quotesService: QuotesService;
   logger?: Logger;
 }
 
@@ -32,6 +35,7 @@ declare module 'hapi' {
     transactionRequestService: TransactionRequestService;
     accountLookupService: AccountLookUpService;
     isoMessagesService: IsoMessageService;
+    quotesService: QuotesService;
     logger: Logger;
     isoMessagingClient?: IsoMessagingClient;
   }
@@ -45,6 +49,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.transactionRequestService = services.transactionRequestService
   adaptor.app.accountLookupService = services.accountLookupService
   adaptor.app.isoMessagesService = services.isoMessagesService
+  adaptor.app.quotesService = services.quotesService
   if (!services.logger) {
     adaptor.app.logger = CentralLogger
   }
@@ -57,14 +62,48 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
         health: {
           get: () => ({ status: 'ok' })
         },
+        iso8583: {
+          transactionRequests: {
+            post: Iso8583TransactionRequestController.create
+          },
+          authorizations: {
+            '{ID}': {
+              put: () => 'dummy handler'
+            }
+          },
+          transfers: {
+            '{ID}': {
+              put: () => 'dummy handler'
+            }
+          }
+        },
         transactionRequests: {
-          post: TransactionRequestController.create
+          '{ID}': {
+            put: () => 'dummy Handler'
+          }
+        },
+        authorizations: {
+          '{ID}': {
+            get: () => 'dummy handler'
+          }
         },
         parties: {
           '{Type}': {
             '{ID}': {
               put: PartiesController.update
             }
+          }
+        },
+        quotes: {
+          post: QuotesController.create,
+          '{ID}': {
+            put: () => 'dummy handler'
+          }
+        },
+        transfers: {
+          post: () => 'dummy handler',
+          '{ID}': {
+            put: () => 'dummy handler'
           }
         }
       }
