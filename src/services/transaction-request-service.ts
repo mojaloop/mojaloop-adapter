@@ -43,6 +43,7 @@ export interface TransactionRequestService {
   getById (id: string): Promise<TransactionRequest>;
   create (request: Partial<TransactionRequest>): Promise<TransactionRequest>;
   updatePayerFspId(id: string, fspId: string): Promise<TransactionRequest>;
+  updateTransactionId(id: string, fspId: string): Promise<TransactionRequest>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
 }
 export class KnexTransactionRequestService implements TransactionRequestService {
@@ -78,6 +79,7 @@ export class KnexTransactionRequestService implements TransactionRequestService 
         }
       },
       stan: transactionRequestResponse.stan,
+      transactionId: transactionRequestResponse.transactionId,
       amount: {
         amount: transactionRequestResponse.amount,
         currency: transactionRequestResponse.currency
@@ -118,6 +120,7 @@ export class KnexTransactionRequestService implements TransactionRequestService 
 
     await this._knex<DBTransactionRequest>('transactionRequests').insert({
       id: transactionRequestId,
+      transactionId: 'null',
       stan: request.stan,
       amount: request.amount.amount,
       currency: request.amount.currency,
@@ -133,16 +136,31 @@ export class KnexTransactionRequestService implements TransactionRequestService 
   async updatePayerFspId (id: string, fspId: string): Promise<TransactionRequest> {
 
     const insertedAccountId = await this._knex('transactionParties').where('transactionRequestId', id).where('type', 'payer').first().update('fspid', fspId)
-    const transactionRequestResponse1 = this.getById(id)
+    const transactionRequestResponse = this.getById(id)
 
     if (!insertedAccountId) {
       throw new Error('Error inserting transaction request into database')
     }
 
-    if (!transactionRequestResponse1) {
+    if (!transactionRequestResponse) {
       throw new Error('Error Updating transaction request into database')
     }
-    return transactionRequestResponse1
+    return transactionRequestResponse
+  }
+
+  async updateTransactionId (id: string, transactionId: string): Promise<TransactionRequest> {
+    const insertedAccountId = await this._knex('transactionRequests').where('id', id).first().update('transactionId', transactionId)
+    const transactionRequestResponse = this.getById(id)
+
+    if (!insertedAccountId) {
+      throw new Error('Error inserting transaction request into database')
+    }
+
+    if (!transactionRequestResponse) {
+      throw new Error('Error Updating transaction request into database')
+    }
+
+    return transactionRequestResponse
   }
 
   async sendToMojaHub (request: TransactionRequest): Promise<void> {

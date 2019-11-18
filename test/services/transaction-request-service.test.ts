@@ -2,7 +2,7 @@ import { KnexTransactionRequestService, TransactionRequest } from '../../src/ser
 import Axios, { AxiosInstance } from 'axios'
 import Knex = require('knex')
 
-describe('Example test', function () {
+describe('Transaction Request Service', function () {
   let knex: Knex
   let transactionRequestService: KnexTransactionRequestService
   const fakeHttpClient: AxiosInstance = Axios.create()
@@ -38,20 +38,20 @@ describe('Example test', function () {
     const data: TransactionRequest = {
       payer: {
         partyIdType: 'MSISDN',
-        partyIdentifier: '9605968739',
-        fspId:'BankNrone'
+        partyIdentifier: '2626756253248953583652695656',
+        fspId: 'BankNrone'
       },
       payee: {
         partyIdInfo: {
           partyIdType: 'DEVICE',
-          partyIdentifier: '12345678',
-          partySubIdOrType: '123450000067890'
+          partyIdentifier: 'c0aziflj',
+          partySubIdOrType: '3omrp6uaiz5xqio'
         }
       },
       stan: '123456',
       amount: {
         amount: '000000010000',
-        currency: '840'
+        currency: '820'
       },
       transactionType: {
         initiator: 'PAYEE',
@@ -59,40 +59,15 @@ describe('Example test', function () {
         scenario: 'WITHDRAWAL'
       },
       authenticationType: 'OTP',
-      expiration: '20180328'
+      expiration: '1118045717'
 
     }
 
     const response = await transactionRequestService.create(data)
 
-    const response1 = await transactionRequestService.getById(response.id!)
+    const transactionReqeust = await transactionRequestService.getById(response.id!)
 
-    expect(response1).toMatchObject({
-      payer: {
-        partyIdType: 'MSISDN',
-        partyIdentifier: '9605968739'
-      },
-      payee: {
-        partyIdInfo: {
-          partyIdType: 'DEVICE',
-          partyIdentifier: '12345678',
-          partySubIdOrType: '123450000067890'
-        }
-      },
-      stan: '123456',
-      amount: {
-        amount: '000000010000',
-        currency: '840'
-      },
-      transactionType: {
-        initiator: 'PAYEE',
-        initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
-      },
-      authenticationType: 'OTP',
-      expiration: '20180328'
-
-    })
+    expect(transactionReqeust).toMatchObject(data)
   })
 
   test('can test a getById request', async () => {
@@ -165,14 +140,14 @@ describe('Example test', function () {
       payee: {
         partyIdInfo: {
           partyIdType: 'DEVICE',
-          partyIdentifier: '12345678',
-          partySubIdOrType: '123450000067890'
+          partyIdentifier: 'c0aziflj',
+          partySubIdOrType: '3omrp6uaiz5xqio'
         }
       },
       stan: '123456',
       amount: {
         amount: '000000010000',
-        currency: '840'
+        currency: '820'
       },
       transactionType: {
         initiator: 'PAYEE',
@@ -185,7 +160,7 @@ describe('Example test', function () {
 
     const response = await transactionRequestService.create(data)
     const fspId = 'New_bank'
-    const response1 = await transactionRequestService.updatePayerFspId(response.id!,fspId)
+    const response1 = await transactionRequestService.updatePayerFspId(response.id!, fspId)
 
     expect(response1).toMatchObject({
       payer: {
@@ -196,14 +171,14 @@ describe('Example test', function () {
       payee: {
         partyIdInfo: {
           partyIdType: 'DEVICE',
-          partyIdentifier: '12345678',
-          partySubIdOrType: '123450000067890'
+          partyIdentifier: 'c0aziflj',
+          partySubIdOrType: '3omrp6uaiz5xqio'
         }
       },
       stan: '123456',
       amount: {
         amount: '000000010000',
-        currency: '840'
+        currency: '820'
       },
       transactionType: {
         initiator: 'PAYEE',
