@@ -9,7 +9,7 @@ describe('Parties API', function () {
     transactionRequestService: {
       getById: jest.fn(),
       create: jest.fn(),
-      update: jest.fn().mockImplementation((id: string, request: { [k: string]: any }) => {
+      updatePayerFspId: jest.fn().mockImplementation((id: string, request: { [k: string]: any }) => {
         return { id, payer: { fspId: request.payer.fspId } }
       }),
       sendToMojaHub: jest.fn().mockResolvedValue(undefined)
@@ -32,7 +32,7 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    expect(services.transactionRequestService.update).toHaveBeenCalledWith('123', { payer: { fspId: putPartiesResponse.party.partyIdInfo.fspId } })
+    expect(services.transactionRequestService.updatePayerFspId).toHaveBeenCalledWith('123', { payer: { fspId: putPartiesResponse.party.partyIdInfo.fspId } })
   })
 
   test('makes a transaction request to the Moja switch', async () => {
