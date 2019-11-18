@@ -18,7 +18,7 @@
     "lint:fix": "standardx --fix ./src/**/*.ts",
     "format": "prettier-eslint --write \"./src/**/*.ts\"",
     "migrate:make": "knex migrate:make",
-    "start": "npm run build && node dist/index.js",
+    "start": "node dist/index.js",
     "test": "LOG_LEVEL=error jest"
   },
   "dependencies": {

@@ -18,4 +18,4 @@ COPY . .
 RUN npm run build
 
 EXPOSE 6969
-CMD [ "node", "index.ts" ]
+CMD [ "npm", "start" ]
