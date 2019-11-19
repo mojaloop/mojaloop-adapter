@@ -47,7 +47,7 @@ const quotesService = new MojaloopQuotesService(quotesClient)
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
-
+  console.log('LOG_LEVEL: ', process.env.LOG_LEVEL)
   const adaptor = await createApp({ transactionRequestService, accountLookupService, isoMessagesService, quotesService }, { port: HTTP_PORT })
 
   await adaptor.start()

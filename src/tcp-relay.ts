@@ -1,23 +1,30 @@
 import net from 'net'
-import { Server } from 'hapi'
+import { Server, ServerInjectResponse } from 'hapi'
 import { TcpIsoMessagingClient } from './services/iso-messaging-client'
 const IsoParser = require('iso_8583')
 
-export function handleIsoMessage (data: Buffer, adaptor: Server): void {
+export async function handleIsoMessage (data: Buffer, adaptor: Server): Promise<void> {
   const mti = data.slice(2, 6).toString()
   const isoMessage = new IsoParser().getIsoJSON(data)
-  adaptor.app.logger.debug('Message mti: ' + mti)
-  adaptor.app.logger.debug('Message converted to JSON: ' + JSON.stringify(isoMessage))
+  adaptor.app.logger.debug('TCPRelay: Message mti: ' + mti)
+  adaptor.app.logger.debug('TCPRelay: Message converted to JSON: ' + JSON.stringify(isoMessage))
+  let response: ServerInjectResponse
   switch (mti) {
     case '0100':
-      adaptor.inject({
+      adaptor.app.logger.debug('TCPRelay: Handling 0100 message...')
+      response = await adaptor.inject({
         method: 'POST',
         url: '/iso8583/transactionRequests',
         payload: isoMessage
       })
+
+      if (response.statusCode !== 200) {
+        throw new Error(response.statusMessage)
+      }
+      adaptor.app.logger.debug('TCPRelay: Finished handling 0100 message...')
       break
     default:
-      adaptor.app.logger.error(`Cannot handle iso message of type: ${mti}`)
+      adaptor.app.logger.error(`TCPRelay: Cannot handle iso message of type: ${mti}`)
   }
 }
 
@@ -31,12 +38,13 @@ export function createTcpRelay (adaptor: Server): net.Server {
 
     adaptor.app.isoMessagingClient = isoMessagingClient
 
-    sock.on('data', (data) => {
+    sock.on('data', async (data) => {
       try {
-        adaptor.app.logger.debug('Received buffer message: ' + data.toString())
-        handleIsoMessage(data, adaptor)
+        adaptor.app.logger.debug('TCPRelay: Received buffer message: ' + data)
+        await handleIsoMessage(data, adaptor)
       } catch (error) {
-        adaptor.app.logger.error('Failed to handle iso message. ' + error.toString())
+        adaptor.app.logger.error('TCPRelay: Failed to handle iso message. ')
+        adaptor.app.logger.error(error)
       }
     })
 

@@ -2,6 +2,7 @@ import Knex from 'knex'
 import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
 const uuidv4 = require('uuid/v4')
+const logger = require('@mojaloop/central-services-logger')
 export type DBTransactionParty = {
   fspid: string;
   transactionRequestId: string;
@@ -56,13 +57,13 @@ export class KnexTransactionRequestService implements TransactionRequestService 
     const transactionRequestResponse: DBTransactionRequest | undefined = await this._knex<DBTransactionRequest>('transactionRequests').where('id', id).first()
 
     if (!transactionRequestResponse) {
-      throw new Error('Error inserting transaction request into database')
+      throw new Error('Error fetching transaction request from database')
     }
     if (!transactionRequestFromPartyPayee) {
-      throw new Error('Error inserting transaction request into database')
+      throw new Error('Error fetching transaction request payee database')
     }
     if (!transactionRequestFromPartyPayer) {
-      throw new Error('Error inserting transaction request into database')
+      throw new Error('Error fetching transaction request party from database')
     }
 
     const transactionRequest: TransactionRequest = {
@@ -99,6 +100,7 @@ export class KnexTransactionRequestService implements TransactionRequestService 
   async create (request: TransactionRequest): Promise<TransactionRequest> {
 
     const transactionRequestId = uuidv4()
+    logger.debug('Transaction Requests Service: Creating transaction request ' + transactionRequestId)
     await this._knex<DBTransactionParty>('transactionParties').insert({
       transactionRequestId: transactionRequestId,
       type: 'payee',
