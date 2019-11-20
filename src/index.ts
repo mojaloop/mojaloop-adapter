@@ -23,8 +23,10 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 }) : Knex({
   client: 'sqlite3',
   connection: {
-    filename: ':memory:'
-  }
+    filename: ':memory:',
+    supportBigNumbers: true
+  },
+  useNullAsDefault: true
 })
 
 const transcationRequestClient = axios.create({
@@ -48,6 +50,12 @@ const quotesService = new MojaloopQuotesService(quotesClient)
 const start = async (): Promise<void> => {
   let shuttingDown = false
   console.log('LOG_LEVEL: ', process.env.LOG_LEVEL)
+  if (KNEX_CLIENT === 'sqlite3') {
+    console.log('in memory sqlite3 is being used. Running migrations....')
+    await knex.migrate.latest()
+    console.log('Migrations finished...')
+  }
+
   const adaptor = await createApp({ transactionRequestService, accountLookupService, isoMessagesService, quotesService }, { port: HTTP_PORT })
 
   await adaptor.start()
