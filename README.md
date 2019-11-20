@@ -18,6 +18,9 @@ KNEX_CLIENT
 ### Running
 Run `npm start`
 
+### DB Schema
+<img src="./media/Adaptor-database-schema.png" style="background: white"/>
+
 ### Flow
 <img src="./media/flow-diagram-1.svg" style="background: white"/>
 <img src="./media/flow-diagram-2.svg" style="background: white"/>

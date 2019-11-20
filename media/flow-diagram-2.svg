@@ -1,49 +1,49 @@
-<svg id="mermaid-1574228166280" width="100%" xmlns="http://www.w3.org/2000/svg" height="100%" style="max-width:1750px;" viewBox="-150 -10 1750 1461"><style>
+<svg id="mermaid-1574234901328" width="100%" xmlns="http://www.w3.org/2000/svg" height="100%" style="max-width:1750px;" viewBox="-150 -10 1750 1146"><style>
 
 
 
-#mermaid-1574228166280 .label {
+#mermaid-1574234901328 .label {
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   color: #333; }
 
-#mermaid-1574228166280 .label text {
+#mermaid-1574234901328 .label text {
   fill: #333; }
 
-#mermaid-1574228166280 .node rect,
-#mermaid-1574228166280 .node circle,
-#mermaid-1574228166280 .node ellipse,
-#mermaid-1574228166280 .node polygon {
+#mermaid-1574234901328 .node rect,
+#mermaid-1574234901328 .node circle,
+#mermaid-1574234901328 .node ellipse,
+#mermaid-1574234901328 .node polygon {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1px; }
 
-#mermaid-1574228166280 .node .label {
+#mermaid-1574234901328 .node .label {
   text-align: center; }
 
-#mermaid-1574228166280 .node.clickable {
+#mermaid-1574234901328 .node.clickable {
   cursor: pointer; }
 
-#mermaid-1574228166280 .arrowheadPath {
+#mermaid-1574234901328 .arrowheadPath {
   fill: #333333; }
 
-#mermaid-1574228166280 .edgePath .path {
+#mermaid-1574234901328 .edgePath .path {
   stroke: #333333;
   stroke-width: 1.5px; }
 
-#mermaid-1574228166280 .edgeLabel {
+#mermaid-1574234901328 .edgeLabel {
   background-color: #e8e8e8;
   text-align: center; }
 
-#mermaid-1574228166280 .cluster rect {
+#mermaid-1574234901328 .cluster rect {
   fill: #ffffde;
   stroke: #aaaa33;
   stroke-width: 1px; }
 
-#mermaid-1574228166280 .cluster text {
+#mermaid-1574234901328 .cluster text {
   fill: #333; }
 
-#mermaid-1574228166280 div.mermaidTooltip {
+#mermaid-1574234901328 div.mermaidTooltip {
   position: absolute;
   text-align: center;
   max-width: 200px;
@@ -57,117 +57,117 @@
   pointer-events: none;
   z-index: 100; }
 
-#mermaid-1574228166280 .actor {
+#mermaid-1574234901328 .actor {
   stroke: #CCCCFF;
   fill: #ECECFF; }
 
-#mermaid-1574228166280 text.actor {
+#mermaid-1574234901328 text.actor {
   fill: black;
   stroke: none; }
 
-#mermaid-1574228166280 .actor-line {
+#mermaid-1574234901328 .actor-line {
   stroke: grey; }
 
-#mermaid-1574228166280 .messageLine0 {
+#mermaid-1574234901328 .messageLine0 {
   stroke-width: 1.5;
   stroke-dasharray: '2 2';
   stroke: #333; }
 
-#mermaid-1574228166280 .messageLine1 {
+#mermaid-1574234901328 .messageLine1 {
   stroke-width: 1.5;
   stroke-dasharray: '2 2';
   stroke: #333; }
 
-#mermaid-1574228166280 #arrowhead {
+#mermaid-1574234901328 #arrowhead {
   fill: #333; }
 
-#mermaid-1574228166280 .sequenceNumber {
+#mermaid-1574234901328 .sequenceNumber {
   fill: white; }
 
-#mermaid-1574228166280 #sequencenumber {
+#mermaid-1574234901328 #sequencenumber {
   fill: #333; }
 
-#mermaid-1574228166280 #crosshead path {
+#mermaid-1574234901328 #crosshead path {
   fill: #333 !important;
   stroke: #333 !important; }
 
-#mermaid-1574228166280 .messageText {
+#mermaid-1574234901328 .messageText {
   fill: #333;
   stroke: none; }
 
-#mermaid-1574228166280 .labelBox {
+#mermaid-1574234901328 .labelBox {
   stroke: #CCCCFF;
   fill: #ECECFF; }
 
-#mermaid-1574228166280 .labelText {
+#mermaid-1574234901328 .labelText {
   fill: black;
   stroke: none; }
 
-#mermaid-1574228166280 .loopText {
+#mermaid-1574234901328 .loopText {
   fill: black;
   stroke: none; }
 
-#mermaid-1574228166280 .loopLine {
+#mermaid-1574234901328 .loopLine {
   stroke-width: 2;
   stroke-dasharray: '2 2';
   stroke: #CCCCFF; }
 
-#mermaid-1574228166280 .note {
+#mermaid-1574234901328 .note {
   stroke: #aaaa33;
   fill: #fff5ad; }
 
-#mermaid-1574228166280 .noteText {
+#mermaid-1574234901328 .noteText {
   fill: black;
   stroke: none;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   font-size: 14px; }
 
-#mermaid-1574228166280 .activation0 {
+#mermaid-1574234901328 .activation0 {
   fill: #f4f4f4;
   stroke: #666; }
 
-#mermaid-1574228166280 .activation1 {
+#mermaid-1574234901328 .activation1 {
   fill: #f4f4f4;
   stroke: #666; }
 
-#mermaid-1574228166280 .activation2 {
+#mermaid-1574234901328 .activation2 {
   fill: #f4f4f4;
   stroke: #666; }
 
 
-#mermaid-1574228166280 .mermaid-main-font {
+#mermaid-1574234901328 .mermaid-main-font {
   font-family: "trebuchet ms", verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 .section {
+#mermaid-1574234901328 .section {
   stroke: none;
   opacity: 0.2; }
 
-#mermaid-1574228166280 .section0 {
+#mermaid-1574234901328 .section0 {
   fill: rgba(102, 102, 255, 0.49); }
 
-#mermaid-1574228166280 .section2 {
+#mermaid-1574234901328 .section2 {
   fill: #fff400; }
 
-#mermaid-1574228166280 .section1,
-#mermaid-1574228166280 .section3 {
+#mermaid-1574234901328 .section1,
+#mermaid-1574234901328 .section3 {
   fill: white;
   opacity: 0.2; }
 
-#mermaid-1574228166280 .sectionTitle0 {
+#mermaid-1574234901328 .sectionTitle0 {
   fill: #333; }
 
-#mermaid-1574228166280 .sectionTitle1 {
+#mermaid-1574234901328 .sectionTitle1 {
   fill: #333; }
 
-#mermaid-1574228166280 .sectionTitle2 {
+#mermaid-1574234901328 .sectionTitle2 {
   fill: #333; }
 
-#mermaid-1574228166280 .sectionTitle3 {
+#mermaid-1574234901328 .sectionTitle3 {
   fill: #333; }
 
-#mermaid-1574228166280 .sectionTitle {
+#mermaid-1574234901328 .sectionTitle {
   text-anchor: start;
   font-size: 11px;
   text-height: 14px;
@@ -175,309 +175,309 @@
   font-family: var(--mermaid-font-family); }
 
 
-#mermaid-1574228166280 .grid .tick {
+#mermaid-1574234901328 .grid .tick {
   stroke: lightgrey;
   opacity: 0.3;
   shape-rendering: crispEdges; }
-#mermaid-1574228166280   .grid .tick text {
+#mermaid-1574234901328   .grid .tick text {
     font-family: 'trebuchet ms', verdana, arial;
     font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 .grid path {
+#mermaid-1574234901328 .grid path {
   stroke-width: 0; }
 
 
-#mermaid-1574228166280 .today {
+#mermaid-1574234901328 .today {
   fill: none;
   stroke: red;
   stroke-width: 2px; }
 
 
 
-#mermaid-1574228166280 .task {
+#mermaid-1574234901328 .task {
   stroke-width: 2; }
 
-#mermaid-1574228166280 .taskText {
+#mermaid-1574234901328 .taskText {
   text-anchor: middle;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 .taskText:not([font-size]) {
+#mermaid-1574234901328 .taskText:not([font-size]) {
   font-size: 11px; }
 
-#mermaid-1574228166280 .taskTextOutsideRight {
+#mermaid-1574234901328 .taskTextOutsideRight {
   fill: black;
   text-anchor: start;
   font-size: 11px;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 .taskTextOutsideLeft {
+#mermaid-1574234901328 .taskTextOutsideLeft {
   fill: black;
   text-anchor: end;
   font-size: 11px; }
 
 
-#mermaid-1574228166280 .task.clickable {
+#mermaid-1574234901328 .task.clickable {
   cursor: pointer; }
 
-#mermaid-1574228166280 .taskText.clickable {
+#mermaid-1574234901328 .taskText.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
-#mermaid-1574228166280 .taskTextOutsideLeft.clickable {
+#mermaid-1574234901328 .taskTextOutsideLeft.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
-#mermaid-1574228166280 .taskTextOutsideRight.clickable {
+#mermaid-1574234901328 .taskTextOutsideRight.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
 
-#mermaid-1574228166280 .taskText0,
-#mermaid-1574228166280 .taskText1,
-#mermaid-1574228166280 .taskText2,
-#mermaid-1574228166280 .taskText3 {
+#mermaid-1574234901328 .taskText0,
+#mermaid-1574234901328 .taskText1,
+#mermaid-1574234901328 .taskText2,
+#mermaid-1574234901328 .taskText3 {
   fill: white; }
 
-#mermaid-1574228166280 .task0,
-#mermaid-1574228166280 .task1,
-#mermaid-1574228166280 .task2,
-#mermaid-1574228166280 .task3 {
+#mermaid-1574234901328 .task0,
+#mermaid-1574234901328 .task1,
+#mermaid-1574234901328 .task2,
+#mermaid-1574234901328 .task3 {
   fill: #8a90dd;
   stroke: #534fbc; }
 
-#mermaid-1574228166280 .taskTextOutside0,
-#mermaid-1574228166280 .taskTextOutside2 {
+#mermaid-1574234901328 .taskTextOutside0,
+#mermaid-1574234901328 .taskTextOutside2 {
   fill: black; }
 
-#mermaid-1574228166280 .taskTextOutside1,
-#mermaid-1574228166280 .taskTextOutside3 {
+#mermaid-1574234901328 .taskTextOutside1,
+#mermaid-1574234901328 .taskTextOutside3 {
   fill: black; }
 
 
-#mermaid-1574228166280 .active0,
-#mermaid-1574228166280 .active1,
-#mermaid-1574228166280 .active2,
-#mermaid-1574228166280 .active3 {
+#mermaid-1574234901328 .active0,
+#mermaid-1574234901328 .active1,
+#mermaid-1574234901328 .active2,
+#mermaid-1574234901328 .active3 {
   fill: #bfc7ff;
   stroke: #534fbc; }
 
-#mermaid-1574228166280 .activeText0,
-#mermaid-1574228166280 .activeText1,
-#mermaid-1574228166280 .activeText2,
-#mermaid-1574228166280 .activeText3 {
+#mermaid-1574234901328 .activeText0,
+#mermaid-1574234901328 .activeText1,
+#mermaid-1574234901328 .activeText2,
+#mermaid-1574234901328 .activeText3 {
   fill: black !important; }
 
 
-#mermaid-1574228166280 .done0,
-#mermaid-1574228166280 .done1,
-#mermaid-1574228166280 .done2,
-#mermaid-1574228166280 .done3 {
+#mermaid-1574234901328 .done0,
+#mermaid-1574234901328 .done1,
+#mermaid-1574234901328 .done2,
+#mermaid-1574234901328 .done3 {
   stroke: grey;
   fill: lightgrey;
   stroke-width: 2; }
 
-#mermaid-1574228166280 .doneText0,
-#mermaid-1574228166280 .doneText1,
-#mermaid-1574228166280 .doneText2,
-#mermaid-1574228166280 .doneText3 {
+#mermaid-1574234901328 .doneText0,
+#mermaid-1574234901328 .doneText1,
+#mermaid-1574234901328 .doneText2,
+#mermaid-1574234901328 .doneText3 {
   fill: black !important; }
 
 
-#mermaid-1574228166280 .crit0,
-#mermaid-1574228166280 .crit1,
-#mermaid-1574228166280 .crit2,
-#mermaid-1574228166280 .crit3 {
+#mermaid-1574234901328 .crit0,
+#mermaid-1574234901328 .crit1,
+#mermaid-1574234901328 .crit2,
+#mermaid-1574234901328 .crit3 {
   stroke: #ff8888;
   fill: red;
   stroke-width: 2; }
 
-#mermaid-1574228166280 .activeCrit0,
-#mermaid-1574228166280 .activeCrit1,
-#mermaid-1574228166280 .activeCrit2,
-#mermaid-1574228166280 .activeCrit3 {
+#mermaid-1574234901328 .activeCrit0,
+#mermaid-1574234901328 .activeCrit1,
+#mermaid-1574234901328 .activeCrit2,
+#mermaid-1574234901328 .activeCrit3 {
   stroke: #ff8888;
   fill: #bfc7ff;
   stroke-width: 2; }
 
-#mermaid-1574228166280 .doneCrit0,
-#mermaid-1574228166280 .doneCrit1,
-#mermaid-1574228166280 .doneCrit2,
-#mermaid-1574228166280 .doneCrit3 {
+#mermaid-1574234901328 .doneCrit0,
+#mermaid-1574234901328 .doneCrit1,
+#mermaid-1574234901328 .doneCrit2,
+#mermaid-1574234901328 .doneCrit3 {
   stroke: #ff8888;
   fill: lightgrey;
   stroke-width: 2;
   cursor: pointer;
   shape-rendering: crispEdges; }
 
-#mermaid-1574228166280 .milestone {
+#mermaid-1574234901328 .milestone {
   transform: rotate(45deg) scale(0.8, 0.8); }
 
-#mermaid-1574228166280 .milestoneText {
+#mermaid-1574234901328 .milestoneText {
   font-style: italic; }
 
-#mermaid-1574228166280 .doneCritText0,
-#mermaid-1574228166280 .doneCritText1,
-#mermaid-1574228166280 .doneCritText2,
-#mermaid-1574228166280 .doneCritText3 {
+#mermaid-1574234901328 .doneCritText0,
+#mermaid-1574234901328 .doneCritText1,
+#mermaid-1574234901328 .doneCritText2,
+#mermaid-1574234901328 .doneCritText3 {
   fill: black !important; }
 
-#mermaid-1574228166280 .activeCritText0,
-#mermaid-1574228166280 .activeCritText1,
-#mermaid-1574228166280 .activeCritText2,
-#mermaid-1574228166280 .activeCritText3 {
+#mermaid-1574234901328 .activeCritText0,
+#mermaid-1574234901328 .activeCritText1,
+#mermaid-1574234901328 .activeCritText2,
+#mermaid-1574234901328 .activeCritText3 {
   fill: black !important; }
 
-#mermaid-1574228166280 .titleText {
+#mermaid-1574234901328 .titleText {
   text-anchor: middle;
   font-size: 18px;
   fill: black;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 g.classGroup text {
+#mermaid-1574234901328 g.classGroup text {
   fill: #9370DB;
   stroke: none;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   font-size: 10px; }
-#mermaid-1574228166280   g.classGroup text .title {
+#mermaid-1574234901328   g.classGroup text .title {
     font-weight: bolder; }
 
-#mermaid-1574228166280 g.classGroup rect {
+#mermaid-1574234901328 g.classGroup rect {
   fill: #ECECFF;
   stroke: #9370DB; }
 
-#mermaid-1574228166280 g.classGroup line {
+#mermaid-1574234901328 g.classGroup line {
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 .classLabel .box {
+#mermaid-1574234901328 .classLabel .box {
   stroke: none;
   stroke-width: 0;
   fill: #ECECFF;
   opacity: 0.5; }
 
-#mermaid-1574228166280 .classLabel .label {
+#mermaid-1574234901328 .classLabel .label {
   fill: #9370DB;
   font-size: 10px; }
 
-#mermaid-1574228166280 .relation {
+#mermaid-1574234901328 .relation {
   stroke: #9370DB;
   stroke-width: 1;
   fill: none; }
 
-#mermaid-1574228166280 #compositionStart {
+#mermaid-1574234901328 #compositionStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 #compositionEnd {
+#mermaid-1574234901328 #compositionEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 #aggregationStart {
+#mermaid-1574234901328 #aggregationStart {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 #aggregationEnd {
+#mermaid-1574234901328 #aggregationEnd {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 #dependencyStart {
+#mermaid-1574234901328 #dependencyStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 #dependencyEnd {
+#mermaid-1574234901328 #dependencyEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 #extensionStart {
+#mermaid-1574234901328 #extensionStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 #extensionEnd {
+#mermaid-1574234901328 #extensionEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 .commit-id,
-#mermaid-1574228166280 .commit-msg,
-#mermaid-1574228166280 .branch-label {
+#mermaid-1574234901328 .commit-id,
+#mermaid-1574234901328 .commit-msg,
+#mermaid-1574234901328 .branch-label {
   fill: lightgrey;
   color: lightgrey;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 .pieTitleText {
+#mermaid-1574234901328 .pieTitleText {
   text-anchor: middle;
   font-size: 25px;
   fill: black;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 .slice {
+#mermaid-1574234901328 .slice {
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 g.stateGroup text {
+#mermaid-1574234901328 g.stateGroup text {
   fill: #9370DB;
   stroke: none;
   font-size: 10px;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574228166280 g.stateGroup text {
+#mermaid-1574234901328 g.stateGroup text {
   fill: #9370DB;
   stroke: none;
   font-size: 10px; }
 
-#mermaid-1574228166280 g.stateGroup .state-title {
+#mermaid-1574234901328 g.stateGroup .state-title {
   font-weight: bolder;
   fill: black; }
 
-#mermaid-1574228166280 g.stateGroup rect {
+#mermaid-1574234901328 g.stateGroup rect {
   fill: #ECECFF;
   stroke: #9370DB; }
 
-#mermaid-1574228166280 g.stateGroup line {
+#mermaid-1574234901328 g.stateGroup line {
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574228166280 .transition {
+#mermaid-1574234901328 .transition {
   stroke: #9370DB;
   stroke-width: 1;
   fill: none; }
 
-#mermaid-1574228166280 .stateGroup .composit {
+#mermaid-1574234901328 .stateGroup .composit {
   fill: white;
   border-bottom: 1px; }
 
-#mermaid-1574228166280 .state-note {
+#mermaid-1574234901328 .state-note {
   stroke: #aaaa33;
   fill: #fff5ad; }
-#mermaid-1574228166280   .state-note text {
+#mermaid-1574234901328   .state-note text {
     fill: black;
     stroke: none;
     font-size: 10px; }
 
-#mermaid-1574228166280 .stateLabel .box {
+#mermaid-1574234901328 .stateLabel .box {
   stroke: none;
   stroke-width: 0;
   fill: #ECECFF;
   opacity: 0.5; }
 
-#mermaid-1574228166280 .stateLabel text {
+#mermaid-1574234901328 .stateLabel text {
   fill: black;
   font-size: 10px;
   font-weight: bold;
@@ -488,7 +488,7 @@
   --mermaid-font-family: '"trebuchet ms", verdana, arial';
   --mermaid-font-family: "Comic Sans MS", "Comic Sans", cursive; }
 
-:root { --mermaid-font-family: "trebuchet ms", verdana, arial;}</style><style>#mermaid-1574228166280 {
+:root { --mermaid-font-family: "trebuchet ms", verdana, arial;}</style><style>#mermaid-1574234901328 {
     color: rgba(0, 0, 0, 0.65);
     font: ;
-  }</style><g></g><g><line id="actor2472" x1="75" y1="5" x2="75" y2="1450" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="75" dy="0">Payer FSP</tspan></text></g><g><line id="actor2473" x1="275" y1="5" x2="275" y2="1450" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="275" dy="0">Moja Switch</tspan></text></g><g><line id="actor2474" x1="475" y1="5" x2="475" y2="1450" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="475" dy="0">Payee FSP</tspan></text></g><g><line id="actor2475" x1="675" y1="5" x2="675" y2="1450" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="675" dy="0">ALS</tspan></text></g><g><line id="actor2476" x1="875" y1="5" x2="875" y2="1450" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="800" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="875" dy="0">Adaptor</tspan></text></g><g><line id="actor2477" x1="1075" y1="5" x2="1075" y2="1450" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1000" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1075" dy="0">TCP Relay</tspan></text></g><g><line id="actor2478" x1="1275" y1="5" x2="1275" y2="1450" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1275" dy="0">Legacy Switch</tspan></text></g><g><line id="actor2479" x1="1475" y1="5" x2="1475" y2="1450" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1475" dy="0">ATM</tspan></text></g><defs><marker id="arrowhead" refX="5" refY="2" markerWidth="6" markerHeight="4" orient="auto"><path d="M 0,0 V 4 L6,2 Z"></path></marker></defs><defs><marker id="crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="16" refY="4"><path fill="black" stroke="#000000" style="stroke-dasharray: 0px, 0px;" stroke-width="1px" d="M 9,2 V 6 L16,4 Z"></path><path fill="none" stroke="#000000" style="stroke-dasharray: 0px, 0px;" stroke-width="1px" d="M 0,1 L 6,7 M 6,1 L 0,7"></path></marker></defs><defs><marker id="sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"></circle></marker></defs><g><text x="1175" y="93" style="text-anchor: middle;" class="messageText">WRITE ISO8583:0200</text><line x1="1275" y1="100" x2="1075" y2="100" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="1000" y="110" fill="#EDF2AE" stroke="#666" width="150" height="68" rx="0" ry="0" class="note"></rect><text x="996" y="134" class="noteText"><tspan x="1016">Convert to JSON </tspan></text><text x="996" y="150" class="noteText"><tspan x="1016"> representation </tspan></text><text x="996" y="166" class="noteText"><tspan x="1016"> Calculate PK</tspan></text></g><g><text x="975" y="206" style="text-anchor: middle;" class="messageText">PUT /iso8583/authorizations/&lt;PK&gt;</text><line x1="1075" y1="213" x2="875" y2="213" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="223" fill="#EDF2AE" stroke="#666" width="150" height="100" rx="0" ry="0" class="note"></rect><text x="796" y="247" class="noteText"><tspan x="816">Store 0200 and map </tspan></text><text x="796" y="263" class="noteText"><tspan x="816"> to PK </tspan></text><text x="796" y="279" class="noteText"><tspan x="816"> Use PK to look up </tspan></text><text x="796" y="295" class="noteText"><tspan x="816"> most recent 0100 </tspan></text><text x="796" y="311" class="noteText"><tspan x="816"> Fetch transactionRequest and parties</tspan></text></g><g><text x="575" y="376" style="text-anchor: middle;" class="messageText">PUT /authorizations/&lt;ID&gt;/error</text><line x1="875" y1="383" x2="275" y2="383" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="411" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="418" x2="875" y2="418" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="446" style="text-anchor: middle;" class="messageText">PUT /authorizations/&lt;ID&gt;/error</text><line x1="275" y1="453" x2="75" y2="453" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="481" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="75" y1="488" x2="275" y2="488" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><line x1="65" y1="333" x2="885" y2="333" class="loopLine"></line><line x1="885" y1="333" x2="885" y2="498" class="loopLine"></line><line x1="65" y1="498" x2="885" y2="498" class="loopLine"></line><line x1="65" y1="333" x2="65" y2="498" class="loopLine"></line><polygon points="65,333 115,333 115,346 106.6,353 65,353" class="labelBox"></polygon><text x="72.5" y="348" class="labelText"><tspan x="72.5">alt</tspan></text><text x="475" y="348" style="text-anchor: middle;" class="loopText"><tspan x="475">[ Authorization failure/rejection ]</tspan></text></g><g><text x="575" y="551" style="text-anchor: middle;" class="messageText">PUT /authorizations/&lt;ID&gt;</text><text x="575" y="568" style="text-anchor: middle;" class="messageText">OTP=1234</text><line x1="875" y1="558" x2="275" y2="558" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="586" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="593" x2="875" y2="593" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="621" style="text-anchor: middle;" class="messageText">PUT /authorizations/&lt;ID&gt;</text><text x="175" y="638" style="text-anchor: middle;" class="messageText">OTP=1234</text><line x1="275" y1="628" x2="75" y2="628" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="656" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="75" y1="663" x2="275" y2="663" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><line x1="65" y1="508" x2="885" y2="508" class="loopLine"></line><line x1="885" y1="508" x2="885" y2="673" class="loopLine"></line><line x1="65" y1="673" x2="885" y2="673" class="loopLine"></line><line x1="65" y1="508" x2="65" y2="673" class="loopLine"></line><polygon points="65,508 115,508 115,521 106.6,528 65,528" class="labelBox"></polygon><text x="72.5" y="523" class="labelText"><tspan x="72.5">alt</tspan></text><text x="475" y="523" style="text-anchor: middle;" class="loopText"><tspan x="475">[ Authorization ]</tspan></text></g><g><rect x="-100" y="683" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="-104" y="707" class="noteText"><tspan x="-84">Validate OTP</tspan></text></g><g><text x="175" y="747" style="text-anchor: middle;" class="messageText">POST /transfers</text><line x1="75" y1="754" x2="275" y2="754" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="782" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="789" x2="75" y2="789" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="817" style="text-anchor: middle;" class="messageText">POST /transfers</text><line x1="275" y1="824" x2="875" y2="824" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="877" style="text-anchor: middle;" class="messageText">POST /transfers</text><line x1="875" y1="884" x2="275" y2="884" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="912" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="919" x2="875" y2="919" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="375" y="947" style="text-anchor: middle;" class="messageText">POST /transfers</text><line x1="275" y1="954" x2="475" y2="954" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="375" y="982" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="475" y1="989" x2="275" y2="989" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="375" y="1017" style="text-anchor: middle;" class="messageText">PUT /transfers/&lt;transferId&gt;</text><line x1="475" y1="1024" x2="275" y2="1024" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="375" y="1052" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="1059" x2="475" y2="1059" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="1087" style="text-anchor: middle;" class="messageText">PUT /transfers/&lt;transferId&gt;</text><line x1="275" y1="1094" x2="875" y2="1094" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="1122" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="875" y1="1129" x2="275" y2="1129" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><line x1="265" y1="834" x2="885" y2="834" class="loopLine"></line><line x1="885" y1="834" x2="885" y2="1139" class="loopLine"></line><line x1="265" y1="1139" x2="885" y2="1139" class="loopLine"></line><line x1="265" y1="834" x2="265" y2="1139" class="loopLine"></line><polygon points="265,834 315,834 315,847 306.6,854 265,854" class="labelBox"></polygon><text x="272.5" y="849" class="labelText"><tspan x="272.5">opt</tspan></text><text x="575" y="849" style="text-anchor: middle;" class="loopText"><tspan x="575">[ Forward transfer from Payee FSP ]</tspan></text></g><g><rect x="800" y="1149" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="796" y="1173" class="noteText"><tspan x="816">Use quoteId to find transaction request </tspan></text><text x="796" y="1189" class="noteText"><tspan x="816"> populate JSON 0210</tspan></text></g><g><text x="975" y="1229" style="text-anchor: middle;" class="messageText">SEND Transaction</text><line x1="875" y1="1236" x2="1075" y2="1236" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="1000" y="1246" fill="#EDF2AE" stroke="#666" width="150" height="84" rx="0" ry="0" class="note"></rect><text x="996" y="1270" class="noteText"><tspan x="1016">Convert to </tspan></text><text x="996" y="1286" class="noteText"><tspan x="1016"> ISO8583:0210 </tspan></text><text x="996" y="1302" class="noteText"><tspan x="1016"> use LPS key to send </tspan></text><text x="996" y="1318" class="noteText"><tspan x="1016"> to correct switch</tspan></text></g><g><text x="1175" y="1358" style="text-anchor: middle;" class="messageText">WRITE ISO8583:0210</text><line x1="1075" y1="1365" x2="1275" y2="1365" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="0" y="1385" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="1417.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="75" dy="0">Payer FSP</tspan></text></g><g><rect x="200" y="1385" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="1417.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="275" dy="0">Moja Switch</tspan></text></g><g><rect x="400" y="1385" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="1417.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="475" dy="0">Payee FSP</tspan></text></g><g><rect x="600" y="1385" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="1417.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="675" dy="0">ALS</tspan></text></g><g><rect x="800" y="1385" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="1417.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="875" dy="0">Adaptor</tspan></text></g><g><rect x="1000" y="1385" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="1417.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1075" dy="0">TCP Relay</tspan></text></g><g><rect x="1200" y="1385" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="1417.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1275" dy="0">Legacy Switch</tspan></text></g><g><rect x="1400" y="1385" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="1417.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1475" dy="0">ATM</tspan></text></g></svg>
+  }</style><g></g><g><line id="actor3952" x1="75" y1="5" x2="75" y2="1135" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="75" dy="0">Payer FSP</tspan></text></g><g><line id="actor3953" x1="275" y1="5" x2="275" y2="1135" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="275" dy="0">Moja Switch</tspan></text></g><g><line id="actor3954" x1="475" y1="5" x2="475" y2="1135" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="475" dy="0">Payee FSP</tspan></text></g><g><line id="actor3955" x1="675" y1="5" x2="675" y2="1135" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="675" dy="0">ALS</tspan></text></g><g><line id="actor3956" x1="875" y1="5" x2="875" y2="1135" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="800" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="875" dy="0">Adaptor</tspan></text></g><g><line id="actor3957" x1="1075" y1="5" x2="1075" y2="1135" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1000" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1075" dy="0">TCP Relay</tspan></text></g><g><line id="actor3958" x1="1275" y1="5" x2="1275" y2="1135" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1275" dy="0">Legacy Switch</tspan></text></g><g><line id="actor3959" x1="1475" y1="5" x2="1475" y2="1135" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1475" dy="0">ATM</tspan></text></g><defs><marker id="arrowhead" refX="5" refY="2" markerWidth="6" markerHeight="4" orient="auto"><path d="M 0,0 V 4 L6,2 Z"></path></marker></defs><defs><marker id="crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="16" refY="4"><path fill="black" stroke="#000000" style="stroke-dasharray: 0px, 0px;" stroke-width="1px" d="M 9,2 V 6 L16,4 Z"></path><path fill="none" stroke="#000000" style="stroke-dasharray: 0px, 0px;" stroke-width="1px" d="M 0,1 L 6,7 M 6,1 L 0,7"></path></marker></defs><defs><marker id="sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"></circle></marker></defs><g><text x="1175" y="93" style="text-anchor: middle;" class="messageText">WRITE ISO8583:0200</text><line x1="1275" y1="100" x2="1075" y2="100" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="1000" y="110" fill="#EDF2AE" stroke="#666" width="150" height="68" rx="0" ry="0" class="note"></rect><text x="996" y="134" class="noteText"><tspan x="1016">Convert to JSON </tspan></text><text x="996" y="150" class="noteText"><tspan x="1016"> representation </tspan></text><text x="996" y="166" class="noteText"><tspan x="1016"> Calculate PK</tspan></text></g><g><text x="975" y="206" style="text-anchor: middle;" class="messageText">PUT /iso8583/authorizations/&lt;PK&gt;</text><line x1="1075" y1="213" x2="875" y2="213" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="223" fill="#EDF2AE" stroke="#666" width="150" height="100" rx="0" ry="0" class="note"></rect><text x="796" y="247" class="noteText"><tspan x="816">Store 0200 and map to PK </tspan></text><text x="796" y="263" class="noteText"><tspan x="816"> Use PK to look up </tspan></text><text x="796" y="279" class="noteText"><tspan x="816"> transaction request and parties</tspan></text><text x="796" y="295" class="noteText"><tspan x="816"> Use transactionRequestId to find PENDING quote </tspan></text><text x="796" y="311" class="noteText"><tspan x="816"> Update quote state = AUTHORIZED</tspan></text></g><g><text x="575" y="376" style="text-anchor: middle;" class="messageText">PUT /authorizations/&lt;ID&gt;/error</text><line x1="875" y1="383" x2="275" y2="383" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="411" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="418" x2="875" y2="418" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="446" style="text-anchor: middle;" class="messageText">PUT /authorizations/&lt;ID&gt;/error</text><line x1="275" y1="453" x2="75" y2="453" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="481" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="75" y1="488" x2="275" y2="488" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><line x1="65" y1="333" x2="885" y2="333" class="loopLine"></line><line x1="885" y1="333" x2="885" y2="498" class="loopLine"></line><line x1="65" y1="498" x2="885" y2="498" class="loopLine"></line><line x1="65" y1="333" x2="65" y2="498" class="loopLine"></line><polygon points="65,333 115,333 115,346 106.6,353 65,353" class="labelBox"></polygon><text x="72.5" y="348" class="labelText"><tspan x="72.5">alt</tspan></text><text x="475" y="348" style="text-anchor: middle;" class="loopText"><tspan x="475">[ Authorization failure/rejection ]</tspan></text></g><g><text x="575" y="551" style="text-anchor: middle;" class="messageText">PUT /authorizations/&lt;ID&gt;</text><text x="575" y="568" style="text-anchor: middle;" class="messageText">OTP=1234</text><line x1="875" y1="558" x2="275" y2="558" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="586" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="593" x2="875" y2="593" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="621" style="text-anchor: middle;" class="messageText">PUT /authorizations/&lt;ID&gt;</text><text x="175" y="638" style="text-anchor: middle;" class="messageText">OTP=1234</text><line x1="275" y1="628" x2="75" y2="628" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="656" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="75" y1="663" x2="275" y2="663" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><line x1="65" y1="508" x2="885" y2="508" class="loopLine"></line><line x1="885" y1="508" x2="885" y2="673" class="loopLine"></line><line x1="65" y1="673" x2="885" y2="673" class="loopLine"></line><line x1="65" y1="508" x2="65" y2="673" class="loopLine"></line><polygon points="65,508 115,508 115,521 106.6,528 65,528" class="labelBox"></polygon><text x="72.5" y="523" class="labelText"><tspan x="72.5">alt</tspan></text><text x="475" y="523" style="text-anchor: middle;" class="loopText"><tspan x="475">[ Authorization ]</tspan></text></g><g><rect x="-100" y="683" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="-104" y="707" class="noteText"><tspan x="-84">Validate OTP</tspan></text></g><g><text x="175" y="747" style="text-anchor: middle;" class="messageText">POST /transfers</text><line x1="75" y1="754" x2="275" y2="754" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="782" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="789" x2="75" y2="789" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="817" style="text-anchor: middle;" class="messageText">POST /transfers</text><line x1="275" y1="824" x2="875" y2="824" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="834" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="796" y="858" class="noteText"><tspan x="816">Use quoteId to find transaction request </tspan></text><text x="796" y="874" class="noteText"><tspan x="816"> populate JSON 0210</tspan></text></g><g><text x="975" y="914" style="text-anchor: middle;" class="messageText">SEND Transaction</text><line x1="875" y1="921" x2="1075" y2="921" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="1000" y="931" fill="#EDF2AE" stroke="#666" width="150" height="84" rx="0" ry="0" class="note"></rect><text x="996" y="955" class="noteText"><tspan x="1016">Convert to </tspan></text><text x="996" y="971" class="noteText"><tspan x="1016"> ISO8583:0210 </tspan></text><text x="996" y="987" class="noteText"><tspan x="1016"> use LPS key to send </tspan></text><text x="996" y="1003" class="noteText"><tspan x="1016"> to correct switch</tspan></text></g><g><text x="1175" y="1043" style="text-anchor: middle;" class="messageText">WRITE ISO8583:0210</text><line x1="1075" y1="1050" x2="1275" y2="1050" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="0" y="1070" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="1102.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="75" dy="0">Payer FSP</tspan></text></g><g><rect x="200" y="1070" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="1102.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="275" dy="0">Moja Switch</tspan></text></g><g><rect x="400" y="1070" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="1102.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="475" dy="0">Payee FSP</tspan></text></g><g><rect x="600" y="1070" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="1102.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="675" dy="0">ALS</tspan></text></g><g><rect x="800" y="1070" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="1102.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="875" dy="0">Adaptor</tspan></text></g><g><rect x="1000" y="1070" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="1102.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1075" dy="0">TCP Relay</tspan></text></g><g><rect x="1200" y="1070" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="1102.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1275" dy="0">Legacy Switch</tspan></text></g><g><rect x="1400" y="1070" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="1102.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1475" dy="0">ATM</tspan></text></g></svg>

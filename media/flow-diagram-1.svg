@@ -1,49 +1,49 @@
-<svg id="mermaid-1574226696692" width="100%" xmlns="http://www.w3.org/2000/svg" height="100%" style="max-width:1750px;" viewBox="-150 -10 1750 1836"><style>
+<svg id="mermaid-1574234556413" width="100%" xmlns="http://www.w3.org/2000/svg" height="100%" style="max-width:1750px;" viewBox="-150 -10 1750 1496"><style>
 
 
 
-#mermaid-1574226696692 .label {
+#mermaid-1574234556413 .label {
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   color: #333; }
 
-#mermaid-1574226696692 .label text {
+#mermaid-1574234556413 .label text {
   fill: #333; }
 
-#mermaid-1574226696692 .node rect,
-#mermaid-1574226696692 .node circle,
-#mermaid-1574226696692 .node ellipse,
-#mermaid-1574226696692 .node polygon {
+#mermaid-1574234556413 .node rect,
+#mermaid-1574234556413 .node circle,
+#mermaid-1574234556413 .node ellipse,
+#mermaid-1574234556413 .node polygon {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1px; }
 
-#mermaid-1574226696692 .node .label {
+#mermaid-1574234556413 .node .label {
   text-align: center; }
 
-#mermaid-1574226696692 .node.clickable {
+#mermaid-1574234556413 .node.clickable {
   cursor: pointer; }
 
-#mermaid-1574226696692 .arrowheadPath {
+#mermaid-1574234556413 .arrowheadPath {
   fill: #333333; }
 
-#mermaid-1574226696692 .edgePath .path {
+#mermaid-1574234556413 .edgePath .path {
   stroke: #333333;
   stroke-width: 1.5px; }
 
-#mermaid-1574226696692 .edgeLabel {
+#mermaid-1574234556413 .edgeLabel {
   background-color: #e8e8e8;
   text-align: center; }
 
-#mermaid-1574226696692 .cluster rect {
+#mermaid-1574234556413 .cluster rect {
   fill: #ffffde;
   stroke: #aaaa33;
   stroke-width: 1px; }
 
-#mermaid-1574226696692 .cluster text {
+#mermaid-1574234556413 .cluster text {
   fill: #333; }
 
-#mermaid-1574226696692 div.mermaidTooltip {
+#mermaid-1574234556413 div.mermaidTooltip {
   position: absolute;
   text-align: center;
   max-width: 200px;
@@ -57,117 +57,117 @@
   pointer-events: none;
   z-index: 100; }
 
-#mermaid-1574226696692 .actor {
+#mermaid-1574234556413 .actor {
   stroke: #CCCCFF;
   fill: #ECECFF; }
 
-#mermaid-1574226696692 text.actor {
+#mermaid-1574234556413 text.actor {
   fill: black;
   stroke: none; }
 
-#mermaid-1574226696692 .actor-line {
+#mermaid-1574234556413 .actor-line {
   stroke: grey; }
 
-#mermaid-1574226696692 .messageLine0 {
+#mermaid-1574234556413 .messageLine0 {
   stroke-width: 1.5;
   stroke-dasharray: '2 2';
   stroke: #333; }
 
-#mermaid-1574226696692 .messageLine1 {
+#mermaid-1574234556413 .messageLine1 {
   stroke-width: 1.5;
   stroke-dasharray: '2 2';
   stroke: #333; }
 
-#mermaid-1574226696692 #arrowhead {
+#mermaid-1574234556413 #arrowhead {
   fill: #333; }
 
-#mermaid-1574226696692 .sequenceNumber {
+#mermaid-1574234556413 .sequenceNumber {
   fill: white; }
 
-#mermaid-1574226696692 #sequencenumber {
+#mermaid-1574234556413 #sequencenumber {
   fill: #333; }
 
-#mermaid-1574226696692 #crosshead path {
+#mermaid-1574234556413 #crosshead path {
   fill: #333 !important;
   stroke: #333 !important; }
 
-#mermaid-1574226696692 .messageText {
+#mermaid-1574234556413 .messageText {
   fill: #333;
   stroke: none; }
 
-#mermaid-1574226696692 .labelBox {
+#mermaid-1574234556413 .labelBox {
   stroke: #CCCCFF;
   fill: #ECECFF; }
 
-#mermaid-1574226696692 .labelText {
+#mermaid-1574234556413 .labelText {
   fill: black;
   stroke: none; }
 
-#mermaid-1574226696692 .loopText {
+#mermaid-1574234556413 .loopText {
   fill: black;
   stroke: none; }
 
-#mermaid-1574226696692 .loopLine {
+#mermaid-1574234556413 .loopLine {
   stroke-width: 2;
   stroke-dasharray: '2 2';
   stroke: #CCCCFF; }
 
-#mermaid-1574226696692 .note {
+#mermaid-1574234556413 .note {
   stroke: #aaaa33;
   fill: #fff5ad; }
 
-#mermaid-1574226696692 .noteText {
+#mermaid-1574234556413 .noteText {
   fill: black;
   stroke: none;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   font-size: 14px; }
 
-#mermaid-1574226696692 .activation0 {
+#mermaid-1574234556413 .activation0 {
   fill: #f4f4f4;
   stroke: #666; }
 
-#mermaid-1574226696692 .activation1 {
+#mermaid-1574234556413 .activation1 {
   fill: #f4f4f4;
   stroke: #666; }
 
-#mermaid-1574226696692 .activation2 {
+#mermaid-1574234556413 .activation2 {
   fill: #f4f4f4;
   stroke: #666; }
 
 
-#mermaid-1574226696692 .mermaid-main-font {
+#mermaid-1574234556413 .mermaid-main-font {
   font-family: "trebuchet ms", verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 .section {
+#mermaid-1574234556413 .section {
   stroke: none;
   opacity: 0.2; }
 
-#mermaid-1574226696692 .section0 {
+#mermaid-1574234556413 .section0 {
   fill: rgba(102, 102, 255, 0.49); }
 
-#mermaid-1574226696692 .section2 {
+#mermaid-1574234556413 .section2 {
   fill: #fff400; }
 
-#mermaid-1574226696692 .section1,
-#mermaid-1574226696692 .section3 {
+#mermaid-1574234556413 .section1,
+#mermaid-1574234556413 .section3 {
   fill: white;
   opacity: 0.2; }
 
-#mermaid-1574226696692 .sectionTitle0 {
+#mermaid-1574234556413 .sectionTitle0 {
   fill: #333; }
 
-#mermaid-1574226696692 .sectionTitle1 {
+#mermaid-1574234556413 .sectionTitle1 {
   fill: #333; }
 
-#mermaid-1574226696692 .sectionTitle2 {
+#mermaid-1574234556413 .sectionTitle2 {
   fill: #333; }
 
-#mermaid-1574226696692 .sectionTitle3 {
+#mermaid-1574234556413 .sectionTitle3 {
   fill: #333; }
 
-#mermaid-1574226696692 .sectionTitle {
+#mermaid-1574234556413 .sectionTitle {
   text-anchor: start;
   font-size: 11px;
   text-height: 14px;
@@ -175,309 +175,309 @@
   font-family: var(--mermaid-font-family); }
 
 
-#mermaid-1574226696692 .grid .tick {
+#mermaid-1574234556413 .grid .tick {
   stroke: lightgrey;
   opacity: 0.3;
   shape-rendering: crispEdges; }
-#mermaid-1574226696692   .grid .tick text {
+#mermaid-1574234556413   .grid .tick text {
     font-family: 'trebuchet ms', verdana, arial;
     font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 .grid path {
+#mermaid-1574234556413 .grid path {
   stroke-width: 0; }
 
 
-#mermaid-1574226696692 .today {
+#mermaid-1574234556413 .today {
   fill: none;
   stroke: red;
   stroke-width: 2px; }
 
 
 
-#mermaid-1574226696692 .task {
+#mermaid-1574234556413 .task {
   stroke-width: 2; }
 
-#mermaid-1574226696692 .taskText {
+#mermaid-1574234556413 .taskText {
   text-anchor: middle;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 .taskText:not([font-size]) {
+#mermaid-1574234556413 .taskText:not([font-size]) {
   font-size: 11px; }
 
-#mermaid-1574226696692 .taskTextOutsideRight {
+#mermaid-1574234556413 .taskTextOutsideRight {
   fill: black;
   text-anchor: start;
   font-size: 11px;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 .taskTextOutsideLeft {
+#mermaid-1574234556413 .taskTextOutsideLeft {
   fill: black;
   text-anchor: end;
   font-size: 11px; }
 
 
-#mermaid-1574226696692 .task.clickable {
+#mermaid-1574234556413 .task.clickable {
   cursor: pointer; }
 
-#mermaid-1574226696692 .taskText.clickable {
+#mermaid-1574234556413 .taskText.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
-#mermaid-1574226696692 .taskTextOutsideLeft.clickable {
+#mermaid-1574234556413 .taskTextOutsideLeft.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
-#mermaid-1574226696692 .taskTextOutsideRight.clickable {
+#mermaid-1574234556413 .taskTextOutsideRight.clickable {
   cursor: pointer;
   fill: #003163 !important;
   font-weight: bold; }
 
 
-#mermaid-1574226696692 .taskText0,
-#mermaid-1574226696692 .taskText1,
-#mermaid-1574226696692 .taskText2,
-#mermaid-1574226696692 .taskText3 {
+#mermaid-1574234556413 .taskText0,
+#mermaid-1574234556413 .taskText1,
+#mermaid-1574234556413 .taskText2,
+#mermaid-1574234556413 .taskText3 {
   fill: white; }
 
-#mermaid-1574226696692 .task0,
-#mermaid-1574226696692 .task1,
-#mermaid-1574226696692 .task2,
-#mermaid-1574226696692 .task3 {
+#mermaid-1574234556413 .task0,
+#mermaid-1574234556413 .task1,
+#mermaid-1574234556413 .task2,
+#mermaid-1574234556413 .task3 {
   fill: #8a90dd;
   stroke: #534fbc; }
 
-#mermaid-1574226696692 .taskTextOutside0,
-#mermaid-1574226696692 .taskTextOutside2 {
+#mermaid-1574234556413 .taskTextOutside0,
+#mermaid-1574234556413 .taskTextOutside2 {
   fill: black; }
 
-#mermaid-1574226696692 .taskTextOutside1,
-#mermaid-1574226696692 .taskTextOutside3 {
+#mermaid-1574234556413 .taskTextOutside1,
+#mermaid-1574234556413 .taskTextOutside3 {
   fill: black; }
 
 
-#mermaid-1574226696692 .active0,
-#mermaid-1574226696692 .active1,
-#mermaid-1574226696692 .active2,
-#mermaid-1574226696692 .active3 {
+#mermaid-1574234556413 .active0,
+#mermaid-1574234556413 .active1,
+#mermaid-1574234556413 .active2,
+#mermaid-1574234556413 .active3 {
   fill: #bfc7ff;
   stroke: #534fbc; }
 
-#mermaid-1574226696692 .activeText0,
-#mermaid-1574226696692 .activeText1,
-#mermaid-1574226696692 .activeText2,
-#mermaid-1574226696692 .activeText3 {
+#mermaid-1574234556413 .activeText0,
+#mermaid-1574234556413 .activeText1,
+#mermaid-1574234556413 .activeText2,
+#mermaid-1574234556413 .activeText3 {
   fill: black !important; }
 
 
-#mermaid-1574226696692 .done0,
-#mermaid-1574226696692 .done1,
-#mermaid-1574226696692 .done2,
-#mermaid-1574226696692 .done3 {
+#mermaid-1574234556413 .done0,
+#mermaid-1574234556413 .done1,
+#mermaid-1574234556413 .done2,
+#mermaid-1574234556413 .done3 {
   stroke: grey;
   fill: lightgrey;
   stroke-width: 2; }
 
-#mermaid-1574226696692 .doneText0,
-#mermaid-1574226696692 .doneText1,
-#mermaid-1574226696692 .doneText2,
-#mermaid-1574226696692 .doneText3 {
+#mermaid-1574234556413 .doneText0,
+#mermaid-1574234556413 .doneText1,
+#mermaid-1574234556413 .doneText2,
+#mermaid-1574234556413 .doneText3 {
   fill: black !important; }
 
 
-#mermaid-1574226696692 .crit0,
-#mermaid-1574226696692 .crit1,
-#mermaid-1574226696692 .crit2,
-#mermaid-1574226696692 .crit3 {
+#mermaid-1574234556413 .crit0,
+#mermaid-1574234556413 .crit1,
+#mermaid-1574234556413 .crit2,
+#mermaid-1574234556413 .crit3 {
   stroke: #ff8888;
   fill: red;
   stroke-width: 2; }
 
-#mermaid-1574226696692 .activeCrit0,
-#mermaid-1574226696692 .activeCrit1,
-#mermaid-1574226696692 .activeCrit2,
-#mermaid-1574226696692 .activeCrit3 {
+#mermaid-1574234556413 .activeCrit0,
+#mermaid-1574234556413 .activeCrit1,
+#mermaid-1574234556413 .activeCrit2,
+#mermaid-1574234556413 .activeCrit3 {
   stroke: #ff8888;
   fill: #bfc7ff;
   stroke-width: 2; }
 
-#mermaid-1574226696692 .doneCrit0,
-#mermaid-1574226696692 .doneCrit1,
-#mermaid-1574226696692 .doneCrit2,
-#mermaid-1574226696692 .doneCrit3 {
+#mermaid-1574234556413 .doneCrit0,
+#mermaid-1574234556413 .doneCrit1,
+#mermaid-1574234556413 .doneCrit2,
+#mermaid-1574234556413 .doneCrit3 {
   stroke: #ff8888;
   fill: lightgrey;
   stroke-width: 2;
   cursor: pointer;
   shape-rendering: crispEdges; }
 
-#mermaid-1574226696692 .milestone {
+#mermaid-1574234556413 .milestone {
   transform: rotate(45deg) scale(0.8, 0.8); }
 
-#mermaid-1574226696692 .milestoneText {
+#mermaid-1574234556413 .milestoneText {
   font-style: italic; }
 
-#mermaid-1574226696692 .doneCritText0,
-#mermaid-1574226696692 .doneCritText1,
-#mermaid-1574226696692 .doneCritText2,
-#mermaid-1574226696692 .doneCritText3 {
+#mermaid-1574234556413 .doneCritText0,
+#mermaid-1574234556413 .doneCritText1,
+#mermaid-1574234556413 .doneCritText2,
+#mermaid-1574234556413 .doneCritText3 {
   fill: black !important; }
 
-#mermaid-1574226696692 .activeCritText0,
-#mermaid-1574226696692 .activeCritText1,
-#mermaid-1574226696692 .activeCritText2,
-#mermaid-1574226696692 .activeCritText3 {
+#mermaid-1574234556413 .activeCritText0,
+#mermaid-1574234556413 .activeCritText1,
+#mermaid-1574234556413 .activeCritText2,
+#mermaid-1574234556413 .activeCritText3 {
   fill: black !important; }
 
-#mermaid-1574226696692 .titleText {
+#mermaid-1574234556413 .titleText {
   text-anchor: middle;
   font-size: 18px;
   fill: black;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 g.classGroup text {
+#mermaid-1574234556413 g.classGroup text {
   fill: #9370DB;
   stroke: none;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family);
   font-size: 10px; }
-#mermaid-1574226696692   g.classGroup text .title {
+#mermaid-1574234556413   g.classGroup text .title {
     font-weight: bolder; }
 
-#mermaid-1574226696692 g.classGroup rect {
+#mermaid-1574234556413 g.classGroup rect {
   fill: #ECECFF;
   stroke: #9370DB; }
 
-#mermaid-1574226696692 g.classGroup line {
+#mermaid-1574234556413 g.classGroup line {
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 .classLabel .box {
+#mermaid-1574234556413 .classLabel .box {
   stroke: none;
   stroke-width: 0;
   fill: #ECECFF;
   opacity: 0.5; }
 
-#mermaid-1574226696692 .classLabel .label {
+#mermaid-1574234556413 .classLabel .label {
   fill: #9370DB;
   font-size: 10px; }
 
-#mermaid-1574226696692 .relation {
+#mermaid-1574234556413 .relation {
   stroke: #9370DB;
   stroke-width: 1;
   fill: none; }
 
-#mermaid-1574226696692 #compositionStart {
+#mermaid-1574234556413 #compositionStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 #compositionEnd {
+#mermaid-1574234556413 #compositionEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 #aggregationStart {
+#mermaid-1574234556413 #aggregationStart {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 #aggregationEnd {
+#mermaid-1574234556413 #aggregationEnd {
   fill: #ECECFF;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 #dependencyStart {
+#mermaid-1574234556413 #dependencyStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 #dependencyEnd {
+#mermaid-1574234556413 #dependencyEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 #extensionStart {
+#mermaid-1574234556413 #extensionStart {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 #extensionEnd {
+#mermaid-1574234556413 #extensionEnd {
   fill: #9370DB;
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 .commit-id,
-#mermaid-1574226696692 .commit-msg,
-#mermaid-1574226696692 .branch-label {
+#mermaid-1574234556413 .commit-id,
+#mermaid-1574234556413 .commit-msg,
+#mermaid-1574234556413 .branch-label {
   fill: lightgrey;
   color: lightgrey;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 .pieTitleText {
+#mermaid-1574234556413 .pieTitleText {
   text-anchor: middle;
   font-size: 25px;
   fill: black;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 .slice {
+#mermaid-1574234556413 .slice {
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 g.stateGroup text {
+#mermaid-1574234556413 g.stateGroup text {
   fill: #9370DB;
   stroke: none;
   font-size: 10px;
   font-family: 'trebuchet ms', verdana, arial;
   font-family: var(--mermaid-font-family); }
 
-#mermaid-1574226696692 g.stateGroup text {
+#mermaid-1574234556413 g.stateGroup text {
   fill: #9370DB;
   stroke: none;
   font-size: 10px; }
 
-#mermaid-1574226696692 g.stateGroup .state-title {
+#mermaid-1574234556413 g.stateGroup .state-title {
   font-weight: bolder;
   fill: black; }
 
-#mermaid-1574226696692 g.stateGroup rect {
+#mermaid-1574234556413 g.stateGroup rect {
   fill: #ECECFF;
   stroke: #9370DB; }
 
-#mermaid-1574226696692 g.stateGroup line {
+#mermaid-1574234556413 g.stateGroup line {
   stroke: #9370DB;
   stroke-width: 1; }
 
-#mermaid-1574226696692 .transition {
+#mermaid-1574234556413 .transition {
   stroke: #9370DB;
   stroke-width: 1;
   fill: none; }
 
-#mermaid-1574226696692 .stateGroup .composit {
+#mermaid-1574234556413 .stateGroup .composit {
   fill: white;
   border-bottom: 1px; }
 
-#mermaid-1574226696692 .state-note {
+#mermaid-1574234556413 .state-note {
   stroke: #aaaa33;
   fill: #fff5ad; }
-#mermaid-1574226696692   .state-note text {
+#mermaid-1574234556413   .state-note text {
     fill: black;
     stroke: none;
     font-size: 10px; }
 
-#mermaid-1574226696692 .stateLabel .box {
+#mermaid-1574234556413 .stateLabel .box {
   stroke: none;
   stroke-width: 0;
   fill: #ECECFF;
   opacity: 0.5; }
 
-#mermaid-1574226696692 .stateLabel text {
+#mermaid-1574234556413 .stateLabel text {
   fill: black;
   font-size: 10px;
   font-weight: bold;
@@ -488,7 +488,7 @@
   --mermaid-font-family: '"trebuchet ms", verdana, arial';
   --mermaid-font-family: "Comic Sans MS", "Comic Sans", cursive; }
 
-:root { --mermaid-font-family: "trebuchet ms", verdana, arial;}</style><style>#mermaid-1574226696692 {
+:root { --mermaid-font-family: "trebuchet ms", verdana, arial;}</style><style>#mermaid-1574234556413 {
     color: rgba(0, 0, 0, 0.65);
     font: ;
-  }</style><g></g><g><line id="actor1256" x1="75" y1="5" x2="75" y2="1825" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="75" dy="0">Payer FSP</tspan></text></g><g><line id="actor1257" x1="275" y1="5" x2="275" y2="1825" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="275" dy="0">Moja Switch</tspan></text></g><g><line id="actor1258" x1="475" y1="5" x2="475" y2="1825" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="475" dy="0">Payee FSP</tspan></text></g><g><line id="actor1259" x1="675" y1="5" x2="675" y2="1825" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="675" dy="0">ALS</tspan></text></g><g><line id="actor1260" x1="875" y1="5" x2="875" y2="1825" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="800" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="875" dy="0">Adaptor</tspan></text></g><g><line id="actor1261" x1="1075" y1="5" x2="1075" y2="1825" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1000" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1075" dy="0">TCP Relay</tspan></text></g><g><line id="actor1262" x1="1275" y1="5" x2="1275" y2="1825" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1275" dy="0">Legacy Switch</tspan></text></g><g><line id="actor1263" x1="1475" y1="5" x2="1475" y2="1825" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1475" dy="0">ATM</tspan></text></g><defs><marker id="arrowhead" refX="5" refY="2" markerWidth="6" markerHeight="4" orient="auto"><path d="M 0,0 V 4 L6,2 Z"></path></marker></defs><defs><marker id="crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="16" refY="4"><path fill="black" stroke="#000000" style="stroke-dasharray: 0px, 0px;" stroke-width="1px" d="M 9,2 V 6 L16,4 Z"></path><path fill="none" stroke="#000000" style="stroke-dasharray: 0px, 0px;" stroke-width="1px" d="M 0,1 L 6,7 M 6,1 L 0,7"></path></marker></defs><defs><marker id="sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"></circle></marker></defs><g><text x="1175" y="93" style="text-anchor: middle;" class="messageText">ISO8583: 0100</text><line x1="1275" y1="100" x2="1075" y2="100" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="1000" y="110" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="996" y="134" class="noteText"><tspan x="1016">Convert to JSON </tspan></text><text x="996" y="150" class="noteText"><tspan x="1016"> representation</tspan></text></g><g><text x="975" y="190" style="text-anchor: middle;" class="messageText">POST /iso8583/transactionRequests</text><line x1="1075" y1="197" x2="875" y2="197" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="207" fill="#EDF2AE" stroke="#666" width="150" height="84" rx="0" ry="0" class="note"></rect><text x="796" y="231" class="noteText"><tspan x="816">Insert Tx Req PK = RNN + LPS key + Switch key </tspan></text><text x="796" y="247" class="noteText"><tspan x="816"> transactionRequest Id = V4 UUID </tspan></text><text x="796" y="263" class="noteText"><tspan x="816">  store transaction parties and map to UUID </tspan></text><text x="796" y="279" class="noteText"><tspan x="816"> store 0100 and map it to primary key</tspan></text></g><g><text x="775" y="319" style="text-anchor: middle;" class="messageText">GET parties/MSISDN/&lt;msisdn&gt;</text><text x="775" y="336" style="text-anchor: middle;" class="messageText">ID=transactionRequestId</text><line x1="875" y1="326" x2="675" y2="326" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="775" y="354" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="675" y1="361" x2="875" y2="361" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="775" y="389" style="text-anchor: middle;" class="messageText">PUT parties/MSISDN/&lt;msisdn&gt; header ID=transactionRequestId</text><line x1="675" y1="396" x2="875" y2="396" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="406" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="796" y="430" class="noteText"><tspan x="816">update payer FSP ID in transaction parties table</tspan></text></g><g><text x="775" y="470" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="875" y1="477" x2="675" y2="477" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="505" style="text-anchor: middle;" class="messageText">POST /transactionRequests</text><text x="575" y="522" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=&lt;adaptor id&gt; FSP-IOP-DESTINATION=payerFSP</text><line x1="875" y1="512" x2="275" y2="512" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="540" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="547" x2="875" y2="547" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="575" style="text-anchor: middle;" class="messageText">POST /transactionRequests</text><text x="175" y="592" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=&lt;adaptor id&gt; FSP-IOP-DESTINATION=payerFSP</text><line x1="275" y1="582" x2="75" y2="582" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="-100" y="592" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="-104" y="616" class="noteText"><tspan x="-84">Create transaction </tspan></text><text x="-104" y="632" class="noteText"><tspan x="-84"> Generate quote ID</tspan></text></g><g><text x="175" y="672" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="75" y1="679" x2="275" y2="679" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="707" style="text-anchor: middle;" class="messageText">POST /quotes</text><text x="175" y="724" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=payerFSP FSP-IOP-DESTINATION=&lt;adaptor id&gt;</text><line x1="75" y1="714" x2="275" y2="714" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="742" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="749" x2="75" y2="749" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="777" style="text-anchor: middle;" class="messageText">POST /qoutes</text><text x="575" y="794" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=payerFSP FSP-IOP-DESTINATION=&lt;adaptor id&gt;</text><line x1="275" y1="784" x2="875" y2="784" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="794" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="796" y="818" class="noteText"><tspan x="816">Map quote ID to </tspan></text><text x="796" y="834" class="noteText"><tspan x="816"> transaction request ID</tspan></text></g><g><text x="575" y="874" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="875" y1="881" x2="275" y2="881" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="934" style="text-anchor: middle;" class="messageText">POST /quotes</text><text x="575" y="951" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=&lt;adaptod id&gt; FSP-IOP-DESTINATION=payeeFSP</text><line x1="875" y1="941" x2="275" y2="941" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="969" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="976" x2="875" y2="976" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="375" y="1004" style="text-anchor: middle;" class="messageText">POST /quotes</text><line x1="275" y1="1011" x2="475" y2="1011" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="400" y="1021" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="396" y="1045" class="noteText"><tspan x="416">Create quote, </tspan></text><text x="396" y="1061" class="noteText"><tspan x="416"> add fees</tspan></text></g><g><text x="375" y="1101" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="475" y1="1108" x2="275" y2="1108" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="375" y="1136" style="text-anchor: middle;" class="messageText">PUT /quotes/&lt;quoteId&gt;</text><line x1="475" y1="1143" x2="275" y2="1143" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="1171" style="text-anchor: middle;" class="messageText">PUT /quotes&lt;quoteId&gt;</text><line x1="275" y1="1178" x2="875" y2="1178" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="1206" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="875" y1="1213" x2="275" y2="1213" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><line x1="265" y1="891" x2="885" y2="891" class="loopLine"></line><line x1="885" y1="891" x2="885" y2="1223" class="loopLine"></line><line x1="265" y1="1223" x2="885" y2="1223" class="loopLine"></line><line x1="265" y1="891" x2="265" y2="1223" class="loopLine"></line><polygon points="265,891 315,891 315,904 306.6,911 265,911" class="labelBox"></polygon><text x="272.5" y="906" class="labelText"><tspan x="272.5">opt</tspan></text><text x="575" y="906" style="text-anchor: middle;" class="loopText"><tspan x="575">[ Request quote from Payee FSP ]</tspan></text></g><g><rect x="800" y="1233" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="796" y="1257" class="noteText"><tspan x="816">Lookup 0100 message, using transactionRequestID, for surcharge</tspan></text></g><g><text x="575" y="1297" style="text-anchor: middle;" class="messageText">PUT /quotes</text><text x="575" y="1314" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=&lt;adaptod id&gt; FSP-IOP-DESTINATION=payerFSP</text><line x1="875" y1="1304" x2="275" y2="1304" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="1332" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="1339" x2="875" y2="1339" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="1367" style="text-anchor: middle;" class="messageText">PUT /quotes</text><line x1="275" y1="1374" x2="75" y2="1374" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="1402" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="75" y1="1409" x2="275" y2="1409" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="1437" style="text-anchor: middle;" class="messageText">GET /authorizations/&lt;transactionRequestId&gt;</text><text x="175" y="1454" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=payerFSP FSP-IOP-DESTINATION=&lt;adaptod id&gt;</text><line x1="75" y1="1444" x2="275" y2="1444" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="1472" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="1479" x2="75" y2="1479" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="1507" style="text-anchor: middle;" class="messageText">Get /authorizations/&lt;transactionRequestId&gt;</text><text x="575" y="1524" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=payerFSP FSP-IOP-DESTINATION=&lt;adaptod id&gt;</text><line x1="275" y1="1514" x2="875" y2="1514" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="1524" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="796" y="1548" class="noteText"><tspan x="816">Fetch transaction request </tspan></text><text x="796" y="1564" class="noteText"><tspan x="816"> Populate JSON 0110</tspan></text></g><g><text x="975" y="1604" style="text-anchor: middle;" class="messageText">SEND Authorization</text><line x1="875" y1="1611" x2="1075" y2="1611" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="1000" y="1621" fill="#EDF2AE" stroke="#666" width="150" height="84" rx="0" ry="0" class="note"></rect><text x="996" y="1645" class="noteText"><tspan x="1016">Convert to </tspan></text><text x="996" y="1661" class="noteText"><tspan x="1016"> ISO8583:0110 </tspan></text><text x="996" y="1677" class="noteText"><tspan x="1016"> use LPS key to send </tspan></text><text x="996" y="1693" class="noteText"><tspan x="1016"> to correct switch</tspan></text></g><g><text x="1175" y="1733" style="text-anchor: middle;" class="messageText">WRITE ISO8583:0110</text><line x1="1075" y1="1740" x2="1275" y2="1740" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="0" y="1760" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="1792.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="75" dy="0">Payer FSP</tspan></text></g><g><rect x="200" y="1760" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="1792.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="275" dy="0">Moja Switch</tspan></text></g><g><rect x="400" y="1760" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="1792.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="475" dy="0">Payee FSP</tspan></text></g><g><rect x="600" y="1760" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="1792.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="675" dy="0">ALS</tspan></text></g><g><rect x="800" y="1760" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="1792.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="875" dy="0">Adaptor</tspan></text></g><g><rect x="1000" y="1760" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="1792.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1075" dy="0">TCP Relay</tspan></text></g><g><rect x="1200" y="1760" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="1792.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1275" dy="0">Legacy Switch</tspan></text></g><g><rect x="1400" y="1760" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="1792.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1475" dy="0">ATM</tspan></text></g></svg>
+  }</style><g></g><g><line id="actor2552" x1="75" y1="5" x2="75" y2="1485" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="75" dy="0">Payer FSP</tspan></text></g><g><line id="actor2553" x1="275" y1="5" x2="275" y2="1485" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="275" dy="0">Moja Switch</tspan></text></g><g><line id="actor2554" x1="475" y1="5" x2="475" y2="1485" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="475" dy="0">Payee FSP</tspan></text></g><g><line id="actor2555" x1="675" y1="5" x2="675" y2="1485" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="600" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="675" dy="0">ALS</tspan></text></g><g><line id="actor2556" x1="875" y1="5" x2="875" y2="1485" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="800" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="875" dy="0">Adaptor</tspan></text></g><g><line id="actor2557" x1="1075" y1="5" x2="1075" y2="1485" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1000" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1075" dy="0">TCP Relay</tspan></text></g><g><line id="actor2558" x1="1275" y1="5" x2="1275" y2="1485" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1200" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1275" dy="0">Legacy Switch</tspan></text></g><g><line id="actor2559" x1="1475" y1="5" x2="1475" y2="1485" class="actor-line" stroke-width="0.5px" stroke="#999"></line><rect x="1400" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="32.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1475" dy="0">ATM</tspan></text></g><defs><marker id="arrowhead" refX="5" refY="2" markerWidth="6" markerHeight="4" orient="auto"><path d="M 0,0 V 4 L6,2 Z"></path></marker></defs><defs><marker id="crosshead" markerWidth="15" markerHeight="8" orient="auto" refX="16" refY="4"><path fill="black" stroke="#000000" style="stroke-dasharray: 0px, 0px;" stroke-width="1px" d="M 9,2 V 6 L16,4 Z"></path><path fill="none" stroke="#000000" style="stroke-dasharray: 0px, 0px;" stroke-width="1px" d="M 0,1 L 6,7 M 6,1 L 0,7"></path></marker></defs><defs><marker id="sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"></circle></marker></defs><g><text x="1175" y="93" style="text-anchor: middle;" class="messageText">ISO8583: 0100</text><line x1="1275" y1="100" x2="1075" y2="100" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="1000" y="110" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="996" y="134" class="noteText"><tspan x="1016">Convert to JSON </tspan></text><text x="996" y="150" class="noteText"><tspan x="1016"> representation</tspan></text></g><g><text x="975" y="190" style="text-anchor: middle;" class="messageText">POST /iso8583/transactionRequests</text><line x1="1075" y1="197" x2="875" y2="197" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="207" fill="#EDF2AE" stroke="#666" width="150" height="84" rx="0" ry="0" class="note"></rect><text x="796" y="231" class="noteText"><tspan x="816">Insert Tx Req PK = RNN + LPS key + Switch key </tspan></text><text x="796" y="247" class="noteText"><tspan x="816"> transactionRequest Id = V4 UUID </tspan></text><text x="796" y="263" class="noteText"><tspan x="816">  store transaction parties and map to UUID </tspan></text><text x="796" y="279" class="noteText"><tspan x="816"> store 0100 and map it to primary key</tspan></text></g><g><text x="775" y="319" style="text-anchor: middle;" class="messageText">GET parties/MSISDN/&lt;msisdn&gt;</text><text x="775" y="336" style="text-anchor: middle;" class="messageText">ID=transactionRequestId</text><line x1="875" y1="326" x2="675" y2="326" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="775" y="354" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="675" y1="361" x2="875" y2="361" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="775" y="389" style="text-anchor: middle;" class="messageText">PUT parties/MSISDN/&lt;msisdn&gt; header ID=transactionRequestId</text><line x1="675" y1="396" x2="875" y2="396" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="406" fill="#EDF2AE" stroke="#666" width="150" height="36" rx="0" ry="0" class="note"></rect><text x="796" y="430" class="noteText"><tspan x="816">update payer FSP ID in transaction parties table</tspan></text></g><g><text x="775" y="470" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="875" y1="477" x2="675" y2="477" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="505" style="text-anchor: middle;" class="messageText">POST /transactionRequests</text><text x="575" y="522" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=&lt;adaptor id&gt; FSP-IOP-DESTINATION=payerFSP</text><line x1="875" y1="512" x2="275" y2="512" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="540" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="547" x2="875" y2="547" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="575" style="text-anchor: middle;" class="messageText">POST /transactionRequests</text><text x="175" y="592" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=&lt;adaptor id&gt; FSP-IOP-DESTINATION=payerFSP</text><line x1="275" y1="582" x2="75" y2="582" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="-100" y="592" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="-104" y="616" class="noteText"><tspan x="-84">Create transaction </tspan></text><text x="-104" y="632" class="noteText"><tspan x="-84"> Generate quote ID</tspan></text></g><g><text x="175" y="672" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="75" y1="679" x2="275" y2="679" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="707" style="text-anchor: middle;" class="messageText">POST /quotes</text><text x="175" y="724" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=payerFSP FSP-IOP-DESTINATION=&lt;adaptor id&gt;</text><line x1="75" y1="714" x2="275" y2="714" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="742" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="749" x2="75" y2="749" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="777" style="text-anchor: middle;" class="messageText">POST /qoutes</text><text x="575" y="794" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=payerFSP FSP-IOP-DESTINATION=&lt;adaptor id&gt;</text><line x1="275" y1="784" x2="875" y2="784" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="812" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="875" y1="819" x2="275" y2="819" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="829" fill="#EDF2AE" stroke="#666" width="150" height="100" rx="0" ry="0" class="note"></rect><text x="796" y="853" class="noteText"><tspan x="816">Store quote </tspan></text><text x="796" y="869" class="noteText"><tspan x="816"> Map quoteId to transactionRequestId </tspan></text><text x="796" y="885" class="noteText"><tspan x="816"> Generate condition </tspan></text><text x="796" y="901" class="noteText"><tspan x="816"> quote state = PENDING </tspan></text><text x="796" y="917" class="noteText"><tspan x="816"> Lookup 0100 message, using transactionRequestID, for surcharge</tspan></text></g><g><text x="575" y="957" style="text-anchor: middle;" class="messageText">PUT /quotes</text><text x="575" y="974" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=&lt;adaptod id&gt; FSP-IOP-DESTINATION=payerFSP</text><line x1="875" y1="964" x2="275" y2="964" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="992" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="999" x2="875" y2="999" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="1027" style="text-anchor: middle;" class="messageText">PUT /quotes</text><line x1="275" y1="1034" x2="75" y2="1034" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="1062" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="75" y1="1069" x2="275" y2="1069" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="1097" style="text-anchor: middle;" class="messageText">GET /authorizations/&lt;transactionRequestId&gt;</text><text x="175" y="1114" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=payerFSP FSP-IOP-DESTINATION=&lt;adaptod id&gt;</text><line x1="75" y1="1104" x2="275" y2="1104" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><text x="175" y="1132" style="text-anchor: middle;" class="messageText">200 Success</text><line x1="275" y1="1139" x2="75" y2="1139" style="stroke-dasharray: 3px, 3px; fill: none;" class="messageLine1" stroke-width="2" stroke="black" marker-end="url(#arrowhead)"></line></g><g><text x="575" y="1167" style="text-anchor: middle;" class="messageText">Get /authorizations/&lt;transactionRequestId&gt;</text><text x="575" y="1184" style="text-anchor: middle;" class="messageText">FSP-IOP-SOURCE=payerFSP FSP-IOP-DESTINATION=&lt;adaptod id&gt;</text><line x1="275" y1="1174" x2="875" y2="1174" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="800" y="1184" fill="#EDF2AE" stroke="#666" width="150" height="52" rx="0" ry="0" class="note"></rect><text x="796" y="1208" class="noteText"><tspan x="816">Fetch transaction request </tspan></text><text x="796" y="1224" class="noteText"><tspan x="816"> Populate JSON 0110</tspan></text></g><g><text x="975" y="1264" style="text-anchor: middle;" class="messageText">SEND Authorization</text><line x1="875" y1="1271" x2="1075" y2="1271" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="1000" y="1281" fill="#EDF2AE" stroke="#666" width="150" height="84" rx="0" ry="0" class="note"></rect><text x="996" y="1305" class="noteText"><tspan x="1016">Convert to </tspan></text><text x="996" y="1321" class="noteText"><tspan x="1016"> ISO8583:0110 </tspan></text><text x="996" y="1337" class="noteText"><tspan x="1016"> use LPS key to send </tspan></text><text x="996" y="1353" class="noteText"><tspan x="1016"> to correct switch</tspan></text></g><g><text x="1175" y="1393" style="text-anchor: middle;" class="messageText">WRITE ISO8583:0110</text><line x1="1075" y1="1400" x2="1275" y2="1400" class="messageLine0" stroke-width="2" stroke="black" style="fill: none;" marker-end="url(#arrowhead)"></line></g><g><rect x="0" y="1420" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="75" y="1452.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="75" dy="0">Payer FSP</tspan></text></g><g><rect x="200" y="1420" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="275" y="1452.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="275" dy="0">Moja Switch</tspan></text></g><g><rect x="400" y="1420" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="475" y="1452.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="475" dy="0">Payee FSP</tspan></text></g><g><rect x="600" y="1420" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="675" y="1452.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="675" dy="0">ALS</tspan></text></g><g><rect x="800" y="1420" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="875" y="1452.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="875" dy="0">Adaptor</tspan></text></g><g><rect x="1000" y="1420" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1075" y="1452.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1075" dy="0">TCP Relay</tspan></text></g><g><rect x="1200" y="1420" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1275" y="1452.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1275" dy="0">Legacy Switch</tspan></text></g><g><rect x="1400" y="1420" fill="#eaeaea" stroke="#666" width="150" height="65" rx="3" ry="3" class="actor"></rect><text x="1475" y="1452.5" style="text-anchor: middle;" dominant-baseline="central" alignment-baseline="central" class="actor"><tspan x="1475" dy="0">ATM</tspan></text></g></svg>
