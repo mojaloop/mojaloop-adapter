@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:lts-slim
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -17,5 +17,6 @@ COPY . .
 
 RUN npm run build
 
-EXPOSE 6969
+EXPOSE 3000
+EXPOSE 3001
 CMD [ "npm", "start" ]
