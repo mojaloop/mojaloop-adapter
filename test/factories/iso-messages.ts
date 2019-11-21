@@ -29,6 +29,8 @@ function generateField7 (): string {
 }
 
 export const ISO0100Factory = Factory.define<Partial<ISO0100>>('Iso0100Factory').attrs({
+  switchKey: '0200:000002:0201151154:000319562',
+  lpsKey: 'postillion',
   3: '012000',
   4: '000000010000',
   49: '820',

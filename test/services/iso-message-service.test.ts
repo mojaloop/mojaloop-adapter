@@ -1,4 +1,4 @@
-import { ISO0110Factory } from '../factories/iso-messages'
+import { ISO0100Factory } from '../factories/iso-messages'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import Knex = require('knex')
 
@@ -32,14 +32,17 @@ describe('IsoMessageService', function () {
   })
 
   test('can create an isoMessage', async () => {
-    const data = ISO0110Factory.build()
+    const data = ISO0100Factory.build({ lpsKey: 'postillion' })
+    const transactionPK = 'aef-123'
 
-    const isoMessage = await isoMessageService.create(data)
+    const isoMessage = await isoMessageService.create({ transactionPK, ...data })
 
     const dbMessage = await knex('isoMessages').where({ id: isoMessage.id }).first()
 
     expect(isoMessage).toMatchObject(data)
     expect(isoMessage.id).toEqual(1)
+    expect(isoMessage.lpsKey).toBe('postillion')
+    expect(isoMessage.transactionPK).toBe(transactionPK)
     expect(JSON.parse(dbMessage.content)).toMatchObject(data)
   })
 
