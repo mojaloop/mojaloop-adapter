@@ -80,6 +80,7 @@ const start = async (): Promise<void> => {
         // Graceful shutdown
         await adaptor.stop()
         relay.close()
+        knex.destroy()
         console.log('completed graceful shutdown.')
       } catch (err) {
         const errInfo =
