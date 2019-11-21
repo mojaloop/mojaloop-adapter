@@ -37,7 +37,7 @@ declare module 'hapi' {
     isoMessagesService: IsoMessageService;
     quotesService: QuotesService;
     logger: Logger;
-    isoMessagingClient?: IsoMessagingClient;
+    isoMessagingClients: Map<string, IsoMessagingClient>;
   }
 }
 
@@ -50,6 +50,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.accountLookupService = services.accountLookupService
   adaptor.app.isoMessagesService = services.isoMessagesService
   adaptor.app.quotesService = services.quotesService
+  adaptor.app.isoMessagingClients = new Map()
   if (!services.logger) {
     adaptor.app.logger = CentralLogger
   }

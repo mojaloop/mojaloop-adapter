@@ -61,8 +61,8 @@ const start = async (): Promise<void> => {
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
 
-  const relay = createTcpRelay(adaptor)
-  relay.listen(TCP_PORT, () => { adaptor.app.logger.info(`TCP Relay server listening on port:${TCP_PORT}`) })
+  const relay = createTcpRelay('postillion', adaptor)
+  relay.listen(TCP_PORT, () => { adaptor.app.logger.info(`Postillion TCP Relay server listening on port:${TCP_PORT}`) })
 
   process.on(
     'SIGINT',
