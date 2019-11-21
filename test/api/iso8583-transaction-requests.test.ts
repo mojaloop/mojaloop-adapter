@@ -3,7 +3,7 @@ import { ISO0100Factory } from '../factories/iso-messages'
 import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { KnexTransactionRequestService } from '../../src/services/transaction-request-service'
+import { KnexTransactionsService } from '../../src/services/transactions-service'
 import Axios from 'axios'
 
 jest.mock('uuid/v4', () => () => '123')
@@ -24,8 +24,8 @@ describe('Transaction Requests API', function () {
       useNullAsDefault: true
     })
     const httpClient = Axios.create()
-    services.transactionRequestService = new KnexTransactionRequestService(knex, httpClient)
-    services.transactionRequestService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    services.transactionsService = new KnexTransactionsService(knex, httpClient)
+    services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     adaptor = await createApp(services)
   })
 
@@ -64,7 +64,7 @@ describe('Transaction Requests API', function () {
     })
 
     expect(response.statusCode).toEqual(200)
-    const transactionRequest = await services.transactionRequestService.getById('123')
+    const transactionRequest = await services.transactionsService.get('123')
     expect(transactionRequest).toMatchObject({
       payer: {
         partyIdType: 'MSISDN',

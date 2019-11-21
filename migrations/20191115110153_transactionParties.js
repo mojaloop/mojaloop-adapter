@@ -2,14 +2,14 @@ exports.up = function (knex) {
   return knex.schema
     .createTable('transactionParties', function (table) {
       table.increments('id').unsigned().primary()
-      table.string('transactionRequestId')
+      table.string('transactionPK')
+      table.foreign('transactionPK').references('id').inTable('transactions')
       table.string('type')
       table.string('identifierType')
-      table.string('identifier')
-      table.string('fspid')
-      table.string('subIdorType')
+      table.string('identifierValue')
+      table.string('fspId').nullable()
+      table.string('subIdorType').nullable()
       table.timestamps(true, true)
-      table.foreign('transactionRequestId').references('id').inTable('transactionRequests')
     })
 }
 exports.down = function (knex) {

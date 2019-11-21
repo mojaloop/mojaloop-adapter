@@ -1,15 +1,15 @@
 exports.up = function (knex) {
   return knex.schema
-    .createTable('transactionRequests', function (table) {
-      table.string('id', 36).primary()
-      table.string('transactionId')
-      table.string('stan')
+    .createTable('transactions', function (table) {
+      table.string('id').primary()
+      table.string('transactionRequestId', 36)
+      table.string('transactionId').nullable()
       table.string('amount')
       table.string('currency', 3)
-      table.integer('expiration')
+      table.string('expiration')
       table.timestamps(true, true)
     })
 }
 exports.down = function (knex) {
-  return knex.schema.dropTableIfExists('transactionRequests')
+  return knex.schema.dropTableIfExists('transactions')
 }

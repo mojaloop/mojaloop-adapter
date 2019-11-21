@@ -1,5 +1,5 @@
 import { Server } from 'hapi'
-import { TransactionRequestService } from './services/transaction-request-service'
+import { TransactionsService } from './services/transactions-service'
 import * as Iso8583TransactionRequestController from './controllers/iso8583-transaction-requests-controller'
 import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
@@ -16,7 +16,7 @@ export type AdaptorConfig = {
 }
 
 export type AdaptorServices = {
-  transactionRequestService: TransactionRequestService;
+  transactionsService: TransactionsService;
   accountLookupService: AccountLookUpService;
   isoMessagesService: IsoMessageService;
   quotesService: QuotesService;
@@ -32,7 +32,7 @@ export type Logger = {
 
 declare module 'hapi' {
   interface ApplicationState {
-    transactionRequestService: TransactionRequestService;
+    transactionsService: TransactionsService;
     accountLookupService: AccountLookUpService;
     isoMessagesService: IsoMessageService;
     quotesService: QuotesService;
@@ -46,7 +46,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   const adaptor = new Server(config)
 
   // register services
-  adaptor.app.transactionRequestService = services.transactionRequestService
+  adaptor.app.transactionsService = services.transactionsService
   adaptor.app.accountLookupService = services.accountLookupService
   adaptor.app.isoMessagesService = services.isoMessagesService
   adaptor.app.quotesService = services.quotesService

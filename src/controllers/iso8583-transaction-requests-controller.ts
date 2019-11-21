@@ -31,8 +31,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     }
     const expiration: string = isoMessage[7]
 
-    const transactionRequest = await request.server.app.transactionRequestService.create({ payer: payer.partyIdInfo, payee, amount, transactionType, expiration, authenticationType: 'OTP' })
-    await request.server.app.isoMessagesService.create({ transactionRequestId: '123', ...isoMessage })
+    const transactionRequest = await request.server.app.transactionsService.create({ payer: payer.partyIdInfo, payee, amount, transactionType, expiration, authenticationType: 'OTP' })
     if (!transactionRequest.id) {
       throw new Error('No transactionRequest.id')
     }

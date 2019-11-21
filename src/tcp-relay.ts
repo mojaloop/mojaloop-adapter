@@ -3,7 +3,7 @@ import { Server, ServerInjectResponse } from 'hapi'
 import { TcpIsoMessagingClient } from './services/iso-messaging-client'
 const IsoParser = require('iso_8583')
 
-export async function handleIsoMessage (data: Buffer, adaptor: Server): Promise<void> {
+export async function handleIsoMessage (lpsKey: string, data: Buffer, adaptor: Server): Promise<void> {
   const mti = data.slice(2, 6).toString()
   const isoMessage = new IsoParser().getIsoJSON(data)
   adaptor.app.logger.debug('TCPRelay: Message mti: ' + mti)
@@ -11,39 +11,39 @@ export async function handleIsoMessage (data: Buffer, adaptor: Server): Promise<
   let response: ServerInjectResponse
   switch (mti) {
     case '0100':
-      adaptor.app.logger.debug('TCPRelay: Handling 0100 message...')
+      adaptor.app.logger.debug(`${lpsKey} relay: Handling 0100 message...`)
       response = await adaptor.inject({
         method: 'POST',
         url: '/iso8583/transactionRequests',
-        payload: isoMessage
+        payload: { lpsKey, ...isoMessage }
       })
 
       if (response.statusCode !== 200) {
         throw new Error(response.statusMessage)
       }
-      adaptor.app.logger.debug('TCPRelay: Finished handling 0100 message...')
+      adaptor.app.logger.debug(`${lpsKey} relay: Finished handling 0100 message...`)
       break
     default:
-      adaptor.app.logger.error(`TCPRelay: Cannot handle iso message of type: ${mti}`)
+      adaptor.app.logger.error(`${lpsKey} relay: Cannot handle iso message of type: ${mti}`)
   }
 }
 
-export function createTcpRelay (adaptor: Server): net.Server {
+export function createTcpRelay (lpsKey: string, adaptor: Server): net.Server {
 
   return net.createServer(function (sock) {
 
-    adaptor.app.logger.info('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort)
+    adaptor.app.logger.info(lpsKey + ' CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort)
 
     const isoMessagingClient = new TcpIsoMessagingClient(sock)
 
-    adaptor.app.isoMessagingClient = isoMessagingClient
+    adaptor.app.isoMessagingClients.set(lpsKey, isoMessagingClient)
 
     sock.on('data', async (data) => {
       try {
-        adaptor.app.logger.debug('TCPRelay: Received buffer message: ' + data)
-        await handleIsoMessage(data, adaptor)
+        adaptor.app.logger.debug(`${lpsKey} relay: Received buffer message: ` + data)
+        await handleIsoMessage(lpsKey, data, adaptor)
       } catch (error) {
-        adaptor.app.logger.error('TCPRelay: Failed to handle iso message. ')
+        adaptor.app.logger.error(`${lpsKey} relay: Failed to handle iso message.`)
         adaptor.app.logger.error(error)
       }
     })

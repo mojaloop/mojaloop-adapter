@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
 import { createApp } from './adaptor'
-import { KnexTransactionRequestService } from './services/transaction-request-service'
+import { KnexTransactionsService } from './services/transactions-service'
 import { AccountLookupService } from './services/account-lookup-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
@@ -33,7 +33,7 @@ const transcationRequestClient = axios.create({
   baseURL: TRANSACTION_REQUESTS_URL,
   timeout: 3000
 })
-const transactionRequestService = new KnexTransactionRequestService(knex, transcationRequestClient)
+const transactionRequestService = new KnexTransactionsService(knex, transcationRequestClient)
 const accountLookupClient: AxiosInstance = axios.create({
   baseURL: ML_API_ADAPTOR_URL,
   timeout: 3000
@@ -56,7 +56,7 @@ const start = async (): Promise<void> => {
     console.log('Migrations finished...')
   }
 
-  const adaptor = await createApp({ transactionRequestService, accountLookupService, isoMessagesService, quotesService }, { port: HTTP_PORT })
+  const adaptor = await createApp({ transactionsService: transactionRequestService, accountLookupService, isoMessagesService, quotesService }, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
