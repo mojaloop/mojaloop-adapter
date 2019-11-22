@@ -15,7 +15,7 @@ export async function handleIsoMessage (lpsKey: string, data: Buffer, adaptor: S
       response = await adaptor.inject({
         method: 'POST',
         url: '/iso8583/transactionRequests',
-        payload: { lpsKey, ...isoMessage }
+        payload: { switchKey: isoMessage['127.2'], lpsKey, ...isoMessage }
       })
 
       if (response.statusCode !== 200) {
