@@ -1,5 +1,3 @@
-import { TransactionRequestService } from '../../src/services/transaction-request-service'
-import { AccountLookUpService } from '../../src/services/account-lookup-service'
 import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'

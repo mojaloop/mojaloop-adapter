@@ -18,17 +18,6 @@
               "produces": [
                   "application/json"
               ],
-              "parameters": [
-                  {
-                      "name": "body",
-                      "description": "",
-                      "schema": {
-                          "$ref": "#/definitions/ISO8583-0100"
-                      },
-                      "in": "body",
-                      "required": true
-                  }
-              ],
               "responses": {
                   "200": {
                       "$ref": "#/responses/Response200",
@@ -763,16 +752,6 @@
       },
       "/iso8583/transfers/{ID}": {
           "put": {
-              "parameters": [
-                  {
-                      "name": "body",
-                      "schema": {
-                          "type": "string"
-                      },
-                      "in": "body",
-                      "required": true
-                  }
-              ],
               "responses": {
                   "200": {
                       "description": "Ok"
@@ -816,16 +795,6 @@
               ],
               "produces": [
                   "application/json"
-              ],
-              "parameters": [
-                  {
-                      "name": "body",
-                      "schema": {
-                          "$ref": "#/definitions/ISO8583-0200"
-                      },
-                      "in": "body",
-                      "required": true
-                  }
               ],
               "responses": {
                   "200": {
@@ -2810,6 +2779,7 @@
                   "type": "string"
               }
           },
+          "additionalProperties": true,
           "example": {
               "3": "390000",
               "4": "000000020000",
@@ -2845,6 +2815,7 @@
                   "type": "string"
               }
           },
+          "additionalProperties": true,
           "example": {
               "3": "390000",
               "39": "00",

@@ -1,10 +1,10 @@
-import { KnexTransactionRequestService, TransactionRequest } from '../../src/services/transaction-request-service'
+import { KnexTransactionsService, TransactionRequest } from '../../src/services/transactions-service'
 import Axios, { AxiosInstance } from 'axios'
-import Knex = require('knex')
+import Knex from 'knex'
 
-describe('Transaction Request Service', function () {
+describe('Transactions Service', function () {
   let knex: Knex
-  let transactionRequestService: KnexTransactionRequestService
+  let transactionsService: KnexTransactionsService
   const fakeHttpClient: AxiosInstance = Axios.create()
   fakeHttpClient.get = jest.fn()
 
@@ -18,7 +18,7 @@ describe('Transaction Request Service', function () {
       useNullAsDefault: true
     })
 
-    transactionRequestService = new KnexTransactionRequestService(knex, fakeHttpClient)
+    transactionsService = new KnexTransactionsService(knex, fakeHttpClient)
   })
 
   beforeEach(async () => {
@@ -36,10 +36,11 @@ describe('Transaction Request Service', function () {
   test('can create a transaction request', async () => {
 
     const data: TransactionRequest = {
+      id: 'aef-123',
+      transactionRequestId: 'abs-321',
       payer: {
         partyIdType: 'MSISDN',
-        partyIdentifier: '2626756253248953583652695656',
-        fspId: 'BankNrone'
+        partyIdentifier: '2626756253248953583652695656'
       },
       payee: {
         partyIdInfo: {
@@ -48,10 +49,9 @@ describe('Transaction Request Service', function () {
           partySubIdOrType: '3omrp6uaiz5xqio'
         }
       },
-      stan: '123456',
       amount: {
-        amount: '000000010000',
-        currency: '820'
+        amount: '10000',
+        currency: 'USD'
       },
       transactionType: {
         initiator: 'PAYEE',
@@ -63,15 +63,40 @@ describe('Transaction Request Service', function () {
 
     }
 
-    const response = await transactionRequestService.create(data)
+    const transaction = await transactionsService.create(data)
 
-    const transactionReqeust = await transactionRequestService.getById(response.id!)
+    const dbTransaction = await knex('transactions').where('id', data.id).first()
+    const dbPayer = await knex('transactionParties').where('transactionPK', data.id).where('type', 'payer').first()
+    const dbPayee = await knex('transactionParties').where('transactionPK', data.id).where('type', 'payee').first()
 
-    expect(transactionReqeust).toMatchObject(data)
+    expect(dbTransaction).toBeDefined()
+    expect(dbTransaction).toMatchObject({
+      id: 'aef-123',
+      transactionRequestId: 'abs-321',
+      amount: '10000',
+      currency: 'USD',
+      expiration: '1118045717'
+    })
+    expect(dbPayer).toMatchObject({
+      transactionPK: 'aef-123',
+      type: 'payer',
+      identifierType: 'MSISDN',
+      identifierValue: '2626756253248953583652695656'
+    })
+    expect(dbPayee).toMatchObject({
+      transactionPK: 'aef-123',
+      type: 'payee',
+      identifierType: 'DEVICE',
+      identifierValue: 'c0aziflj',
+      subIdorType: '3omrp6uaiz5xqio'
+    })
+    expect(transaction).toMatchObject(data)
   })
 
-  test('can test a getById request', async () => {
+  test('can fetch transaction by id (unique PK)', async () => {
     const data: TransactionRequest = {
+      id: 'aef-123',
+      transactionRequestId: 'abc-321',
       payer: {
         partyIdType: 'MSISDN',
         partyIdentifier: '9605968739',
@@ -84,7 +109,6 @@ describe('Transaction Request Service', function () {
           partySubIdOrType: '123450000067890'
         }
       },
-      stan: '123456',
       amount: {
         amount: '000000010000',
         currency: '840'
@@ -97,12 +121,17 @@ describe('Transaction Request Service', function () {
       authenticationType: 'OTP',
       expiration: '20180328'
     }
+    await transactionsService.create(data)
 
-    const response = await transactionRequestService.create(data)
+    const transaction = await transactionsService.get(data.id, 'id')
 
-    const response1 = await transactionRequestService.getById(response.id!)
+    expect(transaction).toMatchObject(data)
+  })
 
-    expect(response1).toMatchObject({
+  test('can update transactionId', async () => {
+    const data: TransactionRequest = {
+      id: 'aef-123',
+      transactionRequestId: 'abc-321',
       payer: {
         partyIdType: 'MSISDN',
         partyIdentifier: '9605968739',
@@ -115,7 +144,6 @@ describe('Transaction Request Service', function () {
           partySubIdOrType: '123450000067890'
         }
       },
-      stan: '123456',
       amount: {
         amount: '000000010000',
         currency: '840'
@@ -127,15 +155,23 @@ describe('Transaction Request Service', function () {
       },
       authenticationType: 'OTP',
       expiration: '20180328'
+    }
+    const transaction = await transactionsService.create(data)
+    expect(transaction.transactionId).toBeNull()
 
-    })
+    await transactionsService.updateTransactionId(data.transactionRequestId, 'transactionRequestId', '1234')
+
+    const freshTransaction = await transactionsService.get('aef-123', 'id')
+    expect(freshTransaction.transactionId).toBe('1234')
   })
-  test('can update Payer FspId request', async () => {
+
+  test('can update Payer FspId', async () => {
     const data: TransactionRequest = {
+      id: 'aef-123',
+      transactionRequestId: 'abc-321',
       payer: {
         partyIdType: 'MSISDN',
-        partyIdentifier: '9605968739',
-        fspId: 'BankNrone'
+        partyIdentifier: '9605968739'
       },
       payee: {
         partyIdInfo: {
@@ -144,7 +180,6 @@ describe('Transaction Request Service', function () {
           partySubIdOrType: '3omrp6uaiz5xqio'
         }
       },
-      stan: '123456',
       amount: {
         amount: '000000010000',
         currency: '820'
@@ -157,36 +192,12 @@ describe('Transaction Request Service', function () {
       authenticationType: 'OTP',
       expiration: '20180328'
     }
-
-    const response = await transactionRequestService.create(data)
+    const transaction = await transactionsService.create(data)
+    expect(transaction.payer.fspId).toBeNull()
     const fspId = 'New_bank'
-    const response1 = await transactionRequestService.updatePayerFspId(response.id!, fspId)
 
-    expect(response1).toMatchObject({
-      payer: {
-        partyIdType: 'MSISDN',
-        partyIdentifier: '9605968739',
-        fspId: 'New_bank'
-      },
-      payee: {
-        partyIdInfo: {
-          partyIdType: 'DEVICE',
-          partyIdentifier: 'c0aziflj',
-          partySubIdOrType: '3omrp6uaiz5xqio'
-        }
-      },
-      stan: '123456',
-      amount: {
-        amount: '000000010000',
-        currency: '820'
-      },
-      transactionType: {
-        initiator: 'PAYEE',
-        initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
-      },
-      authenticationType: 'OTP',
-      expiration: '20180328'
-    })
+    const freshTransaction = await transactionsService.updatePayerFspId(transaction.id, 'id', fspId)
+
+    expect(freshTransaction.payer.fspId).toBe('New_bank')
   })
 })

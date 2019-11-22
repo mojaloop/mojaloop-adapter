@@ -8,8 +8,8 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
   isoMessagesService: {
     create: jest.fn()
   },
-  transactionRequestService: {
-    getById: jest.fn(),
+  transactionsService: {
+    get: jest.fn(),
     create: jest.fn(),
     updatePayerFspId: jest.fn(),
     updateTransactionId: jest.fn(),

@@ -4,10 +4,11 @@ import { PartiesPutResponseFactory } from '../factories/mojaloop-messages'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import Knex from 'knex'
-import { KnexTransactionRequestService } from '../../src/services/transaction-request-service'
+import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { ISO0100Factory } from '../factories/iso-messages'
 
 jest.mock('uuid/v4', () => () => '123')
+const LPS_KEY = 'postillion'
 
 describe('Parties API', function () {
 
@@ -25,8 +26,8 @@ describe('Parties API', function () {
       useNullAsDefault: true
     })
     const httpClient = Axios.create()
-    services.transactionRequestService = new KnexTransactionRequestService(knex, httpClient)
-    services.transactionRequestService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    services.transactionsService = new KnexTransactionsService(knex, httpClient)
+    services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     adaptor = await createApp(services)
   })
 
@@ -37,7 +38,7 @@ describe('Parties API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: iso0100
+      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
     })
     expect(response.statusCode).toBe(200)
   })
@@ -61,8 +62,8 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    const transactionRequest = await services.transactionRequestService.getById('123')
-    expect(transactionRequest.payer.fspId).toBe(putPartiesResponse.party.partyIdInfo.fspId)
+    const transaction = await services.transactionsService.get('postillion:000319562', 'id')
+    expect(transaction.payer.fspId).toBe(putPartiesResponse.party.partyIdInfo.fspId)
   })
 
   test('makes a transaction request to the Moja switch', async () => {
@@ -76,7 +77,7 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    const transactionRequest = await services.transactionRequestService.getById('123')
-    expect(services.transactionRequestService.sendToMojaHub).toHaveBeenCalledWith(transactionRequest)
+    const transaction = await services.transactionsService.get('postillion:000319562', 'id')
+    expect(services.transactionsService.sendToMojaHub).toHaveBeenCalledWith(transaction)
   })
 })

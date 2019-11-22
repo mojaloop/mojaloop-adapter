@@ -18,7 +18,11 @@ KNEX_CLIENT
 ### Running
 Run `npm start`
 
+### DB Schema
+<img src="./media/Adaptor-database-schema.png" style="background: white"/>
+
 ### Flow
 <img src="./media/flow-diagram-1.svg" style="background: white"/>
 <img src="./media/flow-diagram-2.svg" style="background: white"/>
+The below flow is not final. It is going to be changed so that the ATM is told to dispense the money after the mojaloop transfer is successfully completed.
 <img src="./media/flow-diagram-3.svg" style="background: white"/>

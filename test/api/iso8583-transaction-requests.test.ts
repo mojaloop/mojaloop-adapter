@@ -3,10 +3,13 @@ import { ISO0100Factory } from '../factories/iso-messages'
 import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { KnexTransactionRequestService } from '../../src/services/transaction-request-service'
+import { KnexTransactionsService } from '../../src/services/transactions-service'
 import Axios from 'axios'
+import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 
 jest.mock('uuid/v4', () => () => '123')
+
+const LPS_KEY = 'postillion'
 
 describe('Transaction Requests API', function () {
 
@@ -24,8 +27,9 @@ describe('Transaction Requests API', function () {
       useNullAsDefault: true
     })
     const httpClient = Axios.create()
-    services.transactionRequestService = new KnexTransactionRequestService(knex, httpClient)
-    services.transactionRequestService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    services.transactionsService = new KnexTransactionsService(knex, httpClient)
+    services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    services.isoMessagesService = new KnexIsoMessageService(knex)
     adaptor = await createApp(services)
   })
 
@@ -47,11 +51,14 @@ describe('Transaction Requests API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: iso0100
+      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(services.isoMessagesService.create).toHaveBeenCalledWith({ transactionRequestId: '123', ...iso0100 })
+    const storedIso0100 = await knex('isoMessages').first()
+    expect(storedIso0100.switchKey).toBe(iso0100['127.2'])
+    expect(storedIso0100.lpsKey).toBe(LPS_KEY)
+    expect(JSON.parse(storedIso0100.content)).toMatchObject(iso0100)
   })
 
   test('creates a transaction request from the ISO0100 message', async () => {
@@ -60,12 +67,14 @@ describe('Transaction Requests API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: iso0100
+      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
     })
 
     expect(response.statusCode).toEqual(200)
-    const transactionRequest = await services.transactionRequestService.getById('123')
+    const transactionRequest = await services.transactionsService.get('postillion:000319562', 'id')
     expect(transactionRequest).toMatchObject({
+      id: 'postillion:000319562',
+      transactionRequestId: '123',
       payer: {
         partyIdType: 'MSISDN',
         partyIdentifier: iso0100[102]
@@ -97,7 +106,7 @@ describe('Transaction Requests API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: iso0100
+      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
     })
 
     expect(response.statusCode).toEqual(200)
