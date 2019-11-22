@@ -6,7 +6,7 @@ exports.up = function (knex) {
       table.string('amount')
       table.string('amountCurrency', 3)
       table.string('feeAmount').nullable()
-      table.string('feeAmountCurrency', 3).nullable()
+      table.string('feeCurrency', 3).nullable()
       table.string('transferAmount').nullable()
       table.string('transferAmountCurrency', 3).nullable()
       table.string('expiration').nullable()

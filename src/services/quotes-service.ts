@@ -28,7 +28,7 @@ export type Quote = {
 }
 
 export interface QuotesService {
-  create (request: QuotesPostRequest, condition: string): Promise<Quote>;
+  create (request: QuotesPostRequest, fees: Money, transferAmount: Money, condition: string): Promise<Quote>;
   get (id: string, idType: string): Promise<Quote>;
   sendQuoteResponse (quoteId: string, response: QuotesIDPutResponse, headers: { [k: string]: string }): Promise<void>;
 }
@@ -37,12 +37,16 @@ export class KnexQuotesService implements QuotesService {
   constructor (private _knex: Knex, private _client: AxiosInstance) {
   }
 
-  async create (request: QuotesPostRequest, condition: string): Promise<Quote> {
+  async create (request: QuotesPostRequest, fees: Money, transferAmount: Money, condition: string): Promise<Quote> {
     await this._knex<DBQuote>('quotes').insert({
       id: request.quoteId,
       transactionId: request.transactionId,
       amount: request.amount.amount,
       amountCurrency: request.amount.currency,
+      feeAmount: fees.amount,
+      feeCurrency: fees.currency,
+      transferAmount: transferAmount.amount,
+      transferAmountCurrency: transferAmount.currency,
       expiration: request.expiration,
       condition
     }).then(results => results[0])

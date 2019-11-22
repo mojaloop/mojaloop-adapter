@@ -17,16 +17,22 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     // const transactionId = quoteRequest.transactionId
     // const transactionRequest = await request.server.app.transactionRequestService.getByTransactionId(transactionId)
     // const iso0100 = await request.server.app.isoMessagesService.getByTransactionId('0100', transactionRequest.transactionId)
-    const transferAmount = new MlNumber(quoteRequest.amount.amount).add(PAYEE_FEE).toString()
+    const transferAmount = {
+      amount: new MlNumber(quoteRequest.amount.amount).add(PAYEE_FEE).toString(),
+      currency: quoteRequest.amount.currency
+    }
+    const fees = {
+      amount: new MlNumber(PAYEE_FEE).toString(),
+      currency: quoteRequest.amount.currency
+    }
+
+    await request.server.app.quotesService.create(quoteRequest, fees, transferAmount, CONDTION)
 
     const quoteResponse: QuotesIDPutResponse = {
       condition: CONDTION,
       expiration: (new Date(Date.now() + EXPIRATION_WINDOW)).toUTCString(),
       ilpPacket: ILP_PACKET,
-      transferAmount: {
-        amount: transferAmount,
-        currency: quoteRequest.amount.currency
-      }
+      transferAmount
     }
     const headers = {
       'fspiop-destination': request.headers['fspiop-source'],
