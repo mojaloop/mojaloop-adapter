@@ -32,21 +32,26 @@ describe('IsoMessageService', function () {
   })
 
   test('can create an isoMessage', async () => {
-    const data = ISO0100Factory.build({ lpsKey: 'postillion' })
+    const data = ISO0100Factory.build()
     const transactionPK = 'aef-123'
-    const switchKey = '00013962'
+    const switchKey = data['127.2']
+    const lpsKey = 'postillion'
 
-    const isoMessage = await isoMessageService.create({ transactionPK, switchKey, ...data })
+    const isoMessage = await isoMessageService.create(transactionPK, lpsKey, switchKey!, data)
 
     const dbMessage = await knex('isoMessages').where({ id: isoMessage.id }).first()
 
     expect(isoMessage).toMatchObject(data)
     expect(isoMessage.id).toEqual(1)
     expect(isoMessage.lpsKey).toBe('postillion')
+    expect(isoMessage.switchKey).toBe(data['127.2'])
     expect(isoMessage.transactionPK).toBe(transactionPK)
     expect(JSON.parse(dbMessage.content)).toMatchObject(data)
+
     expect(dbMessage.lpsKey).toBe('postillion')
-    expect(dbMessage.switchKey).toBe('00013962')
+    expect(dbMessage.transactionPK).toBe(transactionPK)
+    expect(dbMessage.switchKey).toBe(data['127.2'])
+    expect(JSON.parse(dbMessage.content)).toMatchObject(data)
   })
 
 })
