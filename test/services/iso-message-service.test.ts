@@ -44,6 +44,7 @@ describe('IsoMessageService', function () {
     expect(isoMessage.lpsKey).toBe('postillion')
     expect(isoMessage.transactionPK).toBe(transactionPK)
     expect(JSON.parse(dbMessage.content)).toMatchObject(data)
+    expect(dbMessage.lpsKey).toBe('postillion')
   })
 
 })

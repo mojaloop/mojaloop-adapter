@@ -14,6 +14,7 @@ export class KnexIsoMessageService implements IsoMessageService {
     const result = await this._knex('isoMessages').insert({
       transactionPK: request.transactionPK,
       mti: request[0],
+      lpsKey: request.lpsKey,
       content: JSON.stringify(request)
     }).then(result => result[0])
 
