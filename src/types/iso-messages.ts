@@ -39,6 +39,7 @@ export type ISO0110 = { id: number } & {
   48: string; // Amount transaction
   49: string; // Currency code
   102: string; // Mobile number/Account Number
+  [k: string]: string;
 }
 
 export type ISOMessage = ISO0100 | ISO0110

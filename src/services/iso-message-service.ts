@@ -2,14 +2,14 @@ import { ISOMessage } from 'types/iso-messages'
 import Knex = require('knex')
 
 export interface IsoMessageService {
-  create (request: Partial<ISOMessage>): Promise<ISOMessage>;
+  create (request: any): Promise<ISOMessage>;
 }
 
 export class KnexIsoMessageService implements IsoMessageService {
   constructor (private _knex: Knex) {
   }
 
-  async create (request: Partial<ISOMessage>): Promise<ISOMessage> {
+  async create (request:any): Promise<ISOMessage> {
 
     const result = await this._knex('isoMessages').insert({
       transactionPK: request.transactionPK,

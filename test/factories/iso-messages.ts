@@ -29,8 +29,7 @@ function generateField7 (): string {
 }
 
 export const ISO0100Factory = Factory.define<Partial<ISO0100>>('Iso0100Factory').attrs({
-  switchKey: '0200:000002:0201151154:000319562',
-  lpsKey: 'postillion',
+  0: '0100',
   3: '012000',
   4: '000000010000',
   49: '820',
@@ -41,7 +40,8 @@ export const ISO0100Factory = Factory.define<Partial<ISO0100>>('Iso0100Factory')
   102: () => '26' + Faker.internet.password(26, false, /[0-9]/),
   28: 'C00000001',
   103: () => '04' + Faker.internet.password(6, false, /[0-9]/),
-  11: Faker.internet.password(6, false, /[0-9]/)
+  11: Faker.internet.password(6, false, /[0-9]/),
+  127.2: '000319562' // Postillion switchKey
 })
 
 export const ISO0110Factory = Factory.define<Partial<ISO0110>>('Iso0110Factory').attrs({
@@ -56,7 +56,8 @@ export const ISO0110Factory = Factory.define<Partial<ISO0110>>('Iso0110Factory')
   42: Faker.internet.password(15, false, /[0-9a-z]/),
   48: '012000',
   49: '840',
-  102: () => '26' + Faker.internet.password(26, false, /[0-9]/)
+  102: () => '26' + Faker.internet.password(26, false, /[0-9]/),
+  127.2: '000319562' // Postillion switchKey
 })
 
 export const iso0100BinaryMessage = Buffer.from([0x01,0x46,0x30,0x31,0x30,0x30,0xf2,0x3e,0x44,0x94,0x09,0xe0,0x81,
