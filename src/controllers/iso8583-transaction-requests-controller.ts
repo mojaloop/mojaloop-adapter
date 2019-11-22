@@ -9,10 +9,9 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     const isoMessage = request.payload as ISO0100
 
     const { lpsKey, switchKey } = isoMessage
-    const isoKey = switchKey.split(':')[3]
-    const primaryKey = lpsKey + ':' + isoKey
+    const primaryKey = lpsKey + ':' + switchKey
 
-    await request.server.app.isoMessagesService.create({ transactionPK: primaryKey, lpsKey, ...isoMessage })
+    await request.server.app.isoMessagesService.create(primaryKey, lpsKey, switchKey, isoMessage)
 
     const transactionRequestId = uuid()
     const payer: Party = {
@@ -41,7 +40,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 
     const transaction = await request.server.app.transactionsService.create({ id: primaryKey, transactionRequestId, payer: payer.partyIdInfo, payee, amount, transactionType, expiration, authenticationType: 'OTP' })
 
-    await request.server.app.accountLookupService.requestFspIdFromMsisdn(transaction.id, isoMessage[102])
+    await request.server.app.accountLookupService.requestFspIdFromMsisdn(transaction.transactionRequestId, isoMessage[102])
 
     return h.response().code(200)
   } catch (error) {

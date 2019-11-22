@@ -5,8 +5,11 @@ import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { KnexTransactionsService } from '../../src/services/transactions-service'
 import Axios from 'axios'
+import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 
 jest.mock('uuid/v4', () => () => '123')
+
+const LPS_KEY = 'postillion'
 
 describe('Transaction Requests API', function () {
 
@@ -26,6 +29,7 @@ describe('Transaction Requests API', function () {
     const httpClient = Axios.create()
     services.transactionsService = new KnexTransactionsService(knex, httpClient)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    services.isoMessagesService = new KnexIsoMessageService(knex)
     adaptor = await createApp(services)
   })
 
@@ -47,11 +51,14 @@ describe('Transaction Requests API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: iso0100
+      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
     })
 
     expect(response.statusCode).toBe(200)
-    expect(services.isoMessagesService.create).toHaveBeenCalledWith({ transactionPK: 'postillion:000319562', lpsKey: 'postillion', ...iso0100 })
+    const storedIso0100 = await knex('isoMessages').first()
+    expect(storedIso0100.switchKey).toBe(iso0100['127.2'])
+    expect(storedIso0100.lpsKey).toBe(LPS_KEY)
+    expect(JSON.parse(storedIso0100.content)).toMatchObject(iso0100)
   })
 
   test('creates a transaction request from the ISO0100 message', async () => {
@@ -60,7 +67,7 @@ describe('Transaction Requests API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: iso0100
+      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
     })
 
     expect(response.statusCode).toEqual(200)
@@ -93,17 +100,17 @@ describe('Transaction Requests API', function () {
     })
   })
 
-  // test('Requests an account lookup and uses the transactionRequestId as the traceId', async () => {
-  //   const iso0100 = ISO0100Factory.build()
+  test('Requests an account lookup and uses the transactionRequestId as the traceId', async () => {
+    const iso0100 = ISO0100Factory.build()
 
-  //   const response = await adaptor.inject({
-  //     method: 'POST',
-  //     url: '/iso8583/transactionRequests',
-  //     payload: iso0100
-  //   })
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/iso8583/transactionRequests',
+      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
+    })
 
-  //   expect(response.statusCode).toEqual(200)
-  //   expect(services.accountLookupService.requestFspIdFromMsisdn).toHaveBeenCalledWith('123', iso0100[102])
-  // })
+    expect(response.statusCode).toEqual(200)
+    expect(services.accountLookupService.requestFspIdFromMsisdn).toHaveBeenCalledWith('123', iso0100[102])
+  })
 
 })
