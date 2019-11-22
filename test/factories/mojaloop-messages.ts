@@ -36,5 +36,6 @@ export const QuotesPostRequestFactory = Factory.define<QuotesPostRequest>('Quote
     initiator: 'PAYEE',
     initiatorType: '',
     scenario: ''
-  }
+  },
+  expiration: () => new Date(Date.now() + 10000).toUTCString()
 })
