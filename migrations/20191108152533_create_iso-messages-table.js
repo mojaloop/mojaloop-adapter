@@ -7,6 +7,7 @@ exports.up = function (knex, Promise) {
       table.foreign('transactionPK').references('id').inTable('transactions')
       table.string('mti')
       table.string('lpsKey')
+      table.string('switchKey')
       table.jsonb('content').notNullable()
       table.timestamps(true, true)
     })

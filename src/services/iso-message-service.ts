@@ -13,6 +13,7 @@ export class KnexIsoMessageService implements IsoMessageService {
 
     const result = await this._knex('isoMessages').insert({
       transactionPK: request.transactionPK,
+      switchKey: request.switchKey,
       mti: request[0],
       lpsKey: request.lpsKey,
       content: JSON.stringify(request)
