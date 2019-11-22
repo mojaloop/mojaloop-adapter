@@ -8,6 +8,7 @@ import { KnexTransactionsService } from '../../src/services/transactions-service
 import { ISO0100Factory } from '../factories/iso-messages'
 
 jest.mock('uuid/v4', () => () => '123')
+const LPS_KEY = 'postillion'
 
 describe('Parties API', function () {
 
@@ -37,7 +38,7 @@ describe('Parties API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: iso0100
+      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
     })
     expect(response.statusCode).toBe(200)
   })
@@ -61,8 +62,8 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    const transactionRequest = await services.transactionsService.get('postillion:000319562', 'id')
-    expect(transactionRequest.payer.fspId).toBe(putPartiesResponse.party.partyIdInfo.fspId)
+    const transaction = await services.transactionsService.get('postillion:000319562', 'id')
+    expect(transaction.payer.fspId).toBe(putPartiesResponse.party.partyIdInfo.fspId)
   })
 
   test('makes a transaction request to the Moja switch', async () => {
@@ -76,7 +77,7 @@ describe('Parties API', function () {
     })
 
     expect(response.statusCode).toBe(200)
-    const transactionRequest = await services.transactionsService.get('postillion:000319562', 'id')
-    expect(services.transactionsService.sendToMojaHub).toHaveBeenCalledWith(transactionRequest)
+    const transaction = await services.transactionsService.get('postillion:000319562', 'id')
+    expect(services.transactionsService.sendToMojaHub).toHaveBeenCalledWith(transaction)
   })
 })

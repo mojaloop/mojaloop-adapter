@@ -9,9 +9,9 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     if (!fspId) {
       throw new Error('No fspId')
     }
-    const transactionRequest = await request.server.app.transactionsService.updatePayerFspId(transactionRequestId, 'transactionRequestId', fspId)
+    const transaction = await request.server.app.transactionsService.updatePayerFspId(transactionRequestId, 'transactionRequestId', fspId)
 
-    await request.server.app.transactionsService.sendToMojaHub(transactionRequest)
+    await request.server.app.transactionsService.sendToMojaHub(transaction)
 
     return h.response().code(200)
   } catch (error) {
