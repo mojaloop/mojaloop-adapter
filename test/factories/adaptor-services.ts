@@ -16,6 +16,8 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     sendToMojaHub: jest.fn().mockResolvedValue(undefined)
   },
   quotesService: {
+    create: jest.fn(),
+    get: jest.fn(),
     sendQuoteResponse: jest.fn().mockResolvedValue(undefined)
   }
 })
