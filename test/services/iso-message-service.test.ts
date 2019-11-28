@@ -61,7 +61,6 @@ describe('IsoMessageService', function () {
 
     const isoMessage = await isoMessageService.create(transactionPK, lpsKey, switchKey!, data)
     const isoMessage1 = await isoMessageService.get(transactionPK, lpsKey,isoMessage[0])
-    console.log('isoMessage1',isoMessage1)
 
     const dbMessage = await knex('isoMessages').where({ id: isoMessage.id }).first()
 
