@@ -2,7 +2,8 @@ import { ISOMessage } from 'types/iso-messages'
 import Knex = require('knex')
 
 export interface IsoMessageService {
-  create (transactionPK: string, lpsKey: string, switchKey: string, request: any): Promise<ISOMessage>;
+  create (transactionPK: string, lpsKey: string, switchKey: string, request: any): Promise <ISOMessage>;
+  get(transactionPK: string, lpsKey: string, mti: string): Promise<ISOMessage>
 }
 
 export class KnexIsoMessageService implements IsoMessageService {
@@ -24,4 +25,19 @@ export class KnexIsoMessageService implements IsoMessageService {
     return { id: isoMessage.id, transactionPK, lpsKey, switchKey, ...JSON.parse(isoMessage.content) }
   }
 
+async get (transactionPK: string, lpsKey: string, mti: string): Promise <ISOMessage> {
+  
+const isoMessage = await this._knex('isoMessages'). where('transactionPK', transactionPK). where('lpsKey', lpsKey).where ('mti', mti).first()
+
+
+
+if(!isoMessage) {
+
+  throw new Error('Cannot find iso message: transactionPK' + transactionPK + 'lpsKey'+ lpsKey +'mti'+ mti)
+}
+
+
+return { id: isoMessage.id, transactionPK, lpsKey, switchKey: isoMessage.switchKey, ...JSON.parse(isoMessage.content) }
+  
+  }
 }

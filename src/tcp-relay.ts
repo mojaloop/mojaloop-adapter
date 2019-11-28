@@ -3,7 +3,7 @@ import { Server, ServerInjectResponse } from 'hapi'
 import { TcpIsoMessagingClient } from './services/iso-messaging-client'
 const IsoParser = require('iso_8583')
 
-export async function handleIsoMessage (lpsKey: string, data: Buffer, adaptor: Server): Promise<void> {
+export async function handleIsoMessage (lpsKey: string, data: Buffer, adaptor: Server): Promise <void> {
   const mti = data.slice(2, 6).toString()
   const isoMessage = new IsoParser().getIsoJSON(data)
   adaptor.app.logger.debug('TCPRelay: Message mti: ' + mti)
@@ -37,7 +37,7 @@ export function createTcpRelay (lpsKey: string, adaptor: Server): net.Server {
     const isoMessagingClient = new TcpIsoMessagingClient(sock)
 
     adaptor.app.isoMessagingClients.set(lpsKey, isoMessagingClient)
-
+    
     sock.on('data', async (data) => {
       try {
         adaptor.app.logger.debug(`${lpsKey} relay: Received buffer message: ` + data)
