@@ -7,7 +7,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
   try {
     request.server.app.logger.info('iso8583 Transaction Requests Controller: Received create transactionsRequest request. payload:' + JSON.stringify(request.payload))
     const isoMessage = request.payload as ISO0100
-
+    
     const { lpsKey, switchKey } = isoMessage
     const primaryKey = lpsKey + ':' + switchKey
 
@@ -41,7 +41,6 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     const transaction = await request.server.app.transactionsService.create({ id: primaryKey, transactionRequestId, payer: payer.partyIdInfo, payee, amount, transactionType, expiration, authenticationType: 'OTP' })
 
     await request.server.app.accountLookupService.requestFspIdFromMsisdn(transaction.transactionRequestId, isoMessage[102])
-
     return h.response().code(200)
   } catch (error) {
     request.server.app.logger.error(`iso8583 Transaction Requests Controller: Error creating transaction request. ${error.message}`)

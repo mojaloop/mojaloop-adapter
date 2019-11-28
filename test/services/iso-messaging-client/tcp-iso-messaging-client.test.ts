@@ -1,6 +1,7 @@
 import { Socket } from 'net'
 import { TcpIsoMessagingClient } from '../../../src/services/iso-messaging-client'
 import { ISO0100Factory } from '../../factories/iso-messages'
+import { ISO0110Factory } from '../../factories/iso-messages'
 const IsoParser = require('iso_8583')
 
 describe('TCP Iso Messaging Client', function () {
@@ -24,4 +25,17 @@ describe('TCP Iso Messaging Client', function () {
     const noSocketClient = new TcpIsoMessagingClient()
     await expect(() => { noSocketClient.send(Buffer.alloc(0)) }).toThrowError('Cannot send ISO message. No socket registered.')
   })
+  
+  describe('sendAuthorizationRequestfor 0110', () => {
+    test('converts 0110 message to buffer and sends over socket', async () => {
+      const isoJsonMessage = ISO0110Factory.build()
+      isoJsonMessage[0] = '0110'
+      await tcpIsoMessagingClient.sendAuthorizationRequest(isoJsonMessage)
+
+      const expectedBuffer = new IsoParser(isoJsonMessage).getBufferMessage()
+      expect(expectedBuffer).toBeInstanceOf(Buffer)
+      expect(sock.write).toHaveBeenCalledWith(expectedBuffer)
+    })
+  })
+
 })

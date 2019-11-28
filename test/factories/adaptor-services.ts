@@ -6,7 +6,8 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     requestFspIdFromMsisdn: jest.fn().mockResolvedValue(undefined)
   },
   isoMessagesService: {
-    create: jest.fn()
+    create: jest.fn(),
+    get : jest.fn()
   },
   transactionsService: {
     get: jest.fn(),
