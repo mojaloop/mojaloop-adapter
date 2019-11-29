@@ -16,6 +16,7 @@ The API surface that the adaptor exposes can be found in the [swagger file](./sr
 
 ### Configuration
 Some environment variables are required:
+
 | FIELD                    | DEFAULT                           |
 | ------------------------ | --------------------------------- |
 | HTTP_PORT                | 3000                              |
