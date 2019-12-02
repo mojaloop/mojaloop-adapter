@@ -27,7 +27,7 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
        throw new Error('No client is set')
      }
   
-     const repsonse=await client.sendAuthorizationRequest(iso110db)
+     await client.sendAuthorizationRequest(iso110db)
      
      return h.response().code(200)
   }
