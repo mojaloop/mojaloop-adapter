@@ -3,7 +3,7 @@ import Knex = require('knex')
 
 export interface IsoMessageService {
   create (transactionRequestId: string, lpsKey: string, lpsId: string, message: any): Promise <ISOMessage>;
-  get(transactionPK: string, lpsKey: string, mti: string): Promise<ISOMessage>;
+  get(transactionRequestId: string, lpsKey: string, mti: string): Promise<ISOMessage>;
 }
 
 export class KnexIsoMessageService implements IsoMessageService {
