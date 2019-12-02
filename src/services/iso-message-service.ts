@@ -32,6 +32,6 @@ export class KnexIsoMessageService implements IsoMessageService {
       throw new Error('Cannot find iso message: transactionRequestId' + transactionRequestId + ' lpsKey:' + lpsKey + ' mti' + mti)
     }
 
-    return { id: isoMessage.id, transactionRequestId, lpsKey, switchKey: isoMessage.switchKey, ...JSON.parse(isoMessage.content) }
+    return { id: isoMessage.id, transactionRequestId, lpsKey, lpsId: isoMessage.lpsId, ...JSON.parse(isoMessage.content) }
   }
 }

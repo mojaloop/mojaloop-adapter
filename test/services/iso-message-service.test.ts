@@ -33,48 +33,41 @@ describe('IsoMessageService', function () {
 
   test('can create an isoMessage', async () => {
     const data = ISO0100Factory.build()
-    const transactionPK = 'aef-123'
-    const switchKey = data['127.2']
-    const lpsKey = 'postillion'
+    const transactionRequestId = 'aef-123'
+    const lpsKey = 'postillion:0100'
+    const lpsId = 'postillion'
 
-    const isoMessage = await isoMessageService.create(transactionPK, lpsKey, switchKey!, data)
+    const isoMessage = await isoMessageService.create(transactionRequestId, lpsKey, lpsId, data)
 
     const dbMessage = await knex('isoMessages').where({ id: isoMessage.id }).first()
 
     expect(isoMessage).toMatchObject(data)
     expect(isoMessage.id).toEqual(1)
-    expect(isoMessage.lpsKey).toBe('postillion')
-    expect(isoMessage.switchKey).toBe(data['127.2'])
-    expect(isoMessage.transactionPK).toBe(transactionPK)
+    expect(isoMessage.lpsId).toBe('postillion')
+    expect(isoMessage.lpsKey).toBe('postillion:0100')
+    expect(isoMessage.transactionRequestId).toBe(transactionRequestId)
     expect(JSON.parse(dbMessage.content)).toMatchObject(data)
 
-    expect(dbMessage.lpsKey).toBe('postillion')
-    expect(dbMessage.transactionPK).toBe(transactionPK)
-    expect(dbMessage.switchKey).toBe(data['127.2'])
+    expect(dbMessage.lpsKey).toBe('postillion:0100')
+    expect(dbMessage.lpsId).toBe('postillion')
+    expect(dbMessage.transactionRequestId).toBe(transactionRequestId)
     expect(JSON.parse(dbMessage.content)).toMatchObject(data)
   })
   test('can get an isoMessage', async () => {
     const data = ISO0100Factory.build()
-    const transactionPK = 'aef-123'
-    const switchKey = data['127.2']
-    const lpsKey = 'postillion'
+    const transactionRequestId = 'aef-123'
+    const lpsKey = 'postillion:0100'
+    const lpsId = 'postillion'
+    await isoMessageService.create(transactionRequestId, lpsKey, lpsId, data)
 
-    const isoMessage = await isoMessageService.create(transactionPK, lpsKey, switchKey!, data)
-    const isoMessage1 = await isoMessageService.get(transactionPK, lpsKey,isoMessage[0])
-
-    const dbMessage = await knex('isoMessages').where({ id: isoMessage.id }).first()
+    const isoMessage = await isoMessageService.get(transactionRequestId, lpsKey, '0100')
 
     expect(isoMessage).toMatchObject(data)
     expect(isoMessage.id).toEqual(1)
-    expect(isoMessage.lpsKey).toBe('postillion')
-    expect(isoMessage.switchKey).toBe(data['127.2'])
-    expect(isoMessage.transactionPK).toBe(transactionPK)
-    expect(JSON.parse(dbMessage.content)).toMatchObject(data)
-
-    expect(dbMessage.lpsKey).toBe('postillion')
-    expect(dbMessage.transactionPK).toBe(transactionPK)
-    expect(dbMessage.switchKey).toBe(data['127.2'])
-    expect(JSON.parse(dbMessage.content)).toMatchObject(data)
+    expect(isoMessage.lpsId).toBe('postillion')
+    expect(isoMessage.lpsKey).toBe('postillion:0100')
+    expect(isoMessage.transactionRequestId).toBe(transactionRequestId)
+    expect(isoMessage).toMatchObject(data)
   })
 
 })
