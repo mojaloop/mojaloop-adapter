@@ -7,7 +7,7 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
   },
   isoMessagesService: {
     create: jest.fn(),
-    get : jest.fn()
+    get: jest.fn()
   },
   transactionsService: {
     get: jest.fn(),

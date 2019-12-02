@@ -9,7 +9,8 @@ import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 
 jest.mock('uuid/v4', () => () => '123')
 
-const LPS_KEY = 'postillion'
+const LPS_KEY = 'postillion:0100'
+const LPS_ID = 'postillion'
 
 describe('Transaction Requests API', function () {
 
@@ -51,12 +52,12 @@ describe('Transaction Requests API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
+      payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
 
     expect(response.statusCode).toBe(200)
     const storedIso0100 = await knex('isoMessages').first()
-    expect(storedIso0100.switchKey).toBe(iso0100['127.2'])
+    expect(storedIso0100.lpsId).toBe(LPS_ID)
     expect(storedIso0100.lpsKey).toBe(LPS_KEY)
     expect(JSON.parse(storedIso0100.content)).toMatchObject(iso0100)
   })
@@ -67,13 +68,12 @@ describe('Transaction Requests API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
+      payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
 
     expect(response.statusCode).toEqual(200)
-    const transactionRequest = await services.transactionsService.get('postillion:000319562', 'id')
+    const transactionRequest = await services.transactionsService.get('123', 'transactionRequestId')
     expect(transactionRequest).toMatchObject({
-      id: 'postillion:000319562',
       transactionRequestId: '123',
       payer: {
         partyIdType: 'MSISDN',
@@ -106,7 +106,7 @@ describe('Transaction Requests API', function () {
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: { lpsKey: LPS_KEY, switchKey: iso0100['127.2'], ...iso0100 }
+      payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
 
     expect(response.statusCode).toEqual(200)
