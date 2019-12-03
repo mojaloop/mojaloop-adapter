@@ -32,7 +32,7 @@ export type Transfer = {
 }
 
 export interface TransfersService {
-  get(id: string, idType: 'id' | 'transactionRequestId'): Promise<Transfer>;
+  get(id: string): Promise<Transfer>;
   create(request: TransferRequest): Promise<Transfer>;
 }
 
@@ -41,7 +41,7 @@ export class KnexTransfersService implements TransfersService {
   }
 
   async get(id: string): Promise<Transfer> {
-    const dbTransfer: DBTransfer | undefined = await this._knex<DBTransfer>('transfers').where(id).first()
+    const dbTransfer: DBTransfer | undefined = await this._knex<DBTransfer>('transfers').where('id', id).first()
     if (!dbTransfer) {
       throw new Error('Error fetching transfer from database')
     }

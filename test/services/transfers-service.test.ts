@@ -65,23 +65,23 @@ describe('Transfers Service', function () {
     expect(transfer).toMatchObject(data)
   })
 
-  // test('can fetch transfer by id', async () => {
-  //   const data: TransferRequest = {
-  //     transactionRequestId: 'abs-836',
-  //     amount: {
-  //       amount: '35',
-  //       currency: 'KRW'
-  //     },
-  //     id: 'abs-935',
-  //     quoteId: 'abs-375',
-  //     fulfillment: 'to be fulfilled',
-  //     transferState: 'has been transfered',
-  //   }
-  //   await transfersService.create(data)
+  test('can fetch transfer by id', async () => {
+    const data: TransferRequest = {
+      transactionRequestId: 'abs-836',
+      amount: {
+        amount: '35',
+        currency: 'KRW'
+      },
+      id: 'abs-935',
+      quoteId: 'abs-375',
+      fulfillment: 'to be fulfilled',
+      transferState: 'has been transfered',
+    }
+    await transfersService.create(data)
 
-  //   const transfer = await transfersService.get(data.id)
+    const transfer = await transfersService.get(data.id)
 
-  //   expect(transfer).toMatchObject(data)
-  // })
+    expect(transfer).toMatchObject(data)
+  })
 
 })
