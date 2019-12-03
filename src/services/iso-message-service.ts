@@ -2,42 +2,36 @@ import { ISOMessage } from 'types/iso-messages'
 import Knex = require('knex')
 
 export interface IsoMessageService {
-  create (transactionPK: string, lpsKey: string, switchKey: string, request: any): Promise <ISOMessage>;
-  get(transactionPK: string, lpsKey: string, mti: string): Promise<ISOMessage>
+  create (transactionRequestId: string, lpsKey: string, lpsId: string, message: any): Promise <ISOMessage>;
+  get(transactionRequestId: string, lpsKey: string, mti: string): Promise<ISOMessage>;
 }
 
 export class KnexIsoMessageService implements IsoMessageService {
   constructor (private _knex: Knex) {
   }
 
-  async create (transactionPK: string, lpsKey: string, switchKey: string, request: any): Promise<ISOMessage> {
+  async create (transactionRequestId: string, lpsKey: string, lpsId: string, message: any): Promise<ISOMessage> {
 
     const result = await this._knex('isoMessages').insert({
-      transactionPK: transactionPK,
-      switchKey: switchKey,
-      mti: request[0],
-      lpsKey: lpsKey,
-      content: JSON.stringify(request)
+      transactionRequestId,
+      lpsId,
+      lpsKey,
+      mti: message[0],
+      content: JSON.stringify(message)
     }).then(result => result[0])
 
     const isoMessage = await this._knex('isoMessages').where({ id: result }).first()
 
-    return { id: isoMessage.id, transactionPK, lpsKey, switchKey, ...JSON.parse(isoMessage.content) }
+    return { id: isoMessage.id, transactionRequestId, lpsKey, lpsId, ...JSON.parse(isoMessage.content) }
   }
 
-async get (transactionPK: string, lpsKey: string, mti: string): Promise <ISOMessage> {
-  
-const isoMessage = await this._knex('isoMessages'). where('transactionPK', transactionPK). where('lpsKey', lpsKey).where ('mti', mti).first()
+  async get (transactionRequestId: string, lpsKey: string, mti: string): Promise <ISOMessage> {
+    const isoMessage = await this._knex('isoMessages').where('transactionRequestId', transactionRequestId).where('lpsKey', lpsKey).where('mti', mti).first()
 
+    if (!isoMessage) {
+      throw new Error('Cannot find iso message: transactionRequestId' + transactionRequestId + ' lpsKey:' + lpsKey + ' mti' + mti)
+    }
 
-
-if(!isoMessage) {
-
-  throw new Error('Cannot find iso message: transactionPK' + transactionPK + 'lpsKey'+ lpsKey +'mti'+ mti)
-}
-
-
-return { id: isoMessage.id, transactionPK, lpsKey, switchKey: isoMessage.switchKey, ...JSON.parse(isoMessage.content) }
-  
+    return { id: isoMessage.id, transactionRequestId, lpsKey, lpsId: isoMessage.lpsId, ...JSON.parse(isoMessage.content) }
   }
 }

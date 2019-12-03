@@ -7,13 +7,11 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
   try {
     request.server.app.logger.info('iso8583 Transaction Requests Controller: Received create transactionsRequest request. payload:' + JSON.stringify(request.payload))
     const isoMessage = request.payload as ISO0100
-    
-    const { lpsKey, switchKey } = isoMessage
-    const primaryKey = lpsKey + ':' + switchKey
-
-    await request.server.app.isoMessagesService.create(primaryKey, lpsKey, switchKey, isoMessage)
-
+    const { lpsKey, lpsId } = isoMessage
     const transactionRequestId = uuid()
+
+    await request.server.app.isoMessagesService.create(transactionRequestId, lpsKey, lpsId, isoMessage)
+
     const payer: Party = {
       partyIdInfo: {
         partyIdType: 'MSISDN',
@@ -37,8 +35,12 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       scenario: 'WITHDRAWAL'
     }
     const expiration: string = isoMessage[7]
+    const lpsFee: Money = {
+      amount: '1',
+      currency: 'USD'
+    }
 
-    const transaction = await request.server.app.transactionsService.create({ id: primaryKey, transactionRequestId, payer: payer.partyIdInfo, payee, amount, transactionType, expiration, authenticationType: 'OTP' })
+    const transaction = await request.server.app.transactionsService.create({ transactionRequestId, lpsId, lpsKey, payer: payer.partyIdInfo, payee, amount, lpsFee, transactionType, expiration, authenticationType: 'OTP' })
 
     await request.server.app.accountLookupService.requestFspIdFromMsisdn(transaction.transactionRequestId, isoMessage[102])
     return h.response().code(200)
