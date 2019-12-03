@@ -76,9 +76,14 @@ export class KnexTransfersService implements TransfersService {
     return this.get(request.id)
   }
 
-  updateTransferState(data: TransferRequest) {
+  async updateTransferState(data: TransferRequest) {
     logger.debug('Transfer Requests Service: Update transfer state of transfer request ' + data.id)
-    // TODO complete this implementation
-    throw new Error("Method not implemented.");
+    // TODO test and complete this implementation
+    await this._knex<DBTransfer>('transfers')
+      .update('transferState', data.transferState)
+      .where('id', data.id)
+      .then(result => result)
+
+    return this.get(data.id)
   }
 }
