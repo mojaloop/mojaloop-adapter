@@ -2,6 +2,7 @@ import Knex from 'knex'
 import { createApp } from '../src/adaptor'
 import { handleIsoMessage } from '../src/tcp-relay'
 import { iso0100BinaryMessage } from './factories/iso-messages'
+// import { iso0200BinaryMessage } from './factories/iso-messages'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from './factories/adaptor-services'
 import Axios from 'axios'
@@ -46,16 +47,14 @@ describe('TCP relay', function () {
     const iso0100 = iso0100BinaryMessage
     const isoMessage = new IsoParser().getIsoJSON(iso0100)
     const injectSpy = jest.spyOn(adaptor, 'inject')
+    const lpsKey = 'postillion' + "-" + isoMessage[41] + "-" + isoMessage[42]
 
     await handleIsoMessage('postillion', iso0100, adaptor)
 
     expect(injectSpy).toHaveBeenCalledWith({
       method: 'POST',
       url: '/iso8583/transactionRequests',
-      payload: { lpsKey: 'postillion', switchKey: '0000000010', ...isoMessage }
+      payload: { lpsId: 'postillion', lpsKey, ...isoMessage }
     })
-
-    const transactionRequest = await services.transactionsService.get('postillion:0000000010', 'id')
-    expect(transactionRequest).toBeDefined()
   })
 })
