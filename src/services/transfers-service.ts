@@ -76,8 +76,9 @@ export class KnexTransfersService implements TransfersService {
     return this.get(request.id)
   }
 
+  updateTransferState(data: TransferRequest) {
+    logger.debug('Transfer Requests Service: Update transfer state of transfer request ' + data.id)
+    // TODO complete this implementation
+    throw new Error("Method not implemented.");
+  }
 }
-
-// next steps: writing tests
-            // adding more methods
-            // adding complexity to properties

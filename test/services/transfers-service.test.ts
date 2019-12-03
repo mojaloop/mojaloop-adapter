@@ -84,4 +84,31 @@ describe('Transfers Service', function () {
     expect(transfer).toMatchObject(data)
   })
 
+
+  test('can update the transfer state', async () => {
+    const data: TransferRequest = {
+      transactionRequestId: 'abs-976',
+      amount: {
+        amount: '35',
+        currency: 'KRW'
+      },
+      id: 'abs-328',
+      quoteId: 'abs-489',
+      fulfillment: 'fulfilliation',
+      transferState: 'transfered states of america',
+    }
+    await transfersService.create(data)
+
+    const transfer = await transfersService.get(data.id)
+
+    expect(transfer).toMatchObject(data)
+
+    data.transferState = 'must be modified'
+
+    const updatedTransfer = await transfersService.updateTransferState(data)
+
+    expect(updatedTransfer).toMatchObject(data)
+  })
+
+  // implement transfer request factory
 })
