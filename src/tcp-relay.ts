@@ -23,6 +23,18 @@ export async function handleIsoMessage (lpsId: string, data: Buffer, adaptor: Se
       }
       adaptor.app.logger.debug(`${lpsId} relay: Finished handling 0100 message...`)
       break
+    case '0200':
+      adaptor.app.logger.debug(`${lpsId} relay: Handling 0200 message...`)
+      response = await adaptor.inject({
+        method: 'PUT',
+        url: `/iso8583/authorizations/${lpsKey}`,
+        payload: { lpsKey: lpsKey, lpsId, ...isoMessage }
+      })
+      if (response.statusCode !== 200) {
+        throw new Error(response.statusMessage)
+      }
+      adaptor.app.logger.debug(`${lpsId} relay: Finished handling 0200 message...`)
+      break
     default:
       adaptor.app.logger.error(`${lpsId} relay: Cannot handle iso message of type: ${mti}`)
   }
