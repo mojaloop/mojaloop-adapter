@@ -6,7 +6,7 @@ const IsoParser = require('iso_8583')
 export async function handleIsoMessage (lpsId: string, data: Buffer, adaptor: Server): Promise <void> {
   const mti = data.slice(2, 6).toString()
   const isoMessage = new IsoParser().getIsoJSON(data)
-  const lpsKey : string = lpsId + "-" + isoMessage[41] + "-" + isoMessage[42]
+  const lpsKey: string = lpsId + '-' + isoMessage[41] + '-' + isoMessage[42]
   adaptor.app.logger.debug('TCPRelay: Message mti: ' + mti)
   adaptor.app.logger.debug('TCPRelay: Message converted to JSON: ' + JSON.stringify(isoMessage))
   let response: ServerInjectResponse
@@ -16,17 +16,12 @@ export async function handleIsoMessage (lpsId: string, data: Buffer, adaptor: Se
       response = await adaptor.inject({
         method: 'POST',
         url: '/iso8583/transactionRequests',
-        payload : {lpsKey: lpsKey, lpsId, ...isoMessage}
+        payload: { lpsKey: lpsKey, lpsId, ...isoMessage }
       })
       if (response.statusCode !== 200) {
         throw new Error(response.statusMessage)
       }
       adaptor.app.logger.debug(`${lpsId} relay: Finished handling 0100 message...`)
-      break
-      if (response.statusCode !== 200) {
-        throw new Error(response.statusMessage)
-      }
-      adaptor.app.logger.debug(`${lpsId} relay: Finished handling 0200 message...`)
       break
     default:
       adaptor.app.logger.error(`${lpsId} relay: Cannot handle iso message of type: ${mti}`)
@@ -42,7 +37,6 @@ export function createTcpRelay (lpsId: string, adaptor: Server): net.Server {
     const isoMessagingClient = new TcpIsoMessagingClient(sock)
 
     adaptor.app.isoMessagingClients.set(lpsId, isoMessagingClient)
-    
     sock.on('data', async (data) => {
       try {
         adaptor.app.logger.debug(`${lpsId} relay: Received buffer message: ` + data)
