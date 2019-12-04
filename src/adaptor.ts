@@ -8,7 +8,7 @@ import { AccountLookUpService } from './services/account-lookup-service'
 import { IsoMessagingClient } from './services/iso-messaging-client'
 import { IsoMessageService } from './services/iso-message-service'
 import { QuotesService } from './services/quotes-service'
-import * as AuthorizationController from './controllers/authorizations-controller' 
+import * as AuthorizationController from './controllers/authorizations-controller'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {

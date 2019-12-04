@@ -6,7 +6,7 @@ const bcd = require('bcd')
 const fetch = require('node-fetch')
 const pad = require('./utils/util').pad
 
-const sim_URL = 'http://APT-03:8444' //fs.readFileSync('Config.txt', 'utf8')
+const sim_URL = 'http://APT-03:8444' // fs.readFileSync('Config.txt', 'utf8')
 const HOST = process.env.HOST || sim_URL
 const quotesEndpoint = HOST + '/payeefsp/quotes'
 const otpEndpoint = HOST + '/accountlookup/authorizations'
