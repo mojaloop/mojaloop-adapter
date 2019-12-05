@@ -13,15 +13,6 @@ export type DBTransfer = {
   currency: string;
 }
 
-export type TransferRequest = {
-  id: string;
-  quoteId: string;
-  transactionRequestId: string;
-  fulfillment: string;
-  transferState: string;
-  amount: Money;
-}
-
 export type Transfer = {
   id: string;
   quoteId: string;
@@ -33,7 +24,8 @@ export type Transfer = {
 
 export interface TransfersService {
   get(id: string): Promise<Transfer>;
-  create(request: TransferRequest): Promise<Transfer>;
+  create(request: Transfer): Promise<Transfer>;
+  updateTransferState(data: Transfer): Promise<Transfer>;
 }
 
 export class KnexTransfersService implements TransfersService {
@@ -61,8 +53,8 @@ export class KnexTransfersService implements TransfersService {
     return transfer
   }
 
-  async create(request: TransferRequest): Promise<Transfer> {
-    logger.debug('Transfer Requests Service: Creating transfer request ' + request.id)
+  async create(request: Transfer): Promise<Transfer> {
+    logger.debug('Transfers Service: Creating transfer ' + request.id)
     await this._knex<DBTransfer>('transfers').insert({
       id: request.id,
       quoteId: request.quoteId,
@@ -76,9 +68,8 @@ export class KnexTransfersService implements TransfersService {
     return this.get(request.id)
   }
 
-  async updateTransferState(data: TransferRequest) {
-    logger.debug('Transfer Requests Service: Update transfer state of transfer request ' + data.id)
-    // TODO test and complete this implementation
+  async updateTransferState(data: Transfer) {
+    logger.debug('Transfer Service: Updating state of transfer ' + data.id)
     await this._knex<DBTransfer>('transfers')
       .update('transferState', data.transferState)
       .where('id', data.id)

@@ -1,7 +1,7 @@
-import { KnexTransfersService, TransferRequest } from '../../src/services/transfers-service'
+import { KnexTransfersService, Transfer } from '../../src/services/transfers-service'
 import Axios, { AxiosInstance } from 'axios'
 import Knex from 'knex'
-import { TransferRequestFactory } from '../factories/transfer-requests'
+import { TransferFactory } from '../factories/transfer'
 
 describe('Transfers Service', function () {
   let knex: Knex
@@ -35,80 +35,38 @@ describe('Transfers Service', function () {
   })
 
   test('can create a transfer request', async () => {
-
-    const data: TransferRequest = {
-      transactionRequestId: 'abs-321',
-      amount: {
-        amount: '10000',
-        currency: 'USD'
-      },
-      id: 'abs-234',
-      quoteId: 'abs-543',
-      fulfillment: 'fulfilled',
-      transferState: 'transfered',
-    }
-
+    const data: Transfer = TransferFactory.build();
     const transfer = await transfersService.create(data)
-
     const dbTransfer = await knex('transfers').where('id', data.id).first()
-
     expect(dbTransfer).toBeDefined()
     expect(dbTransfer).toMatchObject({
-      transactionRequestId: 'abs-321',
-      amount: '10000',
-      currency: 'USD',
-      id: 'abs-234',
-      quoteId: 'abs-543',
-      fulfillment: 'fulfilled',
-      transferState: 'transfered',
+      transactionRequestId: data.transactionRequestId,
+      amount: data.amount.amount,
+      currency: data.amount.currency,
+      id: data.id,
+      quoteId: data.quoteId,
+      fulfillment: data.fulfillment,
+      transferState: data.transferState,
     })
     expect(transfer).toMatchObject(data)
   })
 
   test('can fetch transfer by id', async () => {
-    const data: TransferRequest = {
-      transactionRequestId: 'abs-836',
-      amount: {
-        amount: '35',
-        currency: 'KRW'
-      },
-      id: 'abs-935',
-      quoteId: 'abs-375',
-      fulfillment: 'to be fulfilled',
-      transferState: 'has been transfered',
-    }
+    const data: Transfer = TransferFactory.build();
     await transfersService.create(data)
-
     const transfer = await transfersService.get(data.id)
-
     expect(transfer).toMatchObject(data)
   })
 
 
   test('can update the transfer state', async () => {
-    const data: TransferRequest = {
-      transactionRequestId: 'abs-976',
-      amount: {
-        amount: '35',
-        currency: 'KRW'
-      },
-      id: 'abs-328',
-      quoteId: 'abs-489',
-      fulfillment: 'fulfilliation',
-      transferState: 'transfered states of america',
-    }
+    const data: Transfer = TransferFactory.build()
     await transfersService.create(data)
-
     const transfer = await transfersService.get(data.id)
-
     expect(transfer).toMatchObject(data)
-
     data.transferState = 'must be modified'
-
     const updatedTransfer = await transfersService.updateTransferState(data)
-
     expect(updatedTransfer).toMatchObject(data)
   })
 
-  // implement transfer request factory
 })

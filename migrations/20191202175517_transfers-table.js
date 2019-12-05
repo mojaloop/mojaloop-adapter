@@ -1,6 +1,6 @@
 
-exports.up = function(knex) {
-	return knex.schema
+exports.up = function (knex) {
+  return knex.schema
     .createTable('transfers', function (table) {
       table.string('id').primary()
       table.string('quoteId')
@@ -12,8 +12,8 @@ exports.up = function(knex) {
       table.string('amount')
       table.string('currency', 3)
     })
-};
+}
 
-exports.down = function(knex) {
-	return knex.schema.dropTableIfExists('transfers')
-};
+exports.down = function (knex) {
+  return knex.schema.dropTableIfExists('transfers')
+}
