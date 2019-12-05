@@ -28,7 +28,7 @@ function generateField7 (): string {
   return pad(month, 2, '0') + pad(day, 2, '0') + pad(hours, 2, '0') + pad(minutes, 2, '0') + pad(seconds, 2, '0')
 }
 
-export const ISO0100Factory = Factory.define<Partial<ISO0100>>('Iso0100Factory').attrs({
+export const ISO0100Factory = Factory.define <Partial<ISO0100>>('Iso0100Factory').attrs({
   0: '0100',
   3: '012000',
   4: '000000010000',
@@ -47,19 +47,20 @@ export const ISO0100Factory = Factory.define<Partial<ISO0100>>('Iso0100Factory')
 export const ISO0110Factory = Factory.define<Partial<ISO0110>>('Iso0110Factory').attrs({
   0: '0110',
   3: '012000',
+  4: '000000010000',
   7: generateField7(),
   11: Faker.internet.password(6, false, /[0-9]/),
+  12: '151932',
   28: 'C00000001',
   30: 'C00000001',
   39: '00',
   41: Faker.internet.password(8, false, /[0-9a-z]/),
   42: Faker.internet.password(15, false, /[0-9a-z]/),
   48: '012000',
-  49: '840',
+  49: '820',
   102: () => '26' + Faker.internet.password(26, false, /[0-9]/),
   127.2: '000319562' // Postillion switchKey
 })
-
 
 export const iso0100BinaryMessage = Buffer.from([0x01,0x46,0x30,0x31,0x30,0x30,0xf2,0x3e,0x44,0x94,0x09,0xe0,0x81,
   0x20,0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x22,0x31,0x36,0x35,0x39,0x35,0x39,0x35,0x39,0x30,0x30,0x30,0x30,0x30,0x30,
@@ -76,3 +77,35 @@ export const iso0100BinaryMessage = Buffer.from([0x01,0x46,0x30,0x31,0x30,0x30,0
   0x30,0x30,0x30,0x30,0x31,0x30,0x53,0x72,0x63,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x20,0x6e,0x65,0x77,0x53,0x69,
   0x6e,0x6b,0x20,0x20,0x20,0x20,0x20,0x34,0x35,0x36,0x37,0x38,0x31,0x34,0x35,0x36,0x37,0x38,0x31,0x44,0x65,0x62,0x69,
   0x74,0x47,0x72,0x6f,0x75,0x70,0x20,0x20,0x32,0x30,0x31,0x38,0x30,0x33,0x32,0x38])
+
+  export const ISO0200 = {
+    0: '0200',
+    2: '19562964394000003',
+    3: '010000',
+    4: '000000020000',
+    5: '100000000000',
+    7: '0201094154',
+    9: '12345678',
+    11: '000002',
+    12: '151154',
+    13: '0201',
+    16: '1115',
+    18: '6011',
+    22: '901',
+    25: '00',
+    26: '31',
+    29: 'C00000000',
+    41: '00000003',
+    42: '000000000000001',
+    43: 'Giraffe Road 19 Monument Park       GPZA',
+    49: '840',
+    50: '840',
+    52: '4134363833363944',
+    53: '313030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030',
+    54: '0040356C000000100000',
+    59: 'B92BEEC8-9723-4756-800D-C744B5A',
+    102: '19562964394',
+    103: '5845',
+    123: '211201213144002',
+    127.2: '000319562',
+  }

@@ -1,7 +1,7 @@
 export type ISO0100 = { id: number } & {
   transactionPK: string;
+  lpsId: string;
   lpsKey: string;
-  switchKey: string;
   0: string; // MTI
   2: string; // PAN
   3: string; // Processing code Transaction type – 01
@@ -25,8 +25,8 @@ export type ISO0100 = { id: number } & {
 
 export type ISO0110 = { id: number } & {
   transactionPK: string;
+  lpsId: string;
   lpsKey: string;
-  switchKey: string;
   0: string; // MTI
   3: string; // Processing code Transaction type – 01
   7: string; // Transmission date & time

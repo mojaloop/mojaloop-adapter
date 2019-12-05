@@ -93,7 +93,6 @@ export class KnexTransactionsService implements TransactionsService {
       authenticationType: 'OTP',
       expiration: transactionRequestResponse.expiration.toString()
     }
-    
     return transactionRequest
   }
 
