@@ -7,7 +7,7 @@ exports.up = function (knex) {
       table.foreign('quoteId').references('id').inTable('quotes')
       table.string('transactionRequestId')
       table.foreign('transactionRequestId').references('transactionRequestId').inTable('transactions')
-      table.string('fulfillment')
+      table.string('fulfilment')
       table.string('transferState')
       table.string('amount')
       table.string('currency', 3)
