@@ -11,6 +11,7 @@ const TCP_PORT = process.env.TCP_PORT || 3001
 const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://ml-api-adaptor.local'
 const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
 const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
+const ILP_SECRET = process.env.ILP_SECRET || 'secret'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
   client: 'mysql',
@@ -45,7 +46,7 @@ const quotesClient: AxiosInstance = axios.create({
   baseURL: QUOTE_REQUESTS_URL,
   timeout: 3000
 })
-const quotesService = new KnexQuotesService(knex, quotesClient)
+const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET)
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
