@@ -1,5 +1,6 @@
 import { Request, ResponseToolkit, ResponseObject } from 'hapi'
 import { TransactionRequestsIDPutResponse } from 'types/mojaloop'
+import { TransactionState } from '../services/transactions-service'
 
 export async function update (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
@@ -7,7 +8,9 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     const transactionRequestResponse = request.payload as TransactionRequestsIDPutResponse
 
     if (transactionRequestResponse.transactionId) {
+      // TODO: refactor update functions
       await request.server.app.transactionsService.updateTransactionId(request.params.ID, 'transactionRequestId', transactionRequestResponse.transactionId)
+      await request.server.app.transactionsService.updateState(request.params.ID, 'transactionRequestId', TransactionState.transactionResponded)
     }
 
     return h.response().code(200)

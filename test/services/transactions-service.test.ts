@@ -81,7 +81,7 @@ describe('Transactions Service', function () {
       lpsFeeCurrency: 'USD',
       lpsId: 'postillion',
       lpsKey: 'postillion:aef-123',
-      state: TransactionState.requested,
+      state: TransactionState.transactionReceived,
       amount: '10000',
       currency: 'USD',
       expiration: '1118045717'

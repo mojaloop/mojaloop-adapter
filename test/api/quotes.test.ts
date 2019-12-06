@@ -4,7 +4,7 @@ import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
-import { KnexTransactionsService } from '../../src/services/transactions-service'
+import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { KnexQuotesService } from '../../src/services/quotes-service'
 import { ISO0100Factory } from '../factories/iso-messages'
@@ -142,6 +142,26 @@ describe('Quotes endpoint', function () {
 
       expect(response.statusCode).toBe(200)
       expect(services.quotesService.sendQuoteResponse).toHaveBeenCalled()
+    })
+
+    test('updates transaction state to quoteResponded', async () => {
+      const quoteRequest = QuotesPostRequestFactory.build({
+        transactionId: '456'
+      })
+
+      const response = await adaptor.inject({
+        method: 'POST',
+        url: '/quotes',
+        payload: quoteRequest,
+        headers: {
+          'fspiop-source': 'payer',
+          'fspiop-destination': 'payee'
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      const transaction = await services.transactionsService.get('456', 'transactionId')
+      expect(transaction.state).toEqual(TransactionState.quoteResponded)
     })
   })
 

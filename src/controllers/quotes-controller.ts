@@ -1,5 +1,6 @@
 import { Request, ResponseToolkit, ResponseObject } from 'hapi'
 import { QuotesPostRequest, QuotesIDPutResponse } from 'types/mojaloop'
+import { TransactionState } from '../services/transactions-service'
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
@@ -23,6 +24,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       'fspiop-source': request.headers['fspiop-destination']
     }
     await request.server.app.quotesService.sendQuoteResponse(quoteRequest.quoteId, quoteResponse, headers)
+    await request.server.app.transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.quoteResponded)
 
     return h.response().code(200)
   } catch (error) {

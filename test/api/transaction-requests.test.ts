@@ -3,7 +3,7 @@ import Axios from 'axios'
 import { Server } from 'hapi'
 import { createApp } from '../../src/adaptor'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { KnexTransactionsService } from '../../src/services/transactions-service'
+import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
 
 jest.mock('uuid/v4', () => () => '123')
@@ -54,6 +54,18 @@ describe('Transaction Requests API', function () {
     expect(response.statusCode).toEqual(200)
     const transaction = await services.transactionsService.get('123', 'transactionRequestId')
     expect(transaction.transactionId).toBe('456')
+  })
+
+  test('updates transaction state to transactionResponded', async () => {
+    const response = await adaptor.inject({
+      method: 'PUT',
+      url: '/transactionRequests/123',
+      payload: { transactionId: '456', transactionRequestState: 'RECEIVED' }
+    })
+
+    expect(response.statusCode).toEqual(200)
+    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
+    expect(transaction.state).toBe(TransactionState.transactionResponded)
   })
 
 })

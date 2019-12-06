@@ -4,12 +4,19 @@ import { AxiosInstance } from 'axios'
 const logger = require('@mojaloop/central-services-logger')
 
 export enum TransactionState {
-  requested = 'REQUESTED',
-  created = 'CREATED',
-  quoted = 'QUOTED',
-  authorised = 'AUTHORISED',
-  pending = 'PENDING',
-  completed = 'COMPLETED'
+  transactionReceived = '01',
+  transactionSent = '02',
+  transactionResponded = '03',
+  quoteReceived = '04',
+  quoteResponded = '05',
+  authRecieved = '06',
+  authSent = '07',
+  financialRequestReceived = '08',
+  financialRequestSent = '09',
+  transferReceived = '0A',
+  fulfillmentSent = '0B',
+  fulfillmentResponse = '0C',
+  financialResponse = '0D'
 }
 
 export type DBTransactionParty = {
@@ -72,8 +79,9 @@ export type TransactactionParty = {
 export interface TransactionsService {
   get (id: string, idType: 'transactionId' | 'transactionRequestId'): Promise<Transaction>;
   create (request: TransactionRequest): Promise<Transaction>;
-  updatePayerFspId(id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<TransactionRequest>;
-  updateTransactionId(id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
+  updatePayerFspId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
+  updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
+  updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
 }
 export class KnexTransactionsService implements TransactionsService {
@@ -162,7 +170,7 @@ export class KnexTransactionsService implements TransactionsService {
       lpsKey: request.lpsKey,
       lpsFeeAmount: request.lpsFee.amount,
       lpsFeeCurrency: request.lpsFee.currency,
-      state: TransactionState.requested,
+      state: TransactionState.transactionReceived,
       amount: request.amount.amount,
       currency: request.amount.currency,
       expiration: request.expiration
@@ -180,6 +188,12 @@ export class KnexTransactionsService implements TransactionsService {
 
   async updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', transactionId: string): Promise<Transaction> {
     await this._knex('transactions').where(idType, id).first().update('transactionId', transactionId)
+
+    return this.get(id, idType)
+  }
+
+  async updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction> {
+    await this._knex('transactions').where(idType, id).first().update('state', state)
 
     return this.get(id, idType)
   }
