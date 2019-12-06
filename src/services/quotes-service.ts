@@ -31,7 +31,7 @@ export type Quote = {
   commission: Money;
   condition: string;
   ilpPacket: string;
-  expiration?: string;
+  expiration: string;
 }
 
 type QuoteIlpResponse = {

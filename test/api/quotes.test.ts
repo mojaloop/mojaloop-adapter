@@ -7,11 +7,19 @@ import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { KnexQuotesService } from '../../src/services/quotes-service'
+import { ISO0100Factory } from '../factories/iso-messages'
+import { Money } from '../../src/types/mojaloop'
+
+jest.mock('uuid/v4', () => () => '123')
 
 describe('Quotes endpoint', function () {
   let knex: Knex
   let adaptor: Server
   const services = AdaptorServicesFactory.build()
+  const LPS_ID = 'postillion'
+  let LPS_KEY: string
+
+  const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
 
   beforeAll(async () => {
     knex = Knex({
@@ -23,16 +31,39 @@ describe('Quotes endpoint', function () {
       useNullAsDefault: true
     })
     const httpClient = Axios.create()
+    const fakeLogger = { log: jest.fn() }
     services.transactionsService = new KnexTransactionsService(knex, httpClient)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
-    services.quotesService = new KnexQuotesService(knex, httpClient)
+    services.quotesService = new KnexQuotesService(knex, httpClient, 'secret', fakeLogger, 10000, calculateAdaptorFees)
     services.quotesService.sendQuoteResponse = jest.fn()
     adaptor = await createApp(services)
   })
 
   beforeEach(async () => {
     await knex.migrate.latest()
+    // send initial transfer request
+    const iso0100 = ISO0100Factory.build({
+      28: '1' // LPS fee
+    })
+    LPS_KEY = `${LPS_ID}-${iso0100[41]}-${iso0100[42]}`
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/iso8583/transactionRequests',
+      payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
+    })
+    expect(response.statusCode).toBe(200)
+
+    // response comes in to update transactionId
+    const putTransactionRequestResponse = await adaptor.inject({
+      method: 'PUT',
+      url: '/transactionRequests/123',
+      payload: {
+        transactionId: '456',
+        transactionRequestState: 'RECEIVED'
+      }
+    })
+    expect(putTransactionRequestResponse.statusCode).toBe(200)
   })
 
   afterEach(async () => {
@@ -44,9 +75,29 @@ describe('Quotes endpoint', function () {
   })
 
   describe('POST', function () {
-
-    test('stores quote', async () => {
+    test('retrieves transaction using quote requests transactionId', async () => {
+      const getTransactionSpy = jest.spyOn(services.transactionsService, 'get')
       const quoteRequest = QuotesPostRequestFactory.build({
+        transactionId: '456',
+        amount: {
+          amount: '100',
+          currency: 'USD'
+        }
+      })
+
+      const response = await adaptor.inject({
+        method: 'POST',
+        url: '/quotes',
+        payload: quoteRequest
+      })
+
+      expect(response.statusCode).toBe(200)
+      expect(getTransactionSpy).toHaveBeenCalledWith('456', 'transactionId')
+    })
+
+    test('creates quote with lpsFee and adaptor fee', async () => {
+      const quoteRequest = QuotesPostRequestFactory.build({
+        transactionId: '456',
         amount: {
           amount: '100',
           currency: 'USD'
@@ -67,14 +118,17 @@ describe('Quotes endpoint', function () {
       const quote = await services.quotesService.get(quoteRequest.quoteId, 'id')
       expect(quote.id).toBe(quoteRequest.quoteId)
       expect(quote.condition).toBeDefined()
-      expect(quote.feeAmount.amount).toBe('1')
-      expect(quote.feeAmount.currency).toBe('USD')
-      expect(quote.transferAmount.amount).toBe('101')
-      expect(quote.transferAmount.currency).toBe('USD')
+      expect(quote.ilpPacket).toBeDefined()
+      expect(quote.amount).toMatchObject({ amount: '100', currency: 'USD' })
+      expect(quote.fees).toMatchObject({ amount: '1', currency: 'USD' })
+      expect(quote.commission).toMatchObject({ amount: '2', currency: 'USD' })
+      expect(quote.transferAmount).toMatchObject({ amount: '103', currency: 'USD' })
     })
 
     test('makes PUT request to mojaloop quotes endpoint', async () => {
-      const quoteRequest = QuotesPostRequestFactory.build()
+      const quoteRequest = QuotesPostRequestFactory.build({
+        transactionId: '456'
+      })
 
       const response = await adaptor.inject({
         method: 'POST',
@@ -88,41 +142,6 @@ describe('Quotes endpoint', function () {
 
       expect(response.statusCode).toBe(200)
       expect(services.quotesService.sendQuoteResponse).toHaveBeenCalled()
-    })
-
-    test('adds surcharge', async () => {
-      const quoteRequest = QuotesPostRequestFactory.build({
-        amount: {
-          amount: '100',
-          currency: 'USD'
-        }
-      })
-      const amountWithSurcharge = '101'
-      Date.now = jest.fn().mockReturnValue(0)
-
-      const response = await adaptor.inject({
-        method: 'POST',
-        url: '/quotes',
-        payload: quoteRequest,
-        headers: {
-          'fspiop-source': 'payer',
-          'fspiop-destination': 'payee'
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      expect(services.quotesService.sendQuoteResponse).toHaveBeenCalledWith(quoteRequest.quoteId, {
-        condition: 'HOr22-H3AfTDHrSkPjJtVPRdKouuMkDXTR4ejlQa8Ks',
-        ilpPacket: 'AQAAAAAAAADIEHByaXZhdGUucGF5ZWVmc3CCAiB7InRyYW5zYWN0aW9uSWQiOiIyZGY3NzRlMi1mMWRiLTRmZjctYTQ5NS0yZGRkMzdhZjdjMmMiLCJxdW90ZUlkIjoiMDNhNjA1NTAtNmYyZi00NTU2LThlMDQtMDcwM2UzOWI4N2ZmIiwicGF5ZWUiOnsicGFydHlJZEluZm8iOnsicGFydHlJZFR5cGUiOiJNU0lTRE4iLCJwYXJ0eUlkZW50aWZpZXIiOiIyNzcxMzgwMzkxMyIsImZzcElkIjoicGF5ZWVmc3AifSwicGVyc29uYWxJbmZvIjp7ImNvbXBsZXhOYW1lIjp7fX19LCJwYXllciI6eyJwYXJ0eUlkSW5mbyI6eyJwYXJ0eUlkVHlwZSI6Ik1TSVNETiIsInBhcnR5SWRlbnRpZmllciI6IjI3NzEzODAzOTExIiwiZnNwSWQiOiJwYXllcmZzcCJ9LCJwZXJzb25hbEluZm8iOnsiY29tcGxleE5hbWUiOnt9fX0sImFtb3VudCI6eyJjdXJyZW5jeSI6IlVTRCIsImFtb3VudCI6IjIwMCJ9LCJ0cmFuc2FjdGlvblR5cGUiOnsic2NlbmFyaW8iOiJERVBPU0lUIiwic3ViU2NlbmFyaW8iOiJERVBPU0lUIiwiaW5pdGlhdG9yIjoiUEFZRVIiLCJpbml0aWF0b3JUeXBlIjoiQ09OU1VNRVIiLCJyZWZ1bmRJbmZvIjp7fX19',
-        expiration: new Date(10000).toUTCString(),
-        transferAmount: {
-          amount: amountWithSurcharge,
-          currency: 'USD'
-        }
-      }, {
-        'fspiop-source': 'payee',
-        'fspiop-destination': 'payer'
-      })
     })
   })
 
