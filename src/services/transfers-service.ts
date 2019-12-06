@@ -7,7 +7,7 @@ export type DBTransfer = {
   id: string;
   quoteId: string;
   transactionRequestId: string;
-  fulfillment: string;
+  fulfilment: string;
   transferState: string;
   amount: string;
   currency: string;
@@ -17,7 +17,7 @@ export type Transfer = {
   id: string;
   quoteId: string;
   transactionRequestId: string;
-  fulfillment: string;
+  fulfilment: string;
   transferState: string;
   amount: Money;
 }
@@ -46,7 +46,7 @@ export class KnexTransfersService implements TransfersService {
         currency: dbTransfer.currency
       },
       quoteId: dbTransfer.quoteId,
-      fulfillment: dbTransfer.fulfillment,
+      fulfilment: dbTransfer.fulfilment,
       transferState: dbTransfer.transferState,
     }
 
@@ -59,7 +59,7 @@ export class KnexTransfersService implements TransfersService {
       id: request.id,
       quoteId: request.quoteId,
       transactionRequestId: request.transactionRequestId,
-      fulfillment: request.fulfillment,
+      fulfilment: request.fulfilment,
       transferState: request.transferState,
       amount: request.amount.amount,
       currency: request.amount.currency,

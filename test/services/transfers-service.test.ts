@@ -45,7 +45,7 @@ describe('Transfers Service', function () {
       currency: data.amount.currency,
       id: data.id,
       quoteId: data.quoteId,
-      fulfillment: data.fulfillment,
+      fulfilment: data.fulfilment,
       transferState: data.transferState,
     })
     expect(transfer).toMatchObject(data)

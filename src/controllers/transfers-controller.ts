@@ -1,8 +1,12 @@
+const sdk = require('@mojaloop/sdk-standard-components')
+const IlpPacket = require('ilp-packet'); 
+
+
+
 // POST/transfer
-// use quoteId to find quote
 // use transactionId to find transaction
 // create transfer
-// calculate fulfillment
+// calculate fulfilment
 // mojaloop/PUT/transfer/<Id>
 
 // PUT/transfer/<Id>
