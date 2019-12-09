@@ -3,7 +3,7 @@ import { ISO0100Factory } from '../factories/iso-messages'
 import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { KnexTransactionsService } from '../../src/services/transactions-service'
+import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import Axios from 'axios'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 
@@ -72,8 +72,8 @@ describe('Transaction Requests API', function () {
     })
 
     expect(response.statusCode).toEqual(200)
-    const transactionRequest = await services.transactionsService.get('123', 'transactionRequestId')
-    expect(transactionRequest).toMatchObject({
+    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
+    expect(transaction).toMatchObject({
       transactionRequestId: '123',
       payer: {
         partyIdType: 'MSISDN',
@@ -96,7 +96,8 @@ describe('Transaction Requests API', function () {
         scenario: 'WITHDRAWAL'
       },
       authenticationType: 'OTP',
-      expiration: iso0100[7]
+      expiration: iso0100[7],
+      state: TransactionState.transactionReceived
     })
   })
 

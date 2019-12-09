@@ -1,6 +1,7 @@
 import { Server } from 'hapi'
 import { TransactionsService } from './services/transactions-service'
 import * as Iso8583TransactionRequestController from './controllers/iso8583-transaction-requests-controller'
+import * as TransactionRequestsController from './controllers/transaction-requests-controller'
 import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
@@ -81,7 +82,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
         },
         transactionRequests: {
           '{ID}': {
-            put: () => 'dummy Handler'
+            put: TransactionRequestsController.update
           }
         },
         authorizations: {
