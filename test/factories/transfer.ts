@@ -2,7 +2,7 @@ import { Factory } from 'rosie'
 import Faker from 'faker'
 import { Transfer } from '../../src/services/transfers-service'
 
-export const TransferFactory = Factory.define<Transfer>('TransferRequestFactory').attrs({
+export const TransferFactory = Factory.define<Transfer>('TransferFactory').attrs({
   amount: () => ({ 
     amount: Faker.random.number().toString(), 
     currency: Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 3),
