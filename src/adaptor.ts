@@ -10,6 +10,7 @@ import { IsoMessagingClient } from './services/iso-messaging-client'
 import { IsoMessageService } from './services/iso-message-service'
 import { QuotesService } from './services/quotes-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
+import { TransfersService } from 'services/transfers-service'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {
@@ -23,6 +24,7 @@ export type AdaptorServices = {
   isoMessagesService: IsoMessageService;
   quotesService: QuotesService;
   logger?: Logger;
+  transfersService:  TransfersService;
 }
 
 export type Logger = {
@@ -40,6 +42,7 @@ declare module 'hapi' {
     quotesService: QuotesService;
     logger: Logger;
     isoMessagingClients: Map<string, IsoMessagingClient>;
+    transfersService:  TransfersService;
   }
 }
 
