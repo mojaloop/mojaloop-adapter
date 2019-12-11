@@ -6,65 +6,73 @@ import { Transfer, KnexTransfersService } from 'services/transfers-service';
 const sdk = require('@mojaloop/sdk-standard-components')
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
+  // decode ILP packet
+  
 
-  const payload: TransfersPostRequest = request.payload as TransfersPostRequest
-
-  const binaryPacket = Buffer.from(payload.ilpPacket, 'base64');
-	const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket);
-	const dataElement = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'));
-  const transactionId = dataElement.transactionId
-
-  // use transactionId to find transaction
-
-  const fulfilment = sdk.Ilp.caluclateFulfil(payload.ilpPacket)
-
-
+  
+  // get trxId
+  // create fulfilment
   // create transfer
-  
-  const transfer: Transfer = {
-    id: "",
-    quoteId: "",
-    transactionRequestId: "",
-    fulfilment: "",
-    transferState: "",
-    amount: {
-      amount: "",
-      currency: "",
-    }
-  }
+  // persist transfer
+  // return fulfilment
+  // update trxState -> enum.fulfilmentSent
 
-  await request.server.app.transfersService.create(transfer)
-  
-  // mojaloop/PUT/transfer/<Id>
+    return h.response().code(200)
+
+}
 
 
-  return h.response().code(500)
-
-// export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
-
-// 	request.server.app.logger.info('Received POST transfer request. headers: ' + JSON.stringify(request.headers) + ' payload: ' + JSON.stringify(request.payload))
-// 	const transferRequest = request.payload as TransfersPostRequest
-// 	const ilpPacket = transferRequest.ilpPacket
-// 	const binaryPacket = Buffer.from(ilpPacket, 'base64');
+//   const payload: TransfersPostRequest = request.payload as TransfersPostRequest
+//   const binaryPacket = Buffer.from(payload.ilpPacket, 'base64');
 // 	const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket);
+// 	const dataElement = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'));
+//   const transactionId = dataElement.transactionId
+
+//   // use transactionId to find transaction
+
+//   const fulfilment = sdk.Ilp.caluclateFulfil(payload.ilpPacket)
+
+
+//   // create transfer
+  
+//   const transfer: Transfer = {
+//     id: "",
+//     quoteId: "",
+//     transactionRequestId: "",
+//     fulfilment: "",
+//     transferState: "",
+//     amount: {
+//       amount: "",
+//       currency: "",
+//     }
+//   }
+
+//   await request.server.app.transfersService.create(transfer)
+  
+//   // mojaloop/PUT/transfer/<Id>
+
+
+
+// // export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
+
+// // 	request.server.app.logger.info('Received POST transfer request. headers: ' + JSON.stringify(request.headers) + ' payload: ' + JSON.stringify(request.payload))
+// // 	const transferRequest = request.payload as TransfersPostRequest
+// // 	const ilpPacket = transferRequest.ilpPacket
+// // 	const binaryPacket = Buffer.from(ilpPacket, 'base64');
+// // 	const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket);
 	
-// 	const dataElement = JSON.parse(Buffer.from(jsonPacket.data.data.toString('utf8'), 'base64').toString('utf8'));
-// 	const transactionId = transferRequest.trans
+// // 	const dataElement = JSON.parse(Buffer.from(jsonPacket.data.data.toString('utf8'), 'base64').toString('utf8'));
+// // 	const transactionId = transferRequest.trans
 	
-// // extract transactionId from ilpPacket
-// // use transactionId to find transaction
-// // calculate fulfilment
-// // create transfer
-// // mojaloop/PUT/transfer/<Id>
+// // // extract transactionId from ilpPacket
+// // // use transactionId to find transaction
+// // // calculate fulfilment
+// // // create transfer
+// // // mojaloop/PUT/transfer/<Id>
+
+// // }
 
 // }
-
-export async function playing (something: Something) {
-	// gets something
-	// does something
-	// return something
-}
-}
 
 
 // PUT/transfer/<Id>
