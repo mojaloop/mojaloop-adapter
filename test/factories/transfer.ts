@@ -11,5 +11,5 @@ export const TransferFactory = Factory.define<Transfer>('TransferFactory').attrs
   fulfilment: () => Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10),
   id: () => Faker.random.uuid(),
   quoteId: () => Faker.random.uuid(),
-  transferState: () => Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10),
+  // transferState: () => Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10), // field suspended, remove if depricated
 })

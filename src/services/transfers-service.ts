@@ -8,7 +8,7 @@ export type DBTransfer = {
   quoteId: string;
   transactionRequestId: string;
   fulfilment: string;
-  transferState: string;
+  // transferState: string; // field suspended, remove if depricated
   amount: string;
   currency: string;
 }
@@ -18,14 +18,14 @@ export type Transfer = {
   quoteId: string;
   transactionRequestId: string;
   fulfilment: string;
-  transferState: string;
+  // transferState: string; // field suspended, remove if depricated
   amount: Money;
 }
 
 export interface TransfersService {
   get(id: string): Promise<Transfer>;
   create(request: Transfer): Promise<Transfer>;
-  updateTransferState(data: Transfer): Promise<Transfer>;
+  // updateTransferState(data: Transfer): Promise<Transfer>; // field suspended, remove if depricated
 }
 
 export class KnexTransfersService implements TransfersService {
@@ -47,7 +47,7 @@ export class KnexTransfersService implements TransfersService {
       },
       quoteId: dbTransfer.quoteId,
       fulfilment: dbTransfer.fulfilment,
-      transferState: dbTransfer.transferState,
+      // transferState: dbTransfer.transferState, // field suspended, remove if depricated
     }
 
     return transfer
@@ -60,7 +60,7 @@ export class KnexTransfersService implements TransfersService {
       quoteId: request.quoteId,
       transactionRequestId: request.transactionRequestId,
       fulfilment: request.fulfilment,
-      transferState: request.transferState,
+      // transferState: request.transferState, // field suspended, remove if depricated
       amount: request.amount.amount,
       currency: request.amount.currency,
     }).then(result => result[0])
@@ -68,13 +68,13 @@ export class KnexTransfersService implements TransfersService {
     return this.get(request.id)
   }
 
-  async updateTransferState(data: Transfer) {
-    logger.debug('Transfer Service: Updating state of transfer ' + data.id)
-    await this._knex<DBTransfer>('transfers')
-      .update('transferState', data.transferState)
-      .where('id', data.id)
-      .then(result => result)
+  // async updateTransferState(data: Transfer) { // field suspended, remove if depricated
+  //   logger.debug('Transfer Service: Updating state of transfer ' + data.id)
+  //   await this._knex<DBTransfer>('transfers')
+  //     .update('transferState', data.transferState)
+  //     .where('id', data.id)
+  //     .then(result => result)
 
-    return this.get(data.id)
-  }
+  //   return this.get(data.id)
+  // }
 }

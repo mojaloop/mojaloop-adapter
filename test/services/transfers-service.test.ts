@@ -46,7 +46,7 @@ describe('Transfers Service', function () {
       id: data.id,
       quoteId: data.quoteId,
       fulfilment: data.fulfilment,
-      transferState: data.transferState,
+      // transferState: data.transferState, // field suspended, remove if depricated
     })
     expect(transfer).toMatchObject(data)
   })
@@ -59,14 +59,14 @@ describe('Transfers Service', function () {
   })
 
 
-  test('can update the transfer state', async () => {
-    const data: Transfer = TransferFactory.build()
-    await transfersService.create(data)
-    const transfer = await transfersService.get(data.id)
-    expect(transfer).toMatchObject(data)
-    data.transferState = 'must be modified'
-    const updatedTransfer = await transfersService.updateTransferState(data)
-    expect(updatedTransfer).toMatchObject(data)
-  })
+  // test('can update the transfer state', async () => { // field suspended, remove if depricated
+  //   const data: Transfer = TransferFactory.build()
+  //   await transfersService.create(data)
+  //   const transfer = await transfersService.get(data.id)
+  //   expect(transfer).toMatchObject(data)
+  //   data.transferState = 'must be modified'
+  //   const updatedTransfer = await transfersService.updateTransferState(data)
+  //   expect(updatedTransfer).toMatchObject(data)
+  // })
 
 })

@@ -8,7 +8,7 @@ exports.up = function (knex) {
       table.string('transactionRequestId')
       table.foreign('transactionRequestId').references('transactionRequestId').inTable('transactions')
       table.string('fulfilment')
-      table.string('transferState')
+      // table.string('transferState') // field suspended, remove if depricated
       table.string('amount')
       table.string('currency', 3)
     })
