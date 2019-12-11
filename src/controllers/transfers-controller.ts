@@ -2,14 +2,14 @@ import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import IlpPacket from 'ilp-packet';
 import { TransfersPostRequest } from 'types/mojaloop';
 import { Transfer, KnexTransfersService } from 'services/transfers-service';
+import { TransferTimedOutError } from 'ilp-packet/dist/src/errors';
 
 const sdk = require('@mojaloop/sdk-standard-components')
 
-export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
+export async function create(request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   // decode ILP packet
-  
 
-  
+
   // get trxId
   // create fulfilment
   // create transfer
@@ -17,68 +17,16 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
   // return fulfilment
   // update trxState -> enum.fulfilmentSent
 
-    return h.response().code(200)
+  return h.response().code(200)
 
 }
 
-
-//   const payload: TransfersPostRequest = request.payload as TransfersPostRequest
-//   const binaryPacket = Buffer.from(payload.ilpPacket, 'base64');
-// 	const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket);
-// 	const dataElement = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'));
-//   const transactionId = dataElement.transactionId
-
-//   // use transactionId to find transaction
-
-//   const fulfilment = sdk.Ilp.caluclateFulfil(payload.ilpPacket)
-
-
-//   // create transfer
-  
-//   const transfer: Transfer = {
-//     id: "",
-//     quoteId: "",
-//     transactionRequestId: "",
-//     fulfilment: "",
-//     transferState: "",
-//     amount: {
-//       amount: "",
-//       currency: "",
-//     }
-//   }
-
-//   await request.server.app.transfersService.create(transfer)
-  
-//   // mojaloop/PUT/transfer/<Id>
-
-
-
-// // export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
-
-// // 	request.server.app.logger.info('Received POST transfer request. headers: ' + JSON.stringify(request.headers) + ' payload: ' + JSON.stringify(request.payload))
-// // 	const transferRequest = request.payload as TransfersPostRequest
-// // 	const ilpPacket = transferRequest.ilpPacket
-// // 	const binaryPacket = Buffer.from(ilpPacket, 'base64');
-// // 	const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket);
-	
-// // 	const dataElement = JSON.parse(Buffer.from(jsonPacket.data.data.toString('utf8'), 'base64').toString('utf8'));
-// // 	const transactionId = transferRequest.trans
-	
-// // // extract transactionId from ilpPacket
-// // // use transactionId to find transaction
-// // // calculate fulfilment
-// // // create transfer
-// // // mojaloop/PUT/transfer/<Id>
-
-// // }
-
-// }
-
-
-// PUT/transfer/<Id>
-// find transaction
-// set STATE = COMPLETED
-// find 0200 by txRID
-// populate 0210
-// use lspId to find correct tcp relay
-// TCPRelay/SEND/{transaction}
+// post/transfer.payload: TransfersPostRequest
+//   transferId
+//   payeeFsp
+//   payerFsp
+//   amount
+//   ilpPacket
+//   condition
+//   expiration
+//   extensionList
