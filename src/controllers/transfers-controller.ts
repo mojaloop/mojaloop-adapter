@@ -30,3 +30,12 @@ export async function create(request: Request, h: ResponseToolkit): Promise<Resp
 //   condition
 //   expiration
 //   extensionList
+
+// export type Transfer = {
+//   id: string;
+//   quoteId: string;
+//   transactionRequestId: string;
+//   fulfilment: string;
+//   transferState: string;
+//   amount: Money;
+// }
