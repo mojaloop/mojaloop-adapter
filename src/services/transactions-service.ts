@@ -1,5 +1,5 @@
 import Knex from 'knex'
-import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'
+import { Party, PartyIdInfo, Money, TransactionType, TransactionRequestsPostRequest } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
 const logger = require('@mojaloop/central-services-logger')
 
@@ -181,6 +181,7 @@ export class KnexTransactionsService implements TransactionsService {
 
   async updatePayerFspId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction> {
     const dbTransaction = await this.get(id, idType)
+    console.log('transaction', dbTransaction)
     await this._knex('transactionParties').where('transactionRequestId', dbTransaction.transactionRequestId).where('type', 'payer').first().update('fspId', fspId)
 
     return this.get(id, idType)
@@ -199,6 +200,21 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async sendToMojaHub (request: TransactionRequest): Promise<void> {
-    await this._client.post('/transactionRequests', request)
+    // TODO: use mojaSDK
+    const headers = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      date: new Date().toUTCString(),
+      'fspiop-source': 'adaptor',
+      'fspiop-destination': request.payer.fspId
+    }
+    const transactionRequest: TransactionRequestsPostRequest = {
+      amount: request.amount,
+      payee: request.payee,
+      payer: request.payer,
+      transactionRequestId: request.transactionRequestId,
+      transactionType: request.transactionType
+    }
+    await this._client.post('/transactionRequests', transactionRequest, { headers })
   }
 }

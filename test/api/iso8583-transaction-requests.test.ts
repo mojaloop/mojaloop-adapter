@@ -9,6 +9,7 @@ import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 
 jest.mock('uuid/v4', () => () => '123')
 
+const MLNumber = require('@mojaloop/ml-number')
 const LPS_KEY = 'postillion:0100'
 const LPS_ID = 'postillion'
 
@@ -87,7 +88,7 @@ describe('Transaction Requests API', function () {
         }
       },
       amount: {
-        amount: iso0100[4],
+        amount: new MLNumber(iso0100[4]).toString(),
         currency: iso0100[49]
       },
       transactionType: {

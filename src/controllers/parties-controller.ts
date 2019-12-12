@@ -15,6 +15,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
 
     return h.response().code(200)
   } catch (error) {
+    request.server.app.logger.error(`Parties Controller: Error receiving parties PUT request. ${error.message}`)
     return h.response().code(500)
   }
 }
