@@ -26,7 +26,17 @@ export async function create(request: Request, h: ResponseToolkit): Promise<Resp
 //   payeeFsp
 //   payerFsp
 //   amount
-//   ilpPacket
+//   ilpPacket -- encrypted as all hell
+  // amount: this._getIlpCurrencyAmount(partialResponse.transferAmount), // unsigned 64bit integer as a string
+  // account: this._getIlpAddress(quoteRequest.payee), // ilp address
+  // data: ilpData // base64url encoded attached data
+    // transactionId: quoteRequest.transactionId,
+    // quoteId: quoteRequest.quoteId,
+    // payee: quoteRequest.payee,
+    // payer: quoteRequest.payer,
+    // amount: partialResponse.transferAmount,
+    // transactionType: quoteRequest.transactionType,
+    // note: quoteRequest.note,
 //   condition
 //   expiration
 //   extensionList
@@ -36,6 +46,6 @@ export async function create(request: Request, h: ResponseToolkit): Promise<Resp
 //   quoteId: string;
 //   transactionRequestId: string;
 //   fulfilment: string;
-//   transferState: string;
+//   transferState: string; // field suspended, remove if depricated
 //   amount: Money;
 // }
