@@ -7,14 +7,40 @@ import { TransferTimedOutError } from 'ilp-packet/dist/src/errors';
 const sdk = require('@mojaloop/sdk-standard-components')
 
 export async function create(request: Request, h: ResponseToolkit): Promise<ResponseObject> {
-  // decode ILP packet
+  const payload: TransfersPostRequest = request.payload as TransfersPostRequest
+  
+  // get quoteId from ilpPacket
+  
+  const quoteId = payload.ilpPacket.data.quoteId
+  
+  // get transactionRequestId
 
-
-  // get trxId
+  const transactionRequestId = get.it.from.transaction.service
+  
   // create fulfilment
+  
+  const fulfilment = fulfilment.blahblah
+  
   // create transfer
+
+  const transfer: Transfer = {
+    id: payload.transferId,
+    quoteId: quoteId,
+    transactionRequestId: transactionRequestId,
+    fulfilment: fulfilment,
+    // transferState: string, // field suspended, remove if depricated
+    amount: payload.amount,
+  }
+
   // persist transfer
   // return fulfilment
+
+
+
+
+
+  // decode ILP packet
+  // get trxId
   // update trxState -> enum.fulfilmentSent
 
   return h.response().code(200)
