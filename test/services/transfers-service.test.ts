@@ -58,7 +58,6 @@ describe('Transfers Service', function () {
     expect(transfer).toMatchObject(data)
   })
 
-
   test('can update the transfer state', async () => {
     const data: Transfer = TransferFactory.build()
     await transfersService.create(data)

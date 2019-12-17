@@ -29,10 +29,10 @@ export interface TransfersService {
 }
 
 export class KnexTransfersService implements TransfersService {
-  constructor(private _knex: Knex, private _client: AxiosInstance) {
+  constructor (private _knex: Knex, private _client: AxiosInstance) {
   }
 
-  async get(id: string): Promise<Transfer> {
+  async get (id: string): Promise<Transfer> {
     const dbTransfer: DBTransfer | undefined = await this._knex<DBTransfer>('transfers').where('id', id).first()
     if (!dbTransfer) {
       throw new Error('Error fetching transfer from database')
@@ -53,7 +53,7 @@ export class KnexTransfersService implements TransfersService {
     return transfer
   }
 
-  async create(request: Transfer): Promise<Transfer> {
+  async create (request: Transfer): Promise<Transfer> {
     logger.debug('Transfers Service: Creating transfer ' + request.id)
     await this._knex<DBTransfer>('transfers').insert({
       id: request.id,
@@ -62,13 +62,13 @@ export class KnexTransfersService implements TransfersService {
       fulfilment: request.fulfilment,
       transferState: request.transferState,
       amount: request.amount.amount,
-      currency: request.amount.currency,
+      currency: request.amount.currency
     }).then(result => result[0])
 
     return this.get(request.id)
   }
 
-  async updateTransferState(data: Transfer) {
+  async updateTransferState (data: Transfer) {
     logger.debug('Transfer Service: Updating state of transfer ' + data.id)
     await this._knex<DBTransfer>('transfers')
       .update('transferState', data.transferState)

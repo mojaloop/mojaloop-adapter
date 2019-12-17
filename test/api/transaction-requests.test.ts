@@ -65,7 +65,7 @@ describe('Transaction Requests API', function () {
 
     expect(response.statusCode).toEqual(200)
     const transaction = await services.transactionsService.get('123', 'transactionRequestId')
-    expect(transaction.state).toBe(TransactionState.transactionResponded)
+    expect(transaction.state).toBe(TransactionState.quoteResponded)
   })
 
 })

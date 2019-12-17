@@ -667,7 +667,7 @@ export interface BulkQuotesIDPutResponse {
   extensionList?: ExtensionList;
 }
 export interface AuthorizationsIDPutResponse {
-  /**
+ /**
    * OTP or QR Code if entered, otherwise empty.
    */
   authenticationInfo?: string;
@@ -675,8 +675,10 @@ export interface AuthorizationsIDPutResponse {
    * Enum containing response information; if the customer entered the authentication value, rejected the transaction, or requested a resend of the authentication value.
    */
   responseType: string;
+
 }
 export interface AuthenticationInfo {
-  authentication: string;
+
+  authentication?: string;
   authenticationValue: string;
 }

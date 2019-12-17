@@ -6,13 +6,13 @@ import { AccountLookupService } from './services/account-lookup-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
+import { KnexAuthorizationsService } from 'services/authorizations-service'
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
-const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
 const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://ml-api-adaptor.local'
 const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
-const ACCOUNT_LOOKUP_URL = process.env.ACCOUNT_LOOKUP_URL || 'http://account-lookup-service.local'
 const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
+const AUTHORIZATIONS_URL = process.env.AUTHORIZATIONS_URL
 const ILP_SECRET = process.env.ILP_SECRET || 'secret'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
@@ -38,9 +38,10 @@ const transcationRequestClient = axios.create({
 })
 const transactionRequestService = new KnexTransactionsService(knex, transcationRequestClient)
 const accountLookupClient: AxiosInstance = axios.create({
-  baseURL: ACCOUNT_LOOKUP_URL,
+  baseURL: ML_API_ADAPTOR_URL,
   timeout: 3000
 })
+
 const accountLookupService = new AccountLookupService(accountLookupClient)
 const isoMessagesService = new KnexIsoMessageService(knex)
 
@@ -49,6 +50,12 @@ const quotesClient: AxiosInstance = axios.create({
   timeout: 3000
 })
 const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET)
+
+const AuthorizationsClient: AxiosInstance = axios.create({
+  baseURL: AUTHORIZATIONS_URL,
+  timeout: 3000
+})
+const authorizationsService = new KnexAuthorizationsService(knex, AuthorizationsClient)
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
@@ -59,7 +66,7 @@ const start = async (): Promise<void> => {
     console.log('Migrations finished...')
   }
 
-  const adaptor = await createApp({ transactionsService: transactionRequestService, accountLookupService, isoMessagesService, quotesService }, { port: HTTP_PORT })
+  const adaptor = await createApp({ transactionsService: transactionRequestService, accountLookupService, isoMessagesService, quotesService, authorizationsService }, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)

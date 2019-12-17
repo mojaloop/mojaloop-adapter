@@ -210,6 +210,12 @@
       },
       "/parties/{Type}/{ID}": {
           "put": {
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
               "parameters": [
                   {
                       "name": "body",
@@ -269,7 +275,7 @@
                   "name": "accept",
                   "description": "The Accept header field indicates the version of the API the client would like the server to use.",
                   "in": "header",
-                  "required": false,
+                  "required": true,
                   "type": "string"
               },
               {
@@ -601,6 +607,12 @@
       },
       "/transactionRequests/{ID}": {
           "put": {
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
               "parameters": [
                   {
                       "name": "body",
@@ -784,16 +796,6 @@
               "produces": [
                   "application/json"
               ],
-              "parameters": [
-                  {
-                      "name": "body",
-                      "schema": {
-                          "$ref": "#/definitions/ISO8583-0200"
-                      },
-                      "in": "body",
-                      "required": true
-                  }
-              ],
               "responses": {
                   "200": {
                       "$ref": "#/responses/Response200",
@@ -853,6 +855,12 @@
       },
       "/transfers": {
           "post": {
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
               "parameters": [
                   {
                       "name": "body",
