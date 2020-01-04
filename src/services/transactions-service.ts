@@ -82,6 +82,7 @@ export interface TransactionsService {
   create (request: TransactionRequest): Promise<Transaction>;
   updatePayerFspId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
   updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
+  sendTransactionCancelToMojaHub(lpsId: string, lpsKey: string): Promise<string>;
   updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
 }
@@ -256,5 +257,17 @@ export class KnexTransactionsService implements TransactionsService {
 
   async sendToMojaHub (request: TransactionRequest): Promise<void> {
     await this._client.post('/transactionRequests', request)
+  }
+
+  async sendTransactionCancelToMojaHub (lpsId: string, lpsKey: string): Promise<string> {
+
+    let transactionrequestId = '123'
+    const transaction = await this._knex('transactions').where('lpsKey', lpsKey).first().where('state', TransactionState.quoteResponded)
+    if (transaction) {
+    // await this._client.put(`/transactionRequests/${transaction.transactionRequestId}/error`)
+      transactionrequestId = '124'
+
+    }
+    return transactionrequestId
   }
 }

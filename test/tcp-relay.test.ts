@@ -59,6 +59,45 @@ describe('TCP relay', function () {
     })
   })
 
+  test ('checks whether previous 0100  transaction is incomplete and send cancel to switch', async () => {
+    // Sending 0100 binary message to create transaction request
+    const iso0100 = iso0100BinaryMessage
+    const isoMessage1 = new IsoParser().getIsoJSON(iso0100)
+    const injectSp1y = jest.spyOn(adaptor, 'inject')
+    const lpsKey = 'postillion' + '-' + isoMessage1[41] + '-' + isoMessage1[42]
+
+    await handleIsoMessage('postillion', iso0100, adaptor)
+
+    expect(injectSp1y).toHaveBeenCalledWith({
+      method: 'POST',
+      url: '/iso8583/transactionRequests',
+      payload: { lpsId: 'postillion', lpsKey, ...isoMessage1 }
+    })
+
+    // Changing its state to Quote responded
+
+    const response = await adaptor.inject({
+      method: 'PUT',
+      url: '/transactionRequests/123',
+      payload: { transactionId: '456', transactionRequestState: 'RECEIVED' }
+    })
+
+    expect (response.statusCode).toEqual(200)
+    const transaction = await services.transactionsService.updatePayerFspId('123', 'transactionRequestId', '1234')
+    expect (transaction.state).toBe('05')
+
+    // sending another transaction0100 for checking previous request has been cancelled
+
+    await handleIsoMessage('postillion', iso0100, adaptor)
+
+     expect (injectSp1y).toHaveBeenCalledWith({
+      method: 'POST',
+      url: '/iso8583/transactionRequests',
+      payload: { lpsId: 'postillion', lpsKey, ...isoMessage1 }
+     })
+
+  })
+
   test('maps 0200 message to the authorizations endpoint', async () => {
 
     // Sending 0100 binary message to create transaction request
@@ -79,7 +118,7 @@ describe('TCP relay', function () {
     // Changing its state to Quote responded
 
     const response = await adaptor.inject({
-      method: 'PUT',
+      method:'PUT',
       url: '/transactionRequests/123',
       payload: { transactionId: '456', transactionRequestState: 'RECEIVED' }
     })

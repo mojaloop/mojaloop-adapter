@@ -8,9 +8,11 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     request.server.app.logger.info('iso8583 Transaction Requests Controller: Received create transactionsRequest request. payload:' + JSON.stringify(request.payload))
     const isoMessage = request.payload as ISO0100
     const { lpsKey, lpsId } = isoMessage
-    const transactionRequestId = uuid()
-
-    await request.server.app.isoMessagesService.create(transactionRequestId, lpsKey, lpsId, isoMessage)
+    let transactionRequestId = uuid()
+    const transactionsService = request.server.app.transactionsService
+    const transactionRequestID = await request.server.app.transactionsService.sendTransactionCancelToMojaHub(lpsId, lpsKey)
+    transactionRequestId =  transactionRequestID
+    await request.server.app.isoMessagesService.create(transactionRequestID, lpsKey, lpsId, isoMessage)
 
     const payer: Party = {
       partyIdInfo: {
@@ -39,9 +41,9 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       amount: '1',
       currency: 'USD'
     }
-
+  
+   
     const transaction = await request.server.app.transactionsService.create({ transactionRequestId, lpsId, lpsKey, payer: payer.partyIdInfo, payee, amount, lpsFee, transactionType, expiration, authenticationType: 'OTP' })
-
     await request.server.app.accountLookupService.requestFspIdFromMsisdn(transaction.transactionRequestId, isoMessage[102])
     return h.response().code(200)
   } catch (error) {
