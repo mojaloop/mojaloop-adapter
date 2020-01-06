@@ -35,7 +35,7 @@ describe('Transfers Service', function () {
   })
 
   test('can create a transfer request', async () => {
-    const data: Transfer = TransferFactory.build();
+    const data: Transfer = TransferFactory.build()
     const transfer = await transfersService.create(data)
     const dbTransfer = await knex('transfers').where('id', data.id).first()
     expect(dbTransfer).toBeDefined()
@@ -45,19 +45,18 @@ describe('Transfers Service', function () {
       currency: data.amount.currency,
       id: data.id,
       quoteId: data.quoteId,
-      fulfilment: data.fulfilment,
+      fulfilment: data.fulfilment
       // transferState: data.transferState, // field suspended, remove if depricated
     })
     expect(transfer).toMatchObject(data)
   })
 
   test('can fetch transfer by id', async () => {
-    const data: Transfer = TransferFactory.build();
+    const data: Transfer = TransferFactory.build()
     await transfersService.create(data)
     const transfer = await transfersService.get(data.id)
     expect(transfer).toMatchObject(data)
   })
-
 
   // test('can update the transfer state', async () => { // field suspended, remove if depricated
   //   const data: Transfer = TransferFactory.build()
