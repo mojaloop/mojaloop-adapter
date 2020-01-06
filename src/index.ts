@@ -8,8 +8,10 @@ import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
+const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
 const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://ml-api-adaptor.local'
 const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
+const ACCOUNT_LOOKUP_URL = process.env.ACCOUNT_LOOKUP_URL || 'http://account-lookup-service.local'
 const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
 const ILP_SECRET = process.env.ILP_SECRET || 'secret'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
@@ -36,7 +38,7 @@ const transcationRequestClient = axios.create({
 })
 const transactionRequestService = new KnexTransactionsService(knex, transcationRequestClient)
 const accountLookupClient: AxiosInstance = axios.create({
-  baseURL: ML_API_ADAPTOR_URL,
+  baseURL: ACCOUNT_LOOKUP_URL,
   timeout: 3000
 })
 const accountLookupService = new AccountLookupService(accountLookupClient)
