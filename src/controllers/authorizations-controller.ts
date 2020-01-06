@@ -33,10 +33,9 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
     if (!iso110db) {
       throw new Error('Error creating Authorization transaction request.')
     }
-    const client = request.server.app.isoMessagingClients.get(lpsKey)
-
-    if (!client) {
-      throw new Error('No client is set')
+    const client = request.server.app.isoMessagingClients.get(lpsKey) // use 'postillion' as lpsId to return client
+    if (!client) {                                                    // client.sendFinancialResponse
+      throw new Error('No client is set')                             // sendFinancialResponse in transfersController
     }
 
     await client.sendAuthorizationRequest(iso110db)
