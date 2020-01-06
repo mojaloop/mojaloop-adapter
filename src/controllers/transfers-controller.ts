@@ -1,11 +1,28 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi'
 import IlpPacket from 'ilp-packet'
 import { TransfersPostRequest } from 'types/mojaloop'
-import { Transfer, KnexTransfersService } from 'services/transfers-service'
-import { TransferTimedOutError } from 'ilp-packet/dist/src/errors'
+// import { Transfer, KnexTransfersService } from 'services/transfers-service'
+// import { TransferTimedOutError } from 'ilp-packet/dist/src/errors'
 import * as util from 'util'
+// import { Transfer } from 'services/transfers-service'
 
-const sdk = require('@mojaloop/sdk-standard-components')
+// const sdk = require('@mojaloop/sdk-standard-components')
+
+// export async function extractTransferFromPayload (payload: TransfersPostRequest): Promise<Transfer> {
+
+//   // unpack ilpPacket
+
+//   const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
+//   const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
+
+//   console.log(`Decoded ILP packet: ${util.inspect(jsonPacket)}`)
+
+//   const dataElement:  = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'))
+
+//   console.log('222222222222222222222222222222222')
+//   console.log(`Decoded ILP packet data element: ${util.inspect(dataElement)}`)
+//   return dataElement
+// }
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
 
@@ -25,28 +42,28 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 
   // get quoteId from ilpPacket
 
-  const quoteId = dataElement.quoteId
+  // const quoteId = dataElement.quoteId
 
   // get trxId
 
   // get transactionRequestId
 
-  const transactionRequestId = get.it.from.transaction.service
+  // const transactionRequestId = get.it.from.transaction.service
 
   // create fulfilment
 
-  const fulfilment = something.fulfilment.blahblah
+  // const fulfilment = something.fulfilment.blahblah
 
   // create transfer
 
-  const transfer: Transfer = {
-    id: payload.transferId,
-    quoteId: quoteId,
-    transactionRequestId: transactionRequestId,
-    fulfilment: fulfilment,
-    // transferState: string, // field suspended, remove if depricated
-    amount: payload.amount
-  }
+  // const transfer: Transfer = {
+  //   id: payload.transferId,
+  //   quoteId: quoteId,
+  //   transactionRequestId: transactionRequestId,
+  //   fulfilment: fulfilment,
+  //   // transferState: string, // field suspended, remove if depricated
+  //   amount: payload.amount
+  // }
 
   // persist transfer
 
