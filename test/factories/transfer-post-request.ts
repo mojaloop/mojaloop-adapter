@@ -5,6 +5,7 @@ import { TransfersPostRequest } from '../../src/types/mojaloop'
 import * as util from 'util'
 
 const sdk = require('@mojaloop/sdk-standard-components')
+const ilp = new sdk.Ilp({secret: test})
 
 const quoteRequest = {
   quoteId: '20508186-1458-4ac0-a824-d4b07e37d7b3',
@@ -72,7 +73,7 @@ const partialResponse = {
   expiration: '2017-11-15T14:17:09.663+01:00'
 }
 
-function getIlpPacketString (): string {
+function getIlpPacketString(): string {
   const transactionObject = {
     transactionId: quoteRequest.transactionId,
     quoteId: quoteRequest.quoteId,
@@ -102,7 +103,11 @@ function getIlpPacketString (): string {
   return base64encodedIlpPacket
 }
 
+const { fulfilment, ilpPacket, condition } = ilp.getQuoteResponseIlp(quoteRequest, partialResponse)
+
 export const TransferPostRequestFactory = Factory.define<TransfersPostRequest>('TransferPostRequestFactory').attrs({
+
+
   transferId: () => Faker.random.uuid(),
   payeeFsp: () => Faker.random.uuid(),
   payerFsp: () => Faker.random.uuid(),
@@ -112,7 +117,7 @@ export const TransferPostRequestFactory = Factory.define<TransfersPostRequest>('
   }),
   condition: () => Faker.random.uuid(),
   expiration: () => Faker.random.uuid(),
-  ilpPacket: () => getIlpPacketString()
+  ilpPacket: ilpPacket
 })
 
 // transferPostRequest structure

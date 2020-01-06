@@ -10,7 +10,10 @@ import { Server } from 'hapi'
 import { createApp } from '../../src/adaptor'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 
+console.log("Blanket")
+
 describe('Transfers Controller', function () {
+  console.log("starting describe")
   let knex: Knex
   // let transfersService: KnexTransfersService
   const fakeHttpClient: AxiosInstance = Axios.create()
@@ -19,6 +22,7 @@ describe('Transfers Controller', function () {
   const services = AdaptorServicesFactory.build()
 
   beforeAll(async () => {
+    console.log("starting before all")
     knex = Knex({
       client: 'sqlite3',
       connection: {
@@ -47,7 +51,11 @@ describe('Transfers Controller', function () {
 
   test('can create a new transfer from Transfer Post Request and return fulfilment', async () => {
     // create transfer post request
+    console.log(1)
     const payload: TransfersPostRequest = TransferPostRequestFactory.build()
+    console.log(payload)
+
+    /* // suspend this to test factory
     // add to request object as payload
     const response = await adaptor.inject({
       method: 'POST',
@@ -69,7 +77,7 @@ describe('Transfers Controller', function () {
       // quoteId: data.quoteId, // this is in the data element
       // fulfilment: data.fulfilment // this is calculated by
       // transferState: data.transferState, // field suspended, remove if depricated
-    })
+    }) */
   })
 
   // test('returns valid fulfilment', async () => {

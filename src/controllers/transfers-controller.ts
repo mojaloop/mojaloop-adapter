@@ -1,28 +1,28 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi'
 import IlpPacket from 'ilp-packet'
 import { TransfersPostRequest } from 'types/mojaloop'
-// import { Transfer, KnexTransfersService } from 'services/transfers-service'
+import { Transfer, KnexTransfersService } from 'services/transfers-service'
 // import { TransferTimedOutError } from 'ilp-packet/dist/src/errors'
 import * as util from 'util'
 // import { Transfer } from 'services/transfers-service'
 
 // const sdk = require('@mojaloop/sdk-standard-components')
 
-// export async function extractTransferFromPayload (payload: TransfersPostRequest): Promise<Transfer> {
+export async function extractTransferFromPayload (payload: TransfersPostRequest): Promise<Transfer> {
 
-//   // unpack ilpPacket
+  // unpack ilpPacket
 
-//   const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
-//   const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
+  const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
+  const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
 
-//   console.log(`Decoded ILP packet: ${util.inspect(jsonPacket)}`)
+  console.log(`Decoded ILP packet: ${util.inspect(jsonPacket)}`)
 
-//   const dataElement:  = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'))
+  const dataElement = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'))
 
-//   console.log('222222222222222222222222222222222')
-//   console.log(`Decoded ILP packet data element: ${util.inspect(dataElement)}`)
-//   return dataElement
-// }
+  console.log('222222222222222222222222222222222')
+  console.log(`Decoded ILP packet data element: ${util.inspect(dataElement)}`)
+  return dataElement
+}
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
 
