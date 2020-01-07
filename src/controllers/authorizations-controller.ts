@@ -2,7 +2,6 @@ import { Request, ResponseToolkit, ResponseObject } from 'hapi'
 import { ISO0200 } from 'types/iso-messages'
 import { AuthorizationsIDPutResponse } from 'types/mojaloop'
 import { TransactionState } from '../services/transactions-service'
-// const uuid = require('uuid/v4')
 
 export async function show (request: Request, h: ResponseToolkit): Promise <ResponseObject> {
   try {
@@ -36,8 +35,8 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
     const client = request.server.app.isoMessagingClients.get(transaction.lpsId)
 
     if (!client) {
-      console.log('cant get any client here !')
-      throw new Error('No client is set')
+      request.server.app.logger.info('cant get any client here !')
+      throw new Error('Client not registered')
     }
 
     await client.sendAuthorizationRequest(iso110db)
@@ -59,7 +58,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     const transactionsService = request.server.app.transactionsService
     const authorizationsService = request.server.app.authorizationsService
     const isoMessageService = request.server.app.isoMessagesService
-    const transaction = await transactionsService.getTransactiontransactionRequestId(lpsKey, lpsId)
+    const transaction = await transactionsService.getByLpsKeyAndState(lpsKey, TransactionState.transactionResponded)
     if (!transaction.transactionRequestId) {
       throw new Error('Cannot find transactionRequestId')
     }
@@ -72,21 +71,24 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
 
       throw new Error('Cannot Update  transaction state to financial request sent')
     }
+
     const headers = {
       'fspiop-destination': request.headers[`${authorizationTransaction.payer.fspId}`],
       'fspiop-source': request.headers[`${transaction.payer.fspId}`]
     }
 
     const authorizationsResponse: AuthorizationsIDPutResponse = {
-      authenticationInfo: authorizationTransaction.authenticationType,
-      responseType: db200[103]
+      authenticationInfo: {
+        authentication: 'OTP',
+        authenticationValue: db200[103]
+      },
+      responseType: 'ENTERED'
     }
     await authorizationsService.sendAuthorizationsResponse(transaction.transactionRequestId, authorizationsResponse, headers)
 
     return h.response().code(200)
   } catch (error) {
     request.server.app.logger.error(`iso8583 Authorizations Requests Controller: Error creating transaction request. ${error.message}`)
-
     return h.response().code(500)
   }
 }
