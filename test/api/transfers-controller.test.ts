@@ -50,13 +50,12 @@ describe('Transfers Controller', function () {
     await knex.destroy()
   })
 
-  test('can create a new transfer from Transfer Post Request and return fulfilment', async () => {
+  test('can create a new transfer from Transfer Post Request', async () => {
     // create transfer post request
     const payload: TransfersPostRequest = TransferPostRequestFactory.build()
     // console.log(payload)
 
-    // add to request object as payload &&
-    // send to create function
+    // add to request object as payload && send to create function
     const response = await adaptor.inject({
       method: 'POST',
       url: '/transfers',
@@ -69,7 +68,6 @@ describe('Transfers Controller', function () {
     // verify newly created transfer matches what was expected
     const dbTransfer = await knex<DBTransfer>('transfers').where('transferId', payload.transferId).first()
     console.log(dbTransfer)
-    // const transactionRequestId =
     const sdk = require('@mojaloop/sdk-standard-components')
     const ilp = new sdk.Ilp({ secret: test })
     const data: DBTransfer = {
@@ -85,6 +83,10 @@ describe('Transfers Controller', function () {
   })
 
   // test('returns valid fulfilment', async () => {
+
+  // })
+
+  // test('updates transactionState by transactionId', async () => {
 
   // })
 
