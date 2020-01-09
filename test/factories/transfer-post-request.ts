@@ -1,8 +1,6 @@
 import { Factory } from 'rosie'
 import Faker from 'faker'
-// import { Transfer } from '../../src/services/transfers-service'
 import { TransfersPostRequest } from '../../src/types/mojaloop'
-// import * as util from 'util'
 
 const sdk = require('@mojaloop/sdk-standard-components')
 const ilp = new sdk.Ilp({ secret: test })
@@ -90,13 +88,3 @@ export const TransferPostRequestFactory = Factory.define<TransfersPostRequest>('
   expiration: () => Faker.random.uuid(),
   ilpPacket: getIlpPacketString()
 })
-
-// transferPostRequest structure
-//  transferId: string;
-//  payeeFsp: string;
-//  payerFsp: string;
-//  amount: Money;
-//  ilpPacket: string;
-//  condition: string;
-//  expiration: string;
-//  extensionList?: ExtensionList;

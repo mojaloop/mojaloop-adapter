@@ -54,7 +54,6 @@ describe('Transfers Controller', function () {
   test('can create a new transfer from Transfer Post Request', async () => {
     // create transfer post request
     const payload: TransfersPostRequest = TransferPostRequestFactory.build()
-    // console.log(payload)
 
     // add to request object as payload && send to create function
     const response = await adaptor.inject({
@@ -68,7 +67,6 @@ describe('Transfers Controller', function () {
 
     // verify newly created transfer matches what was expected
     const dbTransfer = await knex<DBTransfer>('transfers').where('transferId', payload.transferId).first()
-    // console.log(dbTransfer)
     const sdk = require('@mojaloop/sdk-standard-components')
     const ilp = new sdk.Ilp({ secret: test })
     const data: DBTransfer = {
@@ -86,7 +84,6 @@ describe('Transfers Controller', function () {
   test('returns valid fulfilment', async () => {
     // create transfer post request
     const payload: TransfersPostRequest = TransferPostRequestFactory.build()
-    // console.log(payload)
 
     // add to request object as payload && send to create function
     const response = await adaptor.inject({
@@ -106,7 +103,6 @@ describe('Transfers Controller', function () {
   test('updates transactionState by transactionId', async () => {
     // create transfer post request
     const payload: TransfersPostRequest = TransferPostRequestFactory.build()
-    // console.log(payload)
 
     // add to request object as payload && send to create function
     const response = await adaptor.inject({
@@ -125,14 +121,3 @@ describe('Transfers Controller', function () {
   })
 
 })
-
-// export interface TransfersPostRequest {
-//   transferId: string;
-//   payeeFsp: string;
-//   payerFsp: string;
-//   amount: Money;
-//   ilpPacket: string;
-//   condition: string;
-//   expiration: string;
-//   extensionList?: ExtensionList;
-// }

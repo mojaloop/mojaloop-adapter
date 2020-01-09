@@ -1,5 +1,4 @@
 import Knex from 'knex'
-// import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'
 import { Money } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
 const logger = require('@mojaloop/central-services-logger')
@@ -43,7 +42,6 @@ export class KnexTransfersService implements TransfersService {
 
   async get (id: string): Promise<Transfer> {
     const dbTransfer: DBTransfer | undefined = await this._knex<DBTransfer>('transfers').where('transferId', id).first()
-    // console.log(dbTransfer)
     if (!dbTransfer) {
       throw new Error('Error fetching transfer from database')
     }

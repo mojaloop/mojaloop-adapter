@@ -45,8 +45,8 @@ describe('Transfers Service', function () {
       currency: data.amount.currency,
       transferId: data.transferId,
       quoteId: data.quoteId,
-      fulfilment: data.fulfilment
-      // transferState: data.transferState, // field suspended, remove if depricated
+      fulfilment: data.fulfilment,
+      transferState: data.transferState
     })
     expect(transfer).toMatchObject(data)
   })
@@ -58,7 +58,7 @@ describe('Transfers Service', function () {
     expect(transfer).toMatchObject(data)
   })
 
-  test('can update the transfer state', async () => { // field suspended, remove if depricated
+  test('can update the transfer state', async () => {
     const data: Transfer = TransferFactory.build()
     await transfersService.create(data)
     const transfer = await transfersService.get(data.transferId)
