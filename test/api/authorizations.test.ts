@@ -9,6 +9,10 @@ import { Socket } from 'net'
 import { TcpIsoMessagingClient } from '../../src/services/iso-messaging-client'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { KnexAuthorizationsService } from '../../src/services/authorizations-service'
+import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
+import { AuthorizationsIDPutResponse } from 'types/mojaloop'
+import { KnexQuotesService } from '../../src/services/quotes-service'
+import { Money } from '../../src/types/mojaloop'
 const IsoParser = require('iso_8583')
 jest.mock('uuid/v4', () => () => '123')
 const lpsKey = 'postillion:0100'
@@ -22,7 +26,7 @@ describe('Authorizations api', function () {
   const services = AdaptorServicesFactory.build()
   let tcpIsoMessagingClient: TcpIsoMessagingClient
   let sock: Socket
-
+  const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
   beforeAll(async () => {
     knex = Knex({
       client: 'sqlite3',
@@ -33,10 +37,12 @@ describe('Authorizations api', function () {
       useNullAsDefault: true
     })
     const httpClient = Axios.create()
-
+    const fakeLogger = { log: jest.fn() }
     services.transactionsService = new KnexTransactionsService(knex, httpClient)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
+    services.quotesService = new KnexQuotesService(knex, httpClient, 'secret', fakeLogger, 10000, calculateAdaptorFees)
+    services.quotesService.sendQuoteResponse = jest.fn()
     services.authorizationsService = new KnexAuthorizationsService(knex, httpClient)
     adaptor = await createApp(services)
 
@@ -58,6 +64,15 @@ describe('Authorizations api', function () {
         payload: { lpsKey: lpsKey, lpsId: lpsId, ...iso0100 }
       })
       expect(response.statusCode).toBe(200)
+      const putTransactionRequestResponse = await adaptor.inject({
+        method: 'PUT',
+        url: '/transactionRequests/123',
+        payload: {
+          transactionId: '456',
+          transactionRequestState: 'RECEIVED'
+        }
+      })
+      expect(putTransactionRequestResponse.statusCode).toBe(200)
     })
   })
 
@@ -111,15 +126,24 @@ describe('Authorizations api', function () {
 
   })
   test('put transaction request with state as  quoteResponded', async () => {
-    const putTransactionRequestResponse = await adaptor.inject({
-      method: 'PUT',
-      url: '/transactionRequests/123',
-      payload: {
-        transactionId: '456',
-        transactionRequestState: '05'
+
+    const quoteRequest = QuotesPostRequestFactory.build({
+      transactionId: '456'
+    })
+
+
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/quotes',
+      payload: quoteRequest,
+      headers: {
+        'fspiop-source': 'payer',
+        'fspiop-destination': 'payee'
       }
     })
-    expect(putTransactionRequestResponse.statusCode).toBe(200)
+
+    expect(response.statusCode).toBe(200)
+
     const transaction = await services.transactionsService.updatePayerFspId('123', 'transactionRequestId', '1234')
     const iso0200 = ISO0200Factory.build()
     const response1 = await adaptor.inject({
@@ -129,9 +153,12 @@ describe('Authorizations api', function () {
     })
     expect(response1.statusCode).toEqual(200)
 
-    const authorizationsResponse = {
-      authenticationInfo: 'OTP',
-      responseType: '1234'
+    const authorizationsResponse: AuthorizationsIDPutResponse = {
+      authenticationInfo: {
+        authentication: 'OTP',
+        authenticationValue: 'null'
+      },
+      responseType: 'ENTERED'
     }
     const headers = {
       'fspiop-destination': 'fspiop-source',

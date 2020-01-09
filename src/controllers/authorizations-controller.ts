@@ -35,7 +35,7 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
     const client = request.server.app.isoMessagingClients.get(transaction.lpsId)
 
     if (!client) {
-      request.server.app.logger.info('cant get any client here !')
+      request.server.app.logger.error('cant get any client here !')
       throw new Error('Client not registered')
     }
 
@@ -48,7 +48,6 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
   }
 
 }
-
 export async function update (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
 
@@ -58,7 +57,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     const transactionsService = request.server.app.transactionsService
     const authorizationsService = request.server.app.authorizationsService
     const isoMessageService = request.server.app.isoMessagesService
-    const transaction = await transactionsService.getByLpsKeyAndState(lpsKey, TransactionState.transactionResponded)
+    const transaction = await transactionsService.getByLpsKeyAndState(lpsKey, TransactionState.quoteResponded) 
     if (!transaction.transactionRequestId) {
       throw new Error('Cannot find transactionRequestId')
     }
@@ -66,14 +65,9 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     if (!db200) {
       throw new Error('Cannot Insert 0200 message')
     }
-    const authorizationTransaction = await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.financialRequestSent)
-    if (!authorizationTransaction) {
-
-      throw new Error('Cannot Update  transaction state to financial request sent')
-    }
-
+    
     const headers = {
-      'fspiop-destination': request.headers[`${authorizationTransaction.payer.fspId}`],
+      'fspiop-destination': request.headers[`${transaction.payer.fspId}`],
       'fspiop-source': request.headers[`${transaction.payer.fspId}`]
     }
 
@@ -85,6 +79,12 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
       responseType: 'ENTERED'
     }
     await authorizationsService.sendAuthorizationsResponse(transaction.transactionRequestId, authorizationsResponse, headers)
+    const authorizationTransaction = await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.financialRequestSent)
+    if (!authorizationTransaction) {
+
+      throw new Error('Cannot Update  transaction state to financial request sent')
+    }
+
 
     return h.response().code(200)
   } catch (error) {
