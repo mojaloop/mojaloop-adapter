@@ -4,22 +4,29 @@ import { Money } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
 const logger = require('@mojaloop/central-services-logger')
 
+export enum TransferState {
+  'RECEIVED',
+  'RESERVED',
+  'COMMITTED',
+  'ABORTED'
+}
+
 export type DBTransfer = {
-  id: string;
+  transferId: string;
   quoteId: string;
   transactionRequestId: string;
   fulfilment: string;
-  // transferState: string; // field suspended, remove if depricated
+  transferState: TransferState;
   amount: string;
   currency: string;
 }
 
 export type Transfer = {
-  id: string;
+  transferId: string;
   quoteId: string;
   transactionRequestId: string;
   fulfilment: string;
-  // transferState: string; // field suspended, remove if depricated
+  transferState: TransferState;
   amount: Money;
 }
 
@@ -34,30 +41,31 @@ export class KnexTransfersService implements TransfersService {
   }
 
   async get (id: string): Promise<Transfer> {
-    const dbTransfer: DBTransfer | undefined = await this._knex<DBTransfer>('transfers').where('id', id).first()
+    const dbTransfer: DBTransfer | undefined = await this._knex<DBTransfer>('transfers').where('transferId', id).first()
+    // console.log(dbTransfer)
     if (!dbTransfer) {
       throw new Error('Error fetching transfer from database')
     }
 
     const transfer: Transfer = {
-      id: dbTransfer.id,
+      transferId: dbTransfer.transferId,
       transactionRequestId: dbTransfer.transactionRequestId,
       amount: {
         amount: dbTransfer.amount,
         currency: dbTransfer.currency
       },
       quoteId: dbTransfer.quoteId,
-      fulfilment: dbTransfer.fulfilment
-      // transferState: dbTransfer.transferState, // field suspended, remove if depricated
+      fulfilment: dbTransfer.fulfilment,
+      transferState: dbTransfer.transferState
     }
 
     return transfer
   }
 
   async create (request: Transfer): Promise<Transfer> {
-    logger.debug('Transfers Service: Creating transfer ' + request.id)
+    logger.debug('Transfers Service: Creating transfer ' + request.transferId)
     await this._knex<DBTransfer>('transfers').insert({
-      id: request.id,
+      transferId: request.transferId,
       quoteId: request.quoteId,
       transactionRequestId: request.transactionRequestId,
       fulfilment: request.fulfilment,
@@ -66,7 +74,7 @@ export class KnexTransfersService implements TransfersService {
       currency: request.amount.currency
     }).then(result => result[0])
 
-    return this.get(request.id)
+    return this.get(request.transferId)
   }
 
   // async updateTransferState(data: Transfer) { // field suspended, remove if depricated

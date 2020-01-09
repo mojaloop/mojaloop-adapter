@@ -1,77 +1,60 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi'
-import IlpPacket from 'ilp-packet'
 import { TransfersPostRequest } from 'types/mojaloop'
-import { Transfer, KnexTransfersService } from 'services/transfers-service'
-// import { TransferTimedOutError } from 'ilp-packet/dist/src/errors'
-import * as util from 'util'
-// import { Transfer } from 'services/transfers-service'
+import { Transfer, TransferState } from '../services/transfers-service'
 
-// const sdk = require('@mojaloop/sdk-standard-components')
-
-export async function extractTransferFromPayload (payload: TransfersPostRequest): Promise<Transfer> {
-
-  // unpack ilpPacket
-
-  const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
-  const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
-
-  console.log(`Decoded ILP packet: ${util.inspect(jsonPacket)}`)
-
-  const dataElement = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'))
-
-  console.log('222222222222222222222222222222222')
-  console.log(`Decoded ILP packet data element: ${util.inspect(dataElement)}`)
-  return dataElement
-}
+const IlpPacket = require('ilp-packet')
+const sdk = require('@mojaloop/sdk-standard-components')
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
+  try {
+    let transactionRequestId = ''
+    const payload: TransfersPostRequest = request.payload as TransfersPostRequest
 
-  const payload: TransfersPostRequest = request.payload as TransfersPostRequest
+    // unpack ilpPacket
+    const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
+    const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
+    const dataElement = JSON.parse(Buffer.from(jsonPacket.data.data.toString(), 'base64').toString('utf8'))
+    // console.log(`Decoded ILP packet data element: ${util.inspect(dataElement)}`)
 
-  // unpack ilpPacket
+    // get transactionRequestId
+    // console.log('a1')
+    // console.log(dataElement)
+    const transaction = await request.server.app.transactionsService.get(dataElement.transactionId, 'transactionId')
+    // console.log('a2')
+    transactionRequestId = transaction.transactionRequestId
+    // console.log('a3')
 
-  const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
-  const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
+    // create fulfilment
+    // console.log('b')
+    const ilp = new sdk.Ilp({ secret: test })
+    const fulfilment = ilp.caluclateFulfil(payload.ilpPacket).replace('"', '')
 
-  console.log(`Decoded ILP packet: ${util.inspect(jsonPacket)}`)
+    // create transfer
+    // console.log('c')
+    const transfer: Transfer = {
+      transferId: payload.transferId,
+      quoteId: dataElement.quoteId,
+      transactionRequestId: transactionRequestId,
+      fulfilment: fulfilment,
+      transferState: TransferState.RECEIVED,
+      amount: payload.amount
+    }
 
-  const dataElement = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'))
+    // persist transfer
+    // console.log(transfer)
+    const transfersService = request.server.app.transfersService
+    await transfersService.create(transfer)
 
-  console.log('222222222222222222222222222222222')
-  console.log(`Decoded ILP packet data element: ${util.inspect(dataElement)}`)
+    // return fulfilment
 
-  // get quoteId from ilpPacket
+    // update trxState -> enum.fulfilmentSent
 
-  // const quoteId = dataElement.quoteId
+    return h.response().code(200)
 
-  // get trxId
-
-  // get transactionRequestId
-
-  // const transactionRequestId = get.it.from.transaction.service
-
-  // create fulfilment
-
-  // const fulfilment = something.fulfilment.blahblah
-
-  // create transfer
-
-  // const transfer: Transfer = {
-  //   id: payload.transferId,
-  //   quoteId: quoteId,
-  //   transactionRequestId: transactionRequestId,
-  //   fulfilment: fulfilment,
-  //   // transferState: string, // field suspended, remove if depricated
-  //   amount: payload.amount
-  // }
-
-  // persist transfer
-
-  // return fulfilment
-
-  // update trxState -> enum.fulfilmentSent
-
-  return h.response().code(200)
+  } catch (e) {
+    console.log(e)
+    return h.response().code(500)
+  }
 
 }
 
@@ -96,7 +79,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 //       note: quoteRequest.note,
 
 // export type Transfer = {
-//   id: string;
+//   transferId: string;
 //   quoteId: string;
 //   transactionRequestId: string;
 //   fulfilment: string;

@@ -57,6 +57,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.isoMessagesService = services.isoMessagesService
   adaptor.app.quotesService = services.quotesService
   adaptor.app.isoMessagingClients = new Map()
+  adaptor.app.transfersService = services.transfersService
   if (!services.logger) {
     adaptor.app.logger = CentralLogger
   }
