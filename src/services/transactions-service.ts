@@ -1,6 +1,7 @@
 import Knex from 'knex'
 import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
+import {TransactionRequestsPostRequest} from '../types/mojaloop'
 const logger = require('@mojaloop/central-services-logger')
 
 export enum TransactionState {
@@ -150,51 +151,16 @@ export class KnexTransactionsService implements TransactionsService {
       throw new Error('Error fetching transaction from database')
     }
 
-    const dbPayee: DBTransactionParty | undefined = await this._knex<DBTransactionParty>('transactionParties').where('transactionRequestId', dbTransaction.transactionRequestId).where('type', 'payee').first()
-    const dbPayer: DBTransactionParty | undefined = await this._knex<DBTransactionParty>('transactionParties').where('transactionRequestId', dbTransaction.transactionRequestId).where('type', 'payer').first()
-
-    if (!dbPayee) {
-      throw new Error('Error fetching transaction payee database')
-    }
-    if (!dbPayer) {
-      throw new Error('Error fetching transaction party from database')
+    if (!dbTransaction.transactionRequestId) {
+      throw new Error('Error fetching transactionRequestId')
     }
 
-    const transaction: Transaction = {
-      transactionRequestId: dbTransaction.transactionRequestId,
-      payer: {
-        partyIdType: dbPayer.identifierType,
-        partyIdentifier: dbPayer.identifierValue,
-        fspId: dbPayer.fspId
-      },
-      payee: {
-        partyIdInfo: {
-          partyIdType: dbPayee.identifierType,
-          partyIdentifier: dbPayee.identifierValue,
-          partySubIdOrType: dbPayee.subIdorType,
-          fspId: dbPayee.fspId
-        }
-      },
-      transactionId: dbTransaction.transactionId,
-      lpsId: dbTransaction.lpsId,
-      lpsKey: dbTransaction.lpsKey,
-      lpsFee: {
-        amount: dbTransaction.lpsFeeAmount,
-        currency: dbTransaction.lpsFeeCurrency
-      },
-      state: dbTransaction.state,
-      amount: {
-        amount: dbTransaction.amount,
-        currency: dbTransaction.currency
-      },
-      transactionType: {
-        initiator: 'PAYEE', // TODO: check that these can be hard coded.
-        initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
-      },
-      authenticationType: 'OTP',
-      expiration: dbTransaction.expiration.toString()
+    const transaction = this.get(dbTransaction.transactionRequestId, 'transactionRequestId')
+
+    if (!transaction) {
+      throw new Error('Error fetching transaction from database')
     }
+
     return transaction
   }
 
@@ -254,7 +220,22 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async sendToMojaHub (request: TransactionRequest): Promise<void> {
-    await this._client.post('/transactionRequests', request)
+    // TODO: use mojaSDK
+    const headers = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      date: new Date().toUTCString(),
+      'fspiop-source': 'adaptor',
+      'fspiop-destination': request.payer.fspId
+    }
+    const transactionRequest: TransactionRequestsPostRequest = {
+      amount: request.amount,
+      payee: request.payee,
+      payer: request.payer,
+      transactionRequestId: request.transactionRequestId,
+      transactionType: request.transactionType
+    }
+    await this._client.post('/transactionRequests', transactionRequest, { headers })
   }
 
 }

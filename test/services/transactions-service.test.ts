@@ -164,4 +164,12 @@ describe('Transactions Service', function () {
     const freshTransaction = await transactionsService.get(transactionRequest.transactionRequestId, 'transactionRequestId')
     expect(freshTransaction.payer.fspId).toBe('New_bank')
   })
+
+  test('to check getByLpsKeyAndState', async () => {
+    const transactionRequest = TransactionRequestFactory.build()
+    const transaction = await transactionsService.create(transactionRequest)
+    const transactiondb = await transactionsService.getByLpsKeyAndState(transaction.lpsKey, transaction.state)
+
+    expect(transaction).toStrictEqual(transactiondb)
+  })
 })

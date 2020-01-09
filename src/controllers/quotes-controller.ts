@@ -19,10 +19,14 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       expiration: quote.expiration,
       transferAmount: quote.transferAmount
     }
+
     const headers = {
-      'fspiop-destination': request.headers['fspiop-source'],
-      'fspiop-source': request.headers['fspiop-destination']
+      'fspiop-destination': request.headers[`${transaction.payer.fspId}`],
+      'fspiop-source': request.headers[`${transaction.payer.fspId}`],
+      date: new Date().toUTCString(),
+      'content-type': 'application/vnd.interoperability.quotes+json;version=1.0'
     }
+
     await request.server.app.quotesService.sendQuoteResponse(quoteRequest.quoteId, quoteResponse, headers)
     await request.server.app.transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.quoteResponded)
 

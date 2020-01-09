@@ -65,7 +65,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     if (!db200) {
       throw new Error('Cannot Insert 0200 message')
     }
-    
+
     const headers = {
       'fspiop-destination': request.headers[`${transaction.payer.fspId}`],
       'fspiop-source': request.headers[`${transaction.payer.fspId}`]

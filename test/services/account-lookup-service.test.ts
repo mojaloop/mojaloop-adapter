@@ -10,6 +10,6 @@ describe('Account Lookup Service', function () {
     await accountLookupService.requestFspIdFromMsisdn('test-id', '1234')
 
     expect(fakeHttpClient.get).toHaveBeenCalledTimes(1)
-    expect((fakeHttpClient.get as jest.Mock).mock.calls[0][0]).toEqual('/parties/msisdn/1234')
+    expect((fakeHttpClient.get as jest.Mock).mock.calls[0][0]).toEqual('/parties/MSISDN/1234')
   })
 })

@@ -31,7 +31,7 @@ function generateField7 (): string {
 export const ISO0100Factory = Factory.define <Partial<ISO0100>>('Iso0100Factory').attrs({
   0: '0100',
   3: '012000',
-  4: '000000010000',
+  4: '10000',
   49: '820',
   7: generateField7(),
   37: Faker.internet.password(12, false, /[0-9a-z]/),
@@ -47,7 +47,7 @@ export const ISO0100Factory = Factory.define <Partial<ISO0100>>('Iso0100Factory'
 export const ISO0110Factory = Factory.define<Partial<ISO0110>>('Iso0110Factory').attrs({
   0: '0110',
   3: '012000',
-  4: '000000010000',
+  4: '10000',
   7: generateField7(),
   11: Faker.internet.password(6, false, /[0-9]/),
   12: '151932',
