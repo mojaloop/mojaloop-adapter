@@ -1,6 +1,7 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi'
 import { TransfersPostRequest } from 'types/mojaloop'
 import { Transfer, TransferState } from '../services/transfers-service'
+import { TransactionState } from '../services/transactions-service'
 
 const IlpPacket = require('ilp-packet')
 const sdk = require('@mojaloop/sdk-standard-components')
@@ -49,6 +50,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     await transfersService.sendFulfilment(transfer, payload.payerFsp)
 
     // update trxState -> enum.fulfilmentSent
+    await request.server.app.transactionsService.updateState(dataElement.transactionId, 'transactionId', TransactionState.fulfillmentSent.toString())
 
     return h.response().code(200)
 

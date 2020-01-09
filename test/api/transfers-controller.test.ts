@@ -2,8 +2,8 @@ import Axios from 'axios'
 import { Server } from 'hapi'
 import Knex from 'knex'
 import { createApp } from '../../src/adaptor'
-import { KnexTransactionsService, TransactionRequest, TransactionState } from '../../src/services/transactions-service'
-import { DBTransfer, KnexTransfersService, TransferState } from '../../src/services/transfers-service'
+import { KnexTransactionsService, TransactionRequest, TransactionState, Transaction } from '../../src/services/transactions-service'
+import { DBTransfer, KnexTransfersService, TransferState, Transfer } from '../../src/services/transfers-service'
 import { TransfersPostRequest } from '../../src/types/mojaloop'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
@@ -103,9 +103,26 @@ describe('Transfers Controller', function () {
     expect(services.transfersService.sendFulfilment).toHaveBeenCalledWith(transfer, payload.payerFsp)
   })
 
-  // test('updates transactionState by transactionId', async () => {
+  test('updates transactionState by transactionId', async () => {
+    // create transfer post request
+    const payload: TransfersPostRequest = TransferPostRequestFactory.build()
+    // console.log(payload)
 
-  // })
+    // add to request object as payload && send to create function
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/transfers',
+      payload: payload
+    })
+
+    // verify the response code is 200
+    expect(response.statusCode).toEqual(200)
+
+    // transactionState must be 'fulfilment sent'
+    const transfer: Transfer = await services.transfersService.get(payload.transferId)
+    const transaction: Transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
+    expect(transaction.state).toEqual(TransactionState.fulfillmentSent.toString())
+  })
 
 })
 
