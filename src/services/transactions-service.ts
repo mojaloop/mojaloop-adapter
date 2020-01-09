@@ -39,6 +39,11 @@ export type DBTransaction = {
   amount: string;
   currency: string;
   expiration: string;
+  initiator: string;
+  initiatorType: string;
+  scenario: string;
+  originalTransactionId?: string;
+  refundReason?: string;
 }
 
 export type TransactionRequest = {
@@ -132,12 +137,19 @@ export class KnexTransactionsService implements TransactionsService {
         currency: dbTransaction.currency
       },
       transactionType: {
-        initiator: 'PAYEE', // TODO: check that these can be hard coded.
-        initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
+        initiator: dbTransaction.initiator,
+        initiatorType: dbTransaction.initiatorType,
+        scenario: dbTransaction.scenario
       },
       authenticationType: 'OTP',
       expiration: dbTransaction.expiration.toString()
+    }
+
+    if (dbTransaction.originalTransactionId) {
+      transaction.transactionType.refundInfo = {
+        originalTransactionId: dbTransaction.originalTransactionId,
+        refundReason: dbTransaction.refundReason
+      }
     }
 
     return transaction
@@ -173,7 +185,12 @@ export class KnexTransactionsService implements TransactionsService {
       state: TransactionState.transactionReceived,
       amount: request.amount.amount,
       currency: request.amount.currency,
-      expiration: request.expiration
+      expiration: request.expiration,
+      initiator: request.transactionType.initiator,
+      initiatorType: request.transactionType.initiatorType,
+      scenario: request.transactionType.scenario,
+      originalTransactionId: request.transactionType.refundInfo?.originalTransactionId,
+      refundReason: request.transactionType.refundInfo?.refundReason
     }).then(result => result[0])
 
     return this.get(request.transactionRequestId, 'transactionRequestId')
@@ -181,7 +198,6 @@ export class KnexTransactionsService implements TransactionsService {
 
   async updatePayerFspId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction> {
     const dbTransaction = await this.get(id, idType)
-    console.log('transaction', dbTransaction)
     await this._knex('transactionParties').where('transactionRequestId', dbTransaction.transactionRequestId).where('type', 'payer').first().update('fspId', fspId)
 
     return this.get(id, idType)

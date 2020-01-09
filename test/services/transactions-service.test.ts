@@ -84,7 +84,12 @@ describe('Transactions Service', function () {
       state: TransactionState.transactionReceived,
       amount: '10000',
       currency: 'USD',
-      expiration: '1118045717'
+      expiration: '1118045717',
+      initiator: 'PAYEE',
+      initiatorType: 'DEVICE',
+      scenario: 'WITHDRAWAL',
+      originalTransactionId: null,
+      refundReason: null
     })
     expect(dbPayer).toMatchObject({
       transactionRequestId: 'abs-321',
@@ -122,9 +127,12 @@ describe('Transactions Service', function () {
         currency: '840'
       },
       transactionType: {
-        initiator: 'PAYEE',
+        initiator: 'PAYER',
         initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
+        scenario: 'REFUND',
+        refundInfo: {
+          originalTransactionId: '123'
+        }
       },
       lpsId: 'postillion',
       lpsKey: 'postillion:aef-123',
