@@ -36,7 +36,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       quoteId: dataElement.quoteId,
       transactionRequestId: transactionRequestId,
       fulfilment: fulfilment,
-      transferState: TransferState.RECEIVED,
+      transferState: TransferState.RECEIVED.toString(),
       amount: payload.amount
     }
 

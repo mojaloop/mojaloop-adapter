@@ -16,7 +16,7 @@ export type DBTransfer = {
   quoteId: string;
   transactionRequestId: string;
   fulfilment: string;
-  transferState: TransferState;
+  transferState: string;
   amount: string;
   currency: string;
 }
@@ -26,7 +26,7 @@ export type Transfer = {
   quoteId: string;
   transactionRequestId: string;
   fulfilment: string;
-  transferState: TransferState;
+  transferState: string;
   amount: Money;
 }
 
@@ -69,7 +69,7 @@ export class KnexTransfersService implements TransfersService {
       quoteId: request.quoteId,
       transactionRequestId: request.transactionRequestId,
       fulfilment: request.fulfilment,
-      // transferState: request.transferState, // field suspended, remove if depricated
+      transferState: request.transferState,
       amount: request.amount.amount,
       currency: request.amount.currency
     }).then(result => result[0])

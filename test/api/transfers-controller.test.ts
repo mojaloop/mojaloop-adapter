@@ -1,21 +1,19 @@
-// import { KnexTransfersService, Transfer } from '../../src/services/transfers-service'
-import { KnexTransfersService, DBTransfer } from '../../src/services/transfers-service'
-// import { create } from '../../src/controllers/transfers-controller'
 import Axios from 'axios'
-import Knex from 'knex'
-// import { TransferFactory } from '../factories/transfer'
-import { TransfersPostRequest } from '../../src/types/mojaloop'
-import { TransferPostRequestFactory } from '../factories/transfer-post-request'
 import { Server } from 'hapi'
+import Knex from 'knex'
 import { createApp } from '../../src/adaptor'
+import { KnexTransactionsService, TransactionRequest, TransactionState } from '../../src/services/transactions-service'
+import { DBTransfer, KnexTransfersService, TransferState } from '../../src/services/transfers-service'
+import { TransfersPostRequest } from '../../src/types/mojaloop'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { TransactionRequest, KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
+import { TransferPostRequestFactory } from '../factories/transfer-post-request'
 
 describe('Transfers Controller', function () {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
   let adaptor: Server
+  let transactionRequestId: string
 
   beforeAll(async () => {
     knex = Knex({
@@ -41,6 +39,7 @@ describe('Transfers Controller', function () {
     await services.transactionsService.create(request)
     await services.transactionsService.updateTransactionId(request.transactionRequestId, 'transactionRequestId', '20508186-1458-4ac0-a824-d4b07e37d7b3')
     await services.transactionsService.updateState(request.transactionRequestId, 'transactionRequestId', TransactionState.financialRequestSent)
+    transactionRequestId = request.transactionRequestId
   })
 
   afterEach(async () => {
@@ -71,15 +70,18 @@ describe('Transfers Controller', function () {
     const dbTransfer = await knex<DBTransfer>('transfers').where('transferId', payload.transferId).first()
     console.log(dbTransfer)
     // const transactionRequestId =
-    // expect(dbTransfer).toMatchObject({
-    //   // transactionRequestId: data.transactionRequestId, // get from payload data
-    //   amount: payload.amount.amount,
-    //   currency: payload.amount.currency,
-    //   id: payload.transferId
-    //   // quoteId: data.quoteId, // this is in the data element
-    //   // fulfilment: data.fulfilment // this is calculated by
-    //   // transferState: data.transferState, // field suspended, remove if depricated
-    // })
+    const sdk = require('@mojaloop/sdk-standard-components')
+    const ilp = new sdk.Ilp({ secret: test })
+    const data: DBTransfer = {
+      transferId: payload.transferId,
+      quoteId: '20508493-1458-4ac0-a824-d4b07e37d7b3',
+      transactionRequestId: transactionRequestId,
+      fulfilment: ilp.caluclateFulfil(payload.ilpPacket).replace('"', ''),
+      transferState: TransferState.RECEIVED.toString(),
+      amount: payload.amount.amount,
+      currency: payload.amount.currency
+    }
+    expect(dbTransfer).toMatchObject(data)
   })
 
   // test('returns valid fulfilment', async () => {
