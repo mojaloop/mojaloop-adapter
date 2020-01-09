@@ -33,7 +33,8 @@ export type Transfer = {
 export interface TransfersService {
   get(id: string): Promise<Transfer>;
   create(request: Transfer): Promise<Transfer>;
-  // updateTransferState(data: Transfer): Promise<Transfer>; // field suspended, remove if depricated
+  updateTransferState(data: Transfer): Promise<Transfer>;
+  sendFulfilment(data: Transfer, payerFspId: string): Promise<void>;
 }
 
 export class KnexTransfersService implements TransfersService {
@@ -86,4 +87,22 @@ export class KnexTransfersService implements TransfersService {
 
     return this.get(data.transferId)
   }
+
+  async sendFulfilment (data: Transfer, payerFspId: string): Promise<void> {
+    await this._client.put(`/transfers/${data.transferId}`, {
+      fulfilment: data.fulfilment,
+      completedTimestamp: new Date().toUTCString(),
+      transferState: TransferState.RESERVED.toString()
+    }, {
+      headers: {
+        'fspiop-source': 'adaptor',
+        'fspiop-destination': payerFspId,
+        'content-type': 'application/vnd.interoperability.transfers+json;version=1.0',
+        accept: 'application/vnd.interoperability.transfers+json;version=1.0',
+        date: new Date().toUTCString()
+      }
+    })
+
+  }
+
 }

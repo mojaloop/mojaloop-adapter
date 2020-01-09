@@ -29,6 +29,7 @@ describe('Transfers Controller', function () {
     services.transactionsService = new KnexTransactionsService(knex, httpClient)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.transfersService = new KnexTransfersService(knex, httpClient)
+    services.transfersService.sendFulfilment = jest.fn().mockResolvedValue(undefined)
     adaptor = await createApp(services)
 
   })
@@ -67,7 +68,7 @@ describe('Transfers Controller', function () {
 
     // verify newly created transfer matches what was expected
     const dbTransfer = await knex<DBTransfer>('transfers').where('transferId', payload.transferId).first()
-    console.log(dbTransfer)
+    // console.log(dbTransfer)
     const sdk = require('@mojaloop/sdk-standard-components')
     const ilp = new sdk.Ilp({ secret: test })
     const data: DBTransfer = {
@@ -82,9 +83,25 @@ describe('Transfers Controller', function () {
     expect(dbTransfer).toMatchObject(data)
   })
 
-  // test('returns valid fulfilment', async () => {
+  test('returns valid fulfilment', async () => {
+    // create transfer post request
+    const payload: TransfersPostRequest = TransferPostRequestFactory.build()
+    // console.log(payload)
 
-  // })
+    // add to request object as payload && send to create function
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/transfers',
+      payload: payload
+    })
+    const transfer = await services.transfersService.get(payload.transferId)
+
+    // verify the response code is 200
+    expect(response.statusCode).toEqual(200)
+
+    // expect sendFulfilment to have been called once
+    expect(services.transfersService.sendFulfilment).toHaveBeenCalledWith(transfer, payload.payerFsp)
+  })
 
   // test('updates transactionState by transactionId', async () => {
 

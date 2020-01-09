@@ -46,6 +46,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     await transfersService.create(transfer)
 
     // return fulfilment
+    await transfersService.sendFulfilment(transfer, payload.payerFsp)
 
     // update trxState -> enum.fulfilmentSent
 
