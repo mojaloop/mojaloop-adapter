@@ -77,13 +77,13 @@ export class KnexTransfersService implements TransfersService {
     return this.get(request.transferId)
   }
 
-  // async updateTransferState(data: Transfer) { // field suspended, remove if depricated
-  //   logger.debug('Transfer Service: Updating state of transfer ' + data.id)
-  //   await this._knex<DBTransfer>('transfers')
-  //     .update('transferState', data.transferState)
-  //     .where('id', data.id)
-  //     .then(result => result)
+  async updateTransferState (data: Transfer): Promise<Transfer> {
+    logger.debug('Transfer Service: Updating state of transfer ' + data.transferId)
+    await this._knex<DBTransfer>('transfers')
+      .update('transferState', data.transferState)
+      .where('transferId', data.transferId)
+      .then(result => result)
 
-  //   return this.get(data.id)
-  // }
+    return this.get(data.transferId)
+  }
 }
