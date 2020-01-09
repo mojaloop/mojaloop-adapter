@@ -22,5 +22,10 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     get: jest.fn(),
     sendQuoteResponse: jest.fn().mockResolvedValue(undefined),
     calculateAdaptorFees: jest.fn()
+  },
+  transfersService: {
+    get: jest.fn(),
+    create: jest.fn()
+    // updateTransferState(data: Transfer): Promise<Transfer>; // field suspended, remove if depricated
   }
 })
