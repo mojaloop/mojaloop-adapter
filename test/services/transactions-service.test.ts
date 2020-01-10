@@ -172,4 +172,44 @@ describe('Transactions Service', function () {
     const freshTransaction = await transactionsService.get(transactionRequest.transactionRequestId, 'transactionRequestId')
     expect(freshTransaction.payer.fspId).toBe('New_bank')
   })
+
+  describe('getByPayerMsisdn', () => {
+    test('can get most recent transaction with transactionReceived state by MSISDN', async () => {
+      const transactionRequest1 = TransactionRequestFactory.build({
+        payer: {
+          partyIdType: 'MSISDN',
+          partyIdentifier: '987654321'
+        }
+      })
+      const transaction1 = await transactionsService.create(transactionRequest1)
+      await transactionsService.updateState(transaction1.transactionRequestId, 'transactionRequestId', TransactionState.transactionReceived)
+      await knex('transactions').where('transactionRequestId', transaction1.transactionRequestId).first().update('created_at', '2020-01-09 14:41:02')
+      const transactionRequest2 = TransactionRequestFactory.build({
+        payer: {
+          partyIdType: 'MSISDN',
+          partyIdentifier: '987654321'
+        }
+      })
+      const transaction2 = await transactionsService.create(transactionRequest2)
+      await transactionsService.updateState(transaction2.transactionRequestId, 'transactionRequestId', TransactionState.transactionReceived)
+      await knex('transactions').where('transactionRequestId', transaction2.transactionRequestId).first().update('created_at', '2020-01-09 14:41:10')
+
+      const transaction = await transactionsService.getByPayerMsisdn('987654321')
+
+      expect(transaction).toMatchObject(transaction2)
+    })
+
+    test('throws error if no transaction is found', async () => {
+      const transactionRequest = TransactionRequestFactory.build({
+        payer: {
+          partyIdType: 'MSISDN',
+          partyIdentifier: '987654321'
+        }
+      })
+      const transaction = await transactionsService.create(transactionRequest)
+      await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.transactionSent)
+
+      await expect(transactionsService.getByPayerMsisdn('987654321')).rejects.toThrow()
+    })
+  })
 })
