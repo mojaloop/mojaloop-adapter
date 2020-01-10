@@ -1,5 +1,5 @@
 import { Request, ResponseToolkit, ResponseObject } from 'hapi'
-import { QuotesPostRequest, QuotesIDPutResponse } from 'types/mojaloop'
+import { QuotesIDPutResponse, QuotesPostRequest } from 'types/mojaloop'
 import { TransactionState } from '../services/transactions-service'
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
@@ -19,13 +19,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       expiration: quote.expiration,
       transferAmount: quote.transferAmount
     }
-    const headers = {
-      'fspiop-destination': request.headers['fspiop-source'],
-      'fspiop-source': request.headers['fspiop-destination'],
-      date: new Date().toUTCString(),
-      'content-type': 'application/vnd.interoperability.quotes+json;version=1.0',
-    }
-    await request.server.app.quotesService.sendQuoteResponse(quoteRequest.quoteId, quoteResponse, headers)
+    await request.server.app.MojaClient.putQuotes(quote.id, quoteResponse, request.headers['fspiop-source'])
     await request.server.app.transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.quoteResponded)
 
     return h.response().code(200)

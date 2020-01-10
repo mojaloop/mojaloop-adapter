@@ -112,7 +112,7 @@ describe('Transaction Requests API', function () {
     })
 
     expect(response.statusCode).toEqual(200)
-    expect(services.accountLookupService.requestFspIdFromMsisdn).toHaveBeenCalledWith('123', iso0100[102])
+    expect(services.MojaClient.getParties).toHaveBeenCalledWith('MSISDN', iso0100[102], null)
   })
 
 })

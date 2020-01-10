@@ -24,7 +24,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
         partyIdType: 'DEVICE',
         partyIdentifier: isoMessage[41],
         partySubIdOrType: isoMessage[42],
-        fspId: 'adaptor' //TODO: pull from env variable
+        fspId: 'adaptor' // TODO: pull from env variable
       }
     }
     const amount: Money = {
@@ -42,9 +42,8 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       currency: 'USD'
     }
 
-    const transaction = await request.server.app.transactionsService.create({ transactionRequestId, lpsId, lpsKey, payer: payer.partyIdInfo, payee, amount, lpsFee, transactionType, expiration, authenticationType: 'OTP' })
-
-    await request.server.app.accountLookupService.requestFspIdFromMsisdn(transaction.transactionRequestId, isoMessage[102])
+    await request.server.app.transactionsService.create({ transactionRequestId, lpsId, lpsKey, payer: payer.partyIdInfo, payee, amount, lpsFee, transactionType, expiration, authenticationType: 'OTP' })
+    await request.server.app.MojaClient.getParties(payer.partyIdInfo.partyIdType, payer.partyIdInfo.partyIdentifier, null)
     return h.response().code(200)
   } catch (error) {
     request.server.app.logger.error(`iso8583 Transaction Requests Controller: Error creating transaction request. ${error.message}`)

@@ -2,10 +2,11 @@ import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
 import { createApp } from './adaptor'
 import { KnexTransactionsService } from './services/transactions-service'
-import { AccountLookupService } from './services/account-lookup-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
+import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
+
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
 const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
@@ -37,11 +38,6 @@ const transcationRequestClient = axios.create({
   timeout: 3000
 })
 const transactionRequestService = new KnexTransactionsService(knex, transcationRequestClient)
-const accountLookupClient: AxiosInstance = axios.create({
-  baseURL: ACCOUNT_LOOKUP_URL,
-  timeout: 3000
-})
-const accountLookupService = new AccountLookupService(accountLookupClient)
 const isoMessagesService = new KnexIsoMessageService(knex)
 
 const quotesClient: AxiosInstance = axios.create({
@@ -49,6 +45,20 @@ const quotesClient: AxiosInstance = axios.create({
   timeout: 3000
 })
 const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET)
+
+const MojaClient = new MojaloopRequests({
+  logger: console,
+  dfspId: ADAPTOR_FSP_ID,
+  quotesEndpoint: QUOTE_REQUESTS_URL,
+  alsEndpoint: ACCOUNT_LOOKUP_URL,
+  jwsSign: false,
+  tls: { outbound: { mutualTLS: { enabled: false } } },
+  wso2Auth: {
+    getToken: () => null
+  },
+  jwsSigningKey: 'string',
+  peerEndpoint: 'string'
+})
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
@@ -59,7 +69,7 @@ const start = async (): Promise<void> => {
     console.log('Migrations finished...')
   }
 
-  const adaptor = await createApp({ transactionsService: transactionRequestService, accountLookupService, isoMessagesService, quotesService }, { port: HTTP_PORT })
+  const adaptor = await createApp({ transactionsService: transactionRequestService, isoMessagesService, quotesService, MojaClient }, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)

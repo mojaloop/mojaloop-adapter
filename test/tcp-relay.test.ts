@@ -46,7 +46,7 @@ describe('TCP relay', function () {
     const iso0100 = iso0100BinaryMessage
     const isoMessage = new IsoParser().getIsoJSON(iso0100)
     const injectSpy = jest.spyOn(adaptor, 'inject')
-    const lpsKey = 'postillion' + "-" + isoMessage[41] + "-" + isoMessage[42]
+    const lpsKey = 'postillion' + '-' + isoMessage[41] + '-' + isoMessage[42]
 
     await handleIsoMessage('postillion', iso0100, adaptor)
 
