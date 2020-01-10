@@ -6,6 +6,8 @@ import { AccountLookupService } from './services/account-lookup-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
+import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
+
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
 const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
@@ -50,6 +52,22 @@ const quotesClient: AxiosInstance = axios.create({
 })
 const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET)
 
+// dummy values
+const MojaClient = new MojaloopRequests({
+  logger: console,
+  dfspId: ADAPTOR_FSP_ID,
+  tls: {
+    outbound: {
+      mutualTLS: {
+        enabled: true
+      }
+    }
+  },
+  jwsSign: true,
+  jwsSigningKey: 'string',
+  peerEndpoint: 'string'
+})
+
 const start = async (): Promise<void> => {
   let shuttingDown = false
   console.log('LOG_LEVEL: ', process.env.LOG_LEVEL)
@@ -59,7 +77,7 @@ const start = async (): Promise<void> => {
     console.log('Migrations finished...')
   }
 
-  const adaptor = await createApp({ transactionsService: transactionRequestService, accountLookupService, isoMessagesService, quotesService }, { port: HTTP_PORT })
+  const adaptor = await createApp({ transactionsService: transactionRequestService, accountLookupService, isoMessagesService, quotesService, MojaClient }, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)

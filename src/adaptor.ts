@@ -10,6 +10,7 @@ import { IsoMessagingClient } from './services/iso-messaging-client'
 import { IsoMessageService } from './services/iso-message-service'
 import { QuotesService } from './services/quotes-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
+import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {
@@ -22,6 +23,7 @@ export type AdaptorServices = {
   accountLookupService: AccountLookUpService;
   isoMessagesService: IsoMessageService;
   quotesService: QuotesService;
+  MojaClient: MojaloopRequests;
   logger?: Logger;
 }
 
@@ -38,6 +40,7 @@ declare module 'hapi' {
     accountLookupService: AccountLookUpService;
     isoMessagesService: IsoMessageService;
     quotesService: QuotesService;
+    MojaClient: MojaloopRequests;
     logger: Logger;
     isoMessagingClients: Map<string, IsoMessagingClient>;
   }
@@ -52,6 +55,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.accountLookupService = services.accountLookupService
   adaptor.app.isoMessagesService = services.isoMessagesService
   adaptor.app.quotesService = services.quotesService
+  adaptor.app.MojaClient = services.MojaClient
   adaptor.app.isoMessagingClients = new Map()
   if (!services.logger) {
     adaptor.app.logger = CentralLogger
