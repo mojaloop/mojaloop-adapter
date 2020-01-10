@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import { createApp } from '../src/adaptor'
 import { handleIsoMessage } from '../src/tcp-relay'
-import { iso0100BinaryMessage, ISO0200Json,iso0200BinaryMessage } from './factories/iso-messages'
+import { iso0100BinaryMessage, iso0200BinaryMessage } from './factories/iso-messages'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from './factories/adaptor-services'
 import Axios from 'axios'
@@ -59,7 +59,6 @@ describe('TCP relay', function () {
     })
   })
 
-   
   test('maps 0200 message to the authorizations endpoint', async () => {
     const iso0200 = iso0200BinaryMessage
     const isoMessage = new IsoParser().getIsoJSON(iso0200)
@@ -74,6 +73,5 @@ describe('TCP relay', function () {
       payload: { lpsId: 'postillion', lpsKey, ...isoMessage }
     })
 
-    
   })
 })
