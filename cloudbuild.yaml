@@ -9,7 +9,7 @@ steps:
       - image
       - deployment
       - adaptor
-      - 'adaptor-sha256=gcr.io/stellar-river-253807/adaptor:$SHORT_SHA'
+      - 'adaptor=gcr.io/stellar-river-253807/adaptor:$SHORT_SHA'
     env:
       - 'CLOUDSDK_COMPUTE_ZONE=europe-west2-a'
       - 'CLOUDSDK_CONTAINER_CLUSTER=iso-adaptor'
