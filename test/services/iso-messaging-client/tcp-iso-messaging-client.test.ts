@@ -15,7 +15,7 @@ describe('TCP Iso Messaging Client', function () {
       await tcpIsoMessagingClient.sendAuthorizationRequest(isoJsonMessage)
 
       const expectedBuffer = new IsoParser(isoJsonMessage).getBufferMessage()
-      expect(expectedBuffer).toBeInstanceOf(Object)
+      expect(expectedBuffer).toBeInstanceOf(Buffer)
       expect(sock.write).toHaveBeenCalledWith(expectedBuffer)
     })
   })
