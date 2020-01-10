@@ -8,7 +8,6 @@ const sdk = require('@mojaloop/sdk-standard-components')
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
-    let transactionRequestId = ''
     const payload: TransfersPostRequest = request.payload as TransfersPostRequest
 
     // unpack ilpPacket
@@ -18,7 +17,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 
     // get transactionRequestId
     const transaction = await request.server.app.transactionsService.get(dataElement.transactionId, 'transactionId')
-    transactionRequestId = transaction.transactionRequestId
+    const transactionRequestId = transaction.transactionRequestId
 
     // create fulfilment
     const ilp = new sdk.Ilp({ secret: test })

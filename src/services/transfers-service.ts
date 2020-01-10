@@ -93,7 +93,7 @@ export class KnexTransfersService implements TransfersService {
       transferState: TransferState.RESERVED.toString()
     }, {
       headers: {
-        'fspiop-source': 'adaptor',
+        'fspiop-source': process.env.ADAPTOR_FSP_ID || 'adaptor',
         'fspiop-destination': payerFspId,
         'content-type': 'application/vnd.interoperability.transfers+json;version=1.0',
         accept: 'application/vnd.interoperability.transfers+json;version=1.0',
