@@ -844,9 +844,6 @@
       },
       "/transfers": {
           "post": {
-              "consumes": [
-                  "application/json"
-              ],
               "parameters": [
                   {
                       "name": "body",
