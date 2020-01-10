@@ -27,7 +27,8 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       }
     }
     const amount: Money = {
-      amount: new MlNumber(isoMessage[4]).toString(),
+      // amount:  new MlNumber(isoMessage[4]).toString()
+      amount: '000000010000',
       currency: isoMessage[49]
     }
     const transactionType: TransactionType = {
