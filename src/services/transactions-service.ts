@@ -150,18 +150,10 @@ export class KnexTransactionsService implements TransactionsService {
     if (!dbTransaction) {
       throw new Error('Error fetching transaction from database')
     }
-
     if (!dbTransaction.transactionRequestId) {
       throw new Error('Error fetching transactionRequestId')
     }
-
-    const transaction = this.get(dbTransaction.transactionRequestId, 'transactionRequestId')
-
-    if (!transaction) {
-      throw new Error('Error fetching transaction from database')
-    }
-
-    return transaction
+    return this.get(dbTransaction.transactionRequestId, 'transactionRequestId')
   }
 
   async create (request: TransactionRequest): Promise<Transaction> {
