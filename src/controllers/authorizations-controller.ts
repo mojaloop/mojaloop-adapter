@@ -50,26 +50,25 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
 }
 export async function update (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
-
-    request.server.app.logger.info('iso8583 Authorization  Controller: Received request from tcp-relay request. payload:' + JSON.stringify(request.payload))
+    request.server.app.logger.info('iso8583 Authorization Controller: Received authorization response from LPS. payload:' + JSON.stringify(request.payload))
     const isoMessage = request.payload as ISO0200
     const { lpsKey, lpsId } = isoMessage
     const transactionsService = request.server.app.transactionsService
     const authorizationsService = request.server.app.authorizationsService
     const isoMessageService = request.server.app.isoMessagesService
-    const transaction = await transactionsService.getByLpsKeyAndState(lpsKey, TransactionState.quoteResponded) 
-    if (!transaction.transactionRequestId) {
-      throw new Error('Cannot find transactionRequestId')
-    }
+    const transaction = await transactionsService.getByLpsKeyAndState(lpsKey, TransactionState.quoteResponded)
     const db200 = await isoMessageService.create(transaction.transactionRequestId, lpsKey, lpsId, isoMessage)
     if (!db200) {
       throw new Error('Cannot Insert 0200 message')
     }
-    const headers = {
-      'fspiop-destination': `${transaction.payer.fspId}`,
-      'fspiop-source': `${transaction.payer.fspId}`
-    }
 
+    // TODO: add authorizations to mojaloop sdk
+    const headers = {
+      'fspiop-destination': transaction.payer.fspId!,
+      'fspiop-source': process.env.ADAPTOR_FSP_ID || 'adaptor',
+      date: new Date().toUTCString(),
+      'content-type': 'application/vnd.interoperability.authorizations+json;version=1.0'
+    }
     const authorizationsResponse: AuthorizationsIDPutResponse = {
       authenticationInfo: {
         authentication: 'OTP',
@@ -78,11 +77,8 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
       responseType: 'ENTERED'
     }
     await authorizationsService.sendAuthorizationsResponse(transaction.transactionRequestId, authorizationsResponse, headers)
-    const authorizationTransaction = await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.financialRequestSent)
-    if (!authorizationTransaction) {
+    await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.financialRequestSent)
 
-      throw new Error('Cannot Update  transaction state to financial request sent')
-    }
     return h.response().code(200)
   } catch (error) {
     request.server.app.logger.error(`iso8583 Authorizations Requests Controller: Error creating transaction request. ${error.message}`)

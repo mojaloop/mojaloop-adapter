@@ -84,7 +84,12 @@ describe('Transactions Service', function () {
       state: TransactionState.transactionReceived,
       amount: '000000010000',
       currency: 'USD',
-      expiration: '1118045717'
+      expiration: '1118045717',
+      initiator: 'PAYEE',
+      initiatorType: 'DEVICE',
+      scenario: 'WITHDRAWAL',
+      originalTransactionId: null,
+      refundReason: null
     })
     expect(dbPayer).toMatchObject({
       transactionRequestId: 'abs-321',
@@ -122,9 +127,12 @@ describe('Transactions Service', function () {
         currency: '840'
       },
       transactionType: {
-        initiator: 'PAYEE',
+        initiator: 'PAYER',
         initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
+        scenario: 'REFUND',
+        refundInfo: {
+          originalTransactionId: '123'
+        }
       },
       lpsId: 'postillion',
       lpsKey: 'postillion:aef-123',
@@ -165,14 +173,58 @@ describe('Transactions Service', function () {
     expect(freshTransaction.payer.fspId).toBe('New_bank')
   })
 
-  test('can get by lpsKey and state', async () => {
-    const transactionRequest = TransactionRequestFactory.build()
-    const transaction = await transactionsService.create(transactionRequest)
-    const transactiondb = await transactionsService.getByLpsKeyAndState(transaction.lpsKey, transaction.state)
-    if (!transactiondb) {
-      throw new Error('transaction by getByLpsKeyAndState does not exist')
-    }
+  describe('getByLpsKeyAndState', () => {
+    test('can get by lpsKey and state', async () => {
+      const transactionRequest = TransactionRequestFactory.build()
+      const transaction = await transactionsService.create(transactionRequest)
 
-    expect(transaction).toStrictEqual(transactiondb)
+      const transactiondb = await transactionsService.getByLpsKeyAndState(transaction.lpsKey, transaction.state)
+
+      expect(transaction).toStrictEqual(transactiondb)
+    })
+
+    test('throws error if no transaction is found', async () => {
+      await expect(transactionsService.getByLpsKeyAndState('somekey', TransactionState.authRecieved)).rejects.toThrow()
+    })
+  })
+
+  describe('getByPayerMsisdn', () => {
+    test('can get most recent transaction with transactionReceived state by MSISDN', async () => {
+      const transactionRequest1 = TransactionRequestFactory.build({
+        payer: {
+          partyIdType: 'MSISDN',
+          partyIdentifier: '987654321'
+        }
+      })
+      const transaction1 = await transactionsService.create(transactionRequest1)
+      await transactionsService.updateState(transaction1.transactionRequestId, 'transactionRequestId', TransactionState.transactionReceived)
+      await knex('transactions').where('transactionRequestId', transaction1.transactionRequestId).first().update('created_at', '2020-01-09 14:41:02')
+      const transactionRequest2 = TransactionRequestFactory.build({
+        payer: {
+          partyIdType: 'MSISDN',
+          partyIdentifier: '987654321'
+        }
+      })
+      const transaction2 = await transactionsService.create(transactionRequest2)
+      await transactionsService.updateState(transaction2.transactionRequestId, 'transactionRequestId', TransactionState.transactionReceived)
+      await knex('transactions').where('transactionRequestId', transaction2.transactionRequestId).first().update('created_at', '2020-01-09 14:41:10')
+
+      const transaction = await transactionsService.getByPayerMsisdn('987654321')
+
+      expect(transaction).toMatchObject(transaction2)
+    })
+
+    test('throws error if no transaction is found', async () => {
+      const transactionRequest = TransactionRequestFactory.build({
+        payer: {
+          partyIdType: 'MSISDN',
+          partyIdentifier: '987654321'
+        }
+      })
+      const transaction = await transactionsService.create(transactionRequest)
+      await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.transactionSent)
+
+      await expect(transactionsService.getByPayerMsisdn('987654321')).rejects.toThrow()
+    })
   })
 })

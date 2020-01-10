@@ -6,7 +6,7 @@ import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import Axios from 'axios'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
-const MlNumber = require('@mojaloop/ml-number')
+const MLNumber = require('@mojaloop/ml-number')
 
 jest.mock('uuid/v4', () => () => '123')
 
@@ -88,8 +88,8 @@ describe('Transaction Requests API', function () {
         }
       },
       amount: {
-        amount: new MlNumber(iso0100[4]).toString(),
-        currency: iso0100[49]
+        amount: new MLNumber(iso0100[4]).toString(),
+        currency: 'USD' // TODO: lookup iso0100[49]
       },
       transactionType: {
         initiator: 'PAYEE',

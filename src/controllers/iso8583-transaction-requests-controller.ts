@@ -2,13 +2,13 @@ import { Request, ResponseToolkit, ResponseObject } from 'hapi'
 import { ISO0100 } from 'types/iso-messages'
 import { Money, TransactionType, Party } from 'types/mojaloop'
 const uuid = require('uuid/v4')
-const MlNumber = require('@mojaloop/ml-number')
+const MLNumber = require('@mojaloop/ml-number')
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
     request.server.app.logger.info('iso8583 Transaction Requests Controller: Received create transactionsRequest request. payload:' + JSON.stringify(request.payload))
     const isoMessage = request.payload as ISO0100
-    const {lpsKey, lpsId } = isoMessage
+    const { lpsKey, lpsId } = isoMessage
     const transactionRequestId = uuid()
     await request.server.app.isoMessagesService.create(transactionRequestId, lpsKey, lpsId, isoMessage)
 
@@ -27,8 +27,8 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       }
     }
     const amount: Money = {
-      amount: new MlNumber(isoMessage[4]).toString(),
-      currency: isoMessage[49]
+      amount: new MLNumber(isoMessage[4]).toString(),
+      currency: 'USD' // TODO: hard-coded to USD for now. Should look up isoMessage[49] to convert to mojaloop currency format
     }
     const transactionType: TransactionType = {
       initiator: 'PAYEE',

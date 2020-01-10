@@ -1,7 +1,6 @@
 import Knex from 'knex'
-import { Party, PartyIdInfo, Money, TransactionType } from '../types/mojaloop'
+import { Party, PartyIdInfo, Money, TransactionType, TransactionRequestsPostRequest } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
-import {TransactionRequestsPostRequest} from '../types/mojaloop'
 const logger = require('@mojaloop/central-services-logger')
 
 export enum TransactionState {
@@ -40,6 +39,11 @@ export type DBTransaction = {
   amount: string;
   currency: string;
   expiration: string;
+  initiator: string;
+  initiatorType: string;
+  scenario: string;
+  originalTransactionId?: string;
+  refundReason?: string;
 }
 
 export type TransactionRequest = {
@@ -85,6 +89,7 @@ export interface TransactionsService {
   updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
   updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
+  getByPayerMsisdn (msisdn: string): Promise<Transaction>;
 }
 export class KnexTransactionsService implements TransactionsService {
   constructor (private _knex: Knex, private _client: AxiosInstance) {
@@ -134,25 +139,30 @@ export class KnexTransactionsService implements TransactionsService {
         currency: dbTransaction.currency
       },
       transactionType: {
-        initiator: 'PAYEE', // TODO: check that these can be hard coded.
-        initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
+        initiator: dbTransaction.initiator,
+        initiatorType: dbTransaction.initiatorType,
+        scenario: dbTransaction.scenario
       },
       authenticationType: 'OTP',
       expiration: dbTransaction.expiration.toString()
+    }
+
+    if (dbTransaction.originalTransactionId) {
+      transaction.transactionType.refundInfo = {
+        originalTransactionId: dbTransaction.originalTransactionId,
+        refundReason: dbTransaction.refundReason
+      }
     }
 
     return transaction
   }
 
   async getByLpsKeyAndState (lpsKey: string, state: string): Promise<Transaction> {
-    const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').where('state', state).where('lpsKey', lpsKey).first()
+    const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').where('state', state).where('lpsKey', lpsKey).orderBy('created_at', 'desc').first()
     if (!dbTransaction) {
       throw new Error('Error fetching transaction from database')
     }
-    if (!dbTransaction.transactionRequestId) {
-      throw new Error('Error fetching transactionRequestId')
-    }
+
     return this.get(dbTransaction.transactionRequestId, 'transactionRequestId')
   }
 
@@ -186,7 +196,12 @@ export class KnexTransactionsService implements TransactionsService {
       state: TransactionState.transactionReceived,
       amount: request.amount.amount,
       currency: request.amount.currency,
-      expiration: request.expiration
+      expiration: request.expiration,
+      initiator: request.transactionType.initiator,
+      initiatorType: request.transactionType.initiatorType,
+      scenario: request.transactionType.scenario,
+      originalTransactionId: request.transactionType.refundInfo?.originalTransactionId,
+      refundReason: request.transactionType.refundInfo?.refundReason
     }).then(result => result[0])
 
     return this.get(request.transactionRequestId, 'transactionRequestId')
@@ -230,4 +245,16 @@ export class KnexTransactionsService implements TransactionsService {
     await this._client.post('/transactionRequests', transactionRequest, { headers })
   }
 
+  async getByPayerMsisdn (msisdn: string): Promise<Transaction> {
+    const transaction = await this._knex('transactionParties').select('transactionParties.transactionRequestId').where('identifierValue', msisdn)
+      .leftJoin('transactions', function () {
+        this.on('transactions.transactionRequestId', '=', 'transactionParties.transactionRequestId')
+      }).where('transactions.state', TransactionState.transactionReceived).orderBy('transactions.created_at', 'desc').first()
+
+    if (!transaction) {
+      throw new Error('No transaction found.')
+    }
+
+    return this.get(transaction.transactionRequestId, 'transactionRequestId')
+  }
 }

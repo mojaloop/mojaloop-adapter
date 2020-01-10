@@ -16,7 +16,8 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     updateTransactionId: jest.fn(),
     sendToMojaHub: jest.fn().mockResolvedValue(undefined),
     updateState: jest.fn().mockResolvedValue(undefined),
-    getByLpsKeyAndState: jest.fn()
+    getByLpsKeyAndState: jest.fn(),
+    getByPayerMsisdn: jest.fn()
   },
   quotesService: {
     create: jest.fn(),
