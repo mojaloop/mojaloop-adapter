@@ -5,7 +5,7 @@ import { KnexTransactionsService } from './services/transactions-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
-import { KnexAuthorizationsService } from 'services/authorizations-service'
+import { KnexAuthorizationsService } from './services/authorizations-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
