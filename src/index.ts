@@ -46,18 +46,16 @@ const quotesClient: AxiosInstance = axios.create({
 })
 const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET)
 
-// dummy values
 const MojaClient = new MojaloopRequests({
   logger: console,
   dfspId: ADAPTOR_FSP_ID,
-  tls: {
-    outbound: {
-      mutualTLS: {
-        enabled: true
-      }
-    }
+  quotesEndpoint: QUOTE_REQUESTS_URL,
+  alsEndpoint: ACCOUNT_LOOKUP_URL,
+  jwsSign: false,
+  tls: { outbound: { mutualTLS: { enabled: false } } },
+  wso2Auth: {
+    getToken: () => null
   },
-  jwsSign: true,
   jwsSigningKey: 'string',
   peerEndpoint: 'string'
 })
