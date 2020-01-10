@@ -89,7 +89,7 @@ describe('Transaction Requests API', function () {
       },
       amount: {
         amount: new MLNumber(iso0100[4]).toString(),
-        currency: iso0100[49]
+        currency: 'USD' // TODO: lookup iso0100[49]
       },
       transactionType: {
         initiator: 'PAYEE',

@@ -29,7 +29,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     }
     const amount: Money = {
       amount: new MLNumber(isoMessage[4]).toString(),
-      currency: isoMessage[49]
+      currency: 'USD' // TODO: hard-coded to USD for now. Should look up isoMessage[49] to convert to mojaloop currency format
     }
     const transactionType: TransactionType = {
       initiator: 'PAYEE',
