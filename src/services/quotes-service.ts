@@ -48,7 +48,7 @@ export interface QuotesService {
   create (request: QuotesPostRequest, fees: Money, commission: Money): Promise<Quote>;
   get (id: string, idType: string): Promise<Quote>;
   calculateAdaptorFees (amount: Money): Promise<Money>;
-  sendQuoteResponse (quoteId: string, response: QuotesIDPutResponse, headers: { [k: string]: string }): Promise<void>;
+  sendQuoteResponse (quoteId: string, response: QuotesIDPutResponse, headers: { [k: string]: string | undefined }): Promise<void>;
 }
 
 export class KnexQuotesService implements QuotesService {
@@ -120,7 +120,9 @@ export class KnexQuotesService implements QuotesService {
     return quote
   }
 
-  async sendQuoteResponse (quoteId: string, request: QuotesIDPutResponse, headers: { [k: string]: string }): Promise<void> {
+  async sendQuoteResponse (quoteId: string, request: QuotesIDPutResponse, headers: { [k: string]: string | undefined }): Promise<void> {
+    delete this._client.defaults.headers.common.Accept
+    delete this._client.defaults.headers.common.accept
     await this._client.put(`/quotes/${quoteId}`, request, { headers })
   }
 

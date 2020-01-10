@@ -1,52 +1,54 @@
-import { Request, ResponseObject, ResponseToolkit } from 'hapi';
-import IlpPacket from 'ilp-packet';
-import { TransfersPostRequest } from 'types/mojaloop';
-import { Transfer, KnexTransfersService } from 'services/transfers-service';
+import { Request, ResponseObject, ResponseToolkit } from 'hapi'
+import { TransfersPostRequest } from 'types/mojaloop'
+import { Transfer, TransferState } from '../services/transfers-service'
+import { TransactionState } from '../services/transactions-service'
 
+const IlpPacket = require('ilp-packet')
 const sdk = require('@mojaloop/sdk-standard-components')
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
+  try {
+    let transactionRequestId = ''
+    const payload: TransfersPostRequest = request.payload as TransfersPostRequest
 
-  const payload: TransfersPostRequest = request.payload as TransfersPostRequest
+    // unpack ilpPacket
+    const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
+    const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
+    const dataElement = JSON.parse(Buffer.from(jsonPacket.data.data.toString(), 'base64').toString('utf8'))
 
-  const binaryPacket = Buffer.from(payload.ilpPacket, 'base64');
-	const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket);
-	const dataElement = JSON.parse(Buffer.from(jsonPacket.data.toString(), 'base64').toString('utf8'));
-  const transactionId = dataElement.transactionId
+    // get transactionRequestId
+    const transaction = await request.server.app.transactionsService.get(dataElement.transactionId, 'transactionId')
+    transactionRequestId = transaction.transactionRequestId
 
-  // use transactionId to find transaction
+    // create fulfilment
+    const ilp = new sdk.Ilp({ secret: test })
+    const fulfilment = ilp.caluclateFulfil(payload.ilpPacket).replace('"', '')
 
-  const fulfilment = sdk.Ilp.caluclateFulfil(payload.ilpPacket)
-
-
-  // create transfer
-  
-  const transfer: Transfer = {
-    id: "",
-    quoteId: "",
-    transactionRequestId: "",
-    fulfilment: "",
-    transferState: "",
-    amount: {
-      amount: "",
-      currency: "",
+    // create transfer
+    const transfer: Transfer = {
+      transferId: payload.transferId,
+      quoteId: dataElement.quoteId,
+      transactionRequestId: transactionRequestId,
+      fulfilment: fulfilment,
+      transferState: TransferState.RECEIVED.toString(),
+      amount: payload.amount
     }
+
+    // persist transfer
+    const transfersService = request.server.app.transfersService
+    await transfersService.create(transfer)
+
+    // return fulfilment
+    await transfersService.sendFulfilment(transfer, payload.payerFsp)
+
+    // update trxState -> enum.fulfilmentSent
+    await request.server.app.transactionsService.updateState(dataElement.transactionId, 'transactionId', TransactionState.fulfillmentSent.toString())
+
+    return h.response().code(200)
+
+  } catch (e) {
+    console.log(e)
+    return h.response().code(500)
   }
 
-  await request.server.app.transfersService.create(transfer)
-  
-  // mojaloop/PUT/transfer/<Id>
-
-
-  return h.response().code(500)
-
 }
-
-
-// PUT/transfer/<Id>
-// find transaction
-// set STATE = COMPLETED
-// find 0200 by txRID
-// populate 0210
-// use lspId to find correct tcp relay
-// TCPRelay/SEND/{transaction}

@@ -35,7 +35,9 @@ describe('Parties API', function () {
   beforeEach(async () => {
     await knex.migrate.latest()
     // this is the iso0100 message first being sent
-    const iso0100 = ISO0100Factory.build()
+    const iso0100 = ISO0100Factory.build({
+      102: '0821234567'
+    })
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
@@ -53,26 +55,40 @@ describe('Parties API', function () {
   })
 
   test('updates the fspId of the payer in the transaction request', async () => {
-    const putPartiesResponse = PartiesPutResponseFactory.build()
+    const putPartiesResponse = PartiesPutResponseFactory.build({
+      party: {
+        partyIdInfo: {
+          partyIdType: 'MSISDN',
+          partyIdentifier: '0821234567',
+          fspId: 'mojawallet'
+        }
+      }
+    })
 
     const response = await adaptor.inject({
       method: 'PUT',
-      headers: { ID: '123' },
       payload: putPartiesResponse,
       url: `/parties/MSISDN/${putPartiesResponse.party.partyIdInfo.partyIdentifier}`
     })
 
     expect(response.statusCode).toBe(200)
     const transaction = await services.transactionsService.get('123', 'transactionRequestId')
-    expect(transaction.payer.fspId).toBe(putPartiesResponse.party.partyIdInfo.fspId)
+    expect(transaction.payer.fspId).toBe('mojawallet')
   })
 
   test('makes a transaction request to the Moja switch', async () => {
-    const putPartiesResponse = PartiesPutResponseFactory.build()
+    const putPartiesResponse = PartiesPutResponseFactory.build({
+      party: {
+        partyIdInfo: {
+          partyIdType: 'MSISDN',
+          partyIdentifier: '0821234567',
+          fspId: 'mojawallet'
+        }
+      }
+    })
 
     const response = await adaptor.inject({
       method: 'PUT',
-      headers: { ID: '123' },
       payload: putPartiesResponse,
       url: `/parties/MSISDN/${putPartiesResponse.party.partyIdInfo.partyIdentifier}`
     })

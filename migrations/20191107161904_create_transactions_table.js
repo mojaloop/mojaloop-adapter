@@ -11,6 +11,11 @@ exports.up = function (knex) {
       table.string('expiration')
       table.string('lpsFeeAmount')
       table.string('lpsFeeCurrency', 3)
+      table.string('initiator').notNullable()
+      table.string('initiatorType').notNullable()
+      table.string('scenario').notNullable()
+      table.string('originalTransactionId').nullable()
+      table.string('refundReason').nullable()
       table.timestamps(true, true)
     })
 }

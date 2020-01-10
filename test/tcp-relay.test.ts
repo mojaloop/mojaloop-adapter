@@ -57,15 +57,15 @@ describe('TCP relay', function () {
     })
   })
   test('maps 0200 message to the authorizations endpoint', async () => {
-    let isopack = new IsoParser(ISO0200)
-    let bufferMessage = isopack.getBufferMessage()
+    const isopack = new IsoParser(ISO0200)
+    const bufferMessage = isopack.getBufferMessage()
     const isoMessage = ISO0200
-    const injectSpy = jest.spyOn(adaptor, 'inject')
-    const lpsKey = 'postillion' + "-" + isoMessage[41] + "-" + isoMessage[42]
+    adaptor.inject = jest.fn().mockResolvedValue({ statusCode: 200 })
+    const lpsKey = 'postillion' + '-' + isoMessage[41] + '-' + isoMessage[42]
 
     await handleIsoMessage('postillion', bufferMessage, adaptor)
 
-    expect(injectSpy).toHaveBeenCalledWith({
+    expect(adaptor.inject).toHaveBeenCalledWith({
       method: 'PUT',
       url: `/iso8583/authorizations/${lpsKey}`,
       payload: { lpsId: 'postillion', lpsKey, ...isoMessage }

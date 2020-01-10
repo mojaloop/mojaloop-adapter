@@ -2,6 +2,7 @@ import { Request, ResponseToolkit, ResponseObject } from 'hapi'
 import { ISO0100 } from 'types/iso-messages'
 import { Money, TransactionType, Party } from 'types/mojaloop'
 const uuid = require('uuid/v4')
+const MLNumber = require('@mojaloop/ml-number')
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
@@ -22,11 +23,12 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       partyIdInfo: {
         partyIdType: 'DEVICE',
         partyIdentifier: isoMessage[41],
-        partySubIdOrType: isoMessage[42]
+        partySubIdOrType: isoMessage[42],
+        fspId: 'adaptor' //TODO: pull from env variable
       }
     }
     const amount: Money = {
-      amount: isoMessage[4],
+      amount: new MLNumber(isoMessage[4]).toString(),
       currency: isoMessage[49]
     }
     const transactionType: TransactionType = {
