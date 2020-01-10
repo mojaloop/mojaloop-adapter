@@ -73,6 +73,19 @@ describe('Authorizations api', function () {
         }
       })
       expect(putTransactionRequestResponse.statusCode).toBe(200)
+      const quoteRequest = QuotesPostRequestFactory.build({
+        transactionId: '456'
+      })
+      const response1 = await adaptor.inject({
+        method: 'POST',
+        url: '/quotes',
+        payload: quoteRequest,
+        headers: {
+          'fspiop-destination': 'fspiop-source',
+          'fspiop-source': 'fspiop-destination'
+        }
+      })
+      expect(response1.statusCode).toBe(200)
     })
   })
 
@@ -99,7 +112,6 @@ describe('Authorizations api', function () {
       method: 'GET',
       url: url
     })
-
     const iso0110 = ISO0110Factory.build()
     iso0110.id = 2
     iso0110.transactionRequestId = '123'
@@ -126,24 +138,6 @@ describe('Authorizations api', function () {
 
   })
   test('put transaction request with state as  quoteResponded', async () => {
-
-    const quoteRequest = QuotesPostRequestFactory.build({
-      transactionId: '456'
-    })
-
-
-    const response = await adaptor.inject({
-      method: 'POST',
-      url: '/quotes',
-      payload: quoteRequest,
-      headers: {
-        'fspiop-source': 'payer',
-        'fspiop-destination': 'payee'
-      }
-    })
-
-    expect(response.statusCode).toBe(200)
-
     const transaction = await services.transactionsService.updatePayerFspId('123', 'transactionRequestId', '1234')
     const iso0200 = ISO0200Factory.build()
     const response1 = await adaptor.inject({
@@ -165,5 +159,7 @@ describe('Authorizations api', function () {
       'fspiop-source': 'fspiop-destination'
     }
     await services.authorizationsService.sendAuthorizationsResponse(transaction.transactionRequestId, authorizationsResponse, headers)
+    const transaction1 = await services.transactionsService.get(transaction.transactionRequestId, 'transactionRequestId')
+    expect(transaction1.state).toEqual(TransactionState.financialRequestSent)
   })
 })
