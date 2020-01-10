@@ -23,7 +23,8 @@ export const TransactionRequestFactory = Factory.define<TransactionRequest>('Tra
   payee: {
     partyIdInfo: {
       partyIdType: 'MSISDN',
-      partyIdentifier: '12345678'
+      partyIdentifier: '12345678',
+      fspId: 'adaptor'
     }
   },
   payer: {

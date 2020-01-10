@@ -88,6 +88,7 @@ export interface TransactionsService {
   updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', transactionId: string): Promise<Transaction>;
   updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
+  getByPayerMsisdn (msisdn: string): Promise<Transaction>;
 }
 export class KnexTransactionsService implements TransactionsService {
   constructor (private _knex: Knex, private _client: AxiosInstance) {
@@ -232,5 +233,18 @@ export class KnexTransactionsService implements TransactionsService {
       transactionType: request.transactionType
     }
     await this._client.post('/transactionRequests', transactionRequest, { headers })
+  }
+
+  async getByPayerMsisdn (msisdn: string): Promise<Transaction> {
+    const transaction = await this._knex('transactionParties').select('transactionParties.transactionRequestId').where('identifierValue', msisdn)
+      .leftJoin('transactions', function () {
+        this.on('transactions.transactionRequestId', '=', 'transactionParties.transactionRequestId')
+      }).where('transactions.state', TransactionState.transactionReceived).orderBy('transactions.created_at', 'desc').first()
+
+    if (!transaction) {
+      throw new Error('No transaction found.')
+    }
+
+    return this.get(transaction.transactionRequestId, 'transactionRequestId')
   }
 }
