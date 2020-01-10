@@ -6,10 +6,10 @@ import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import Axios from 'axios'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
+const MLNumber = require('@mojaloop/ml-number')
 
 jest.mock('uuid/v4', () => () => '123')
 
-const MLNumber = require('@mojaloop/ml-number')
 const LPS_KEY = 'postillion:0100'
 const LPS_ID = 'postillion'
 
@@ -89,7 +89,7 @@ describe('Transaction Requests API', function () {
       },
       amount: {
         amount: new MLNumber(iso0100[4]).toString(),
-        currency: iso0100[49]
+        currency: 'USD' // TODO: lookup iso0100[49]
       },
       transactionType: {
         initiator: 'PAYEE',
@@ -112,7 +112,7 @@ describe('Transaction Requests API', function () {
     })
 
     expect(response.statusCode).toEqual(200)
-    expect(services.accountLookupService.requestFspIdFromMsisdn).toHaveBeenCalledWith('123', iso0100[102])
+    expect(services.MojaClient.getParties).toHaveBeenCalledWith('MSISDN', iso0100[102], null)
   })
 
 })

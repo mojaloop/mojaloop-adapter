@@ -189,6 +189,21 @@ describe('Transactions Service', function () {
     expect(updatedTransaction.previousState).toBe(TransactionState.transactionReceived)
   })
 
+  describe('getByLpsKeyAndState', () => {
+    test('can get by lpsKey and state', async () => {
+      const transactionRequest = TransactionRequestFactory.build()
+      const transaction = await transactionsService.create(transactionRequest)
+
+      const transactiondb = await transactionsService.getByLpsKeyAndState(transaction.lpsKey, transaction.state)
+
+      expect(transaction).toStrictEqual(transactiondb)
+    })
+
+    test('throws error if no transaction is found', async () => {
+      await expect(transactionsService.getByLpsKeyAndState('somekey', TransactionState.authRecieved)).rejects.toThrow()
+    })
+  })
+
   describe('getByPayerMsisdn', () => {
     test('can get most recent transaction with transactionReceived state by MSISDN', async () => {
       const transactionRequest1 = TransactionRequestFactory.build({
