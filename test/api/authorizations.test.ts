@@ -23,9 +23,10 @@ describe('Authorizations api', function () {
   let adaptor: Server
   const fakeHttpClient: AxiosInstance = Axios.create()
   fakeHttpClient.get = jest.fn()
-  const services = AdaptorServicesFactory.build()
   let tcpIsoMessagingClient: TcpIsoMessagingClient
   let sock: Socket
+  const iso0100 = ISO0100Factory.build();
+  const services = AdaptorServicesFactory.build()
   const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
   beforeAll(async () => {
     knex = Knex({
@@ -43,7 +44,7 @@ describe('Authorizations api', function () {
     services.isoMessagesService = new KnexIsoMessageService(knex)
     services.quotesService = new KnexQuotesService(knex, httpClient, 'secret', fakeLogger, 10000, calculateAdaptorFees)
     services.quotesService.sendQuoteResponse = jest.fn()
-    services.authorizationsService = new KnexAuthorizationsService(knex, httpClient)
+    services.authorizationsService.sendAuthorizationsResponse = jest.fn().mockResolvedValue(undefined)
     adaptor = await createApp(services)
 
     sock = new Socket()
@@ -57,7 +58,6 @@ describe('Authorizations api', function () {
 
       // this is the iso0100 message first being sent
 
-      const iso0100 = ISO0100Factory.build()
       const response = await adaptor.inject({
         method: 'POST',
         url: '/iso8583/transactionRequests',
@@ -112,25 +112,24 @@ describe('Authorizations api', function () {
       method: 'GET',
       url: url
     })
-    const iso0110 = ISO0110Factory.build()
-    iso0110.id = 2
-    iso0110.transactionRequestId = '123'
-    iso0110.lpsKey = 'postillion:0100'
-    iso0110.lpsId = 'postillion'
+    const id = 2
+    const transactionRequestId = '123'
+    const lpsKey = 'postillion:0100'
+    const lpsId = 'postillion'
 
     const isoMessageService = adaptor.app.isoMessagesService
     const iso0110JsonMessage = await isoMessageService.get('123', lpsKey, '0110')
-    expect(iso0110[0]).toBe(iso0110JsonMessage[0])
-    expect(iso0110[3]).toBe(iso0110JsonMessage[3])
-    expect(iso0110[4]).toBe(iso0110JsonMessage[4])
-    expect(iso0110[28]).toBe(iso0110JsonMessage[28])
-    expect(iso0110[39]).toBe(iso0110JsonMessage[39])
-    expect(iso0110[49]).toBe(iso0110JsonMessage[49])
-    expect(iso0110[127.2]).toBe(iso0110JsonMessage[127.2])
-    expect(iso0110.id).toBe(iso0110JsonMessage.id)
-    expect(iso0110.transactionRequestId).toBe(iso0110JsonMessage.transactionRequestId)
-    expect(iso0110.lpsKey).toBe(iso0110JsonMessage.lpsKey)
-    expect(iso0110.lpsId).toBe(iso0110JsonMessage.lpsId)
+    expect('0110').toBe(iso0110JsonMessage[0])
+    expect(iso0100[3]).toBe(iso0110JsonMessage[3])
+    expect(iso0100[4]).toBe(iso0110JsonMessage[4])
+    expect(iso0100[28]).toBe(iso0110JsonMessage[28])
+    expect('00').toBe(iso0110JsonMessage[39])
+    expect(iso0100[49]).toBe(iso0110JsonMessage[49])
+    expect(iso0100[127.2]).toBe(iso0110JsonMessage[127.2])
+    expect(id).toBe(iso0110JsonMessage.id)
+    expect(transactionRequestId).toBe(iso0110JsonMessage.transactionRequestId)
+    expect(lpsKey).toBe(iso0110JsonMessage.lpsKey)
+    expect(lpsId).toBe(iso0110JsonMessage.lpsId)
     const expectedBuffer = new IsoParser(iso0110JsonMessage).getBufferMessage()
 
     expect(expectedBuffer).toBeInstanceOf(Buffer)
@@ -146,20 +145,24 @@ describe('Authorizations api', function () {
       payload: { lpsKey: lpsKey, lpsId, ...iso0200 }
     })
     expect(response1.statusCode).toEqual(200)
+    const isoMessageService = adaptor.app.isoMessagesService
+    const iso0200JsonMessage = await isoMessageService.get('123', lpsKey, '0200')
 
     const authorizationsResponse: AuthorizationsIDPutResponse = {
       authenticationInfo: {
         authentication: 'OTP',
-        authenticationValue: 'null'
+        authenticationValue: iso0200JsonMessage[103]
       },
       responseType: 'ENTERED'
     }
     const headers = {
-      'fspiop-destination': 'fspiop-source',
-      'fspiop-source': 'fspiop-destination'
+      'fspiop-destination': '1234',
+      'fspiop-source': '1234'
     }
-    await services.authorizationsService.sendAuthorizationsResponse(transaction.transactionRequestId, authorizationsResponse, headers)
+
+    expect(services.authorizationsService.sendAuthorizationsResponse).toHaveBeenCalledWith('123', authorizationsResponse, headers)
     const transaction1 = await services.transactionsService.get(transaction.transactionRequestId, 'transactionRequestId')
     expect(transaction1.state).toEqual(TransactionState.financialRequestSent)
+
   })
 })
