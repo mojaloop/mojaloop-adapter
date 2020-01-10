@@ -56,7 +56,7 @@ const transfersClient: AxiosInstance = axios.create({
   baseURL: TRANSFERS_URL,
   timeout: 3000
 })
-const transfersService = new KnexTransfersService(knex, transfersClient)
+const transfersService = new KnexTransfersService(knex, transfersClient, ILP_SECRET)
 
 const start = async (): Promise<void> => {
   let shuttingDown = false

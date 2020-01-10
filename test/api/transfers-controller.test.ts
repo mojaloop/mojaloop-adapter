@@ -28,7 +28,7 @@ describe('Transfers Controller', function () {
     const httpClient = Axios.create()
     services.transactionsService = new KnexTransactionsService(knex, httpClient)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
-    services.transfersService = new KnexTransfersService(knex, httpClient)
+    services.transfersService = new KnexTransfersService(knex, httpClient, 'secret')
     services.transfersService.sendFulfilment = jest.fn().mockResolvedValue(undefined)
     adaptor = await createApp(services)
 
@@ -67,13 +67,11 @@ describe('Transfers Controller', function () {
 
     // verify newly created transfer matches what was expected
     const dbTransfer = await knex<DBTransfer>('transfers').where('transferId', payload.transferId).first()
-    const sdk = require('@mojaloop/sdk-standard-components')
-    const ilp = new sdk.Ilp({ secret: test })
     const data: DBTransfer = {
       transferId: payload.transferId,
       quoteId: '20508493-1458-4ac0-a824-d4b07e37d7b3',
       transactionRequestId: transactionRequestId,
-      fulfilment: ilp.caluclateFulfil(payload.ilpPacket).replace('"', ''),
+      fulfilment: services.transfersService.calculateFulfilment(payload.ilpPacket),
       transferState: TransferState.RECEIVED.toString(),
       amount: payload.amount.amount,
       currency: payload.amount.currency

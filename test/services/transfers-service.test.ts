@@ -19,7 +19,7 @@ describe('Transfers Service', function () {
       useNullAsDefault: true
     })
 
-    transfersService = new KnexTransfersService(knex, fakeHttpClient)
+    transfersService = new KnexTransfersService(knex, fakeHttpClient, 'secret')
   })
 
   beforeEach(async () => {

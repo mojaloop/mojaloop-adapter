@@ -2,6 +2,7 @@ import Knex from 'knex'
 import { Money } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
 const logger = require('@mojaloop/central-services-logger')
+const MojaloopSDK = require('@mojaloop/sdk-standard-components')
 
 export enum TransferState {
   'RECEIVED',
@@ -29,15 +30,22 @@ export type Transfer = {
   amount: Money;
 }
 
+interface IlpService {
+  caluclateFulfil (ilpPacket: string): string;
+}
+
 export interface TransfersService {
   get(id: string): Promise<Transfer>;
   create(request: Transfer): Promise<Transfer>;
   updateTransferState(data: Transfer): Promise<Transfer>;
   sendFulfilment(data: Transfer, payerFspId: string): Promise<void>;
+  calculateFulfilment (ilpPacket: string): string;
 }
 
 export class KnexTransfersService implements TransfersService {
-  constructor (private _knex: Knex, private _client: AxiosInstance) {
+  private _ilp: IlpService
+  constructor (private _knex: Knex, private _client: AxiosInstance, _ilpSecret: string, private _logger?: any) {
+    this._ilp = new MojaloopSDK.Ilp({ secret: _ilpSecret, logger: _logger })
   }
 
   async get (id: string): Promise<Transfer> {
@@ -101,6 +109,10 @@ export class KnexTransfersService implements TransfersService {
       }
     })
 
+  }
+
+  calculateFulfilment (ilpPacket: string): string {
+    return this._ilp.caluclateFulfil(ilpPacket).replace('"', '')
   }
 
 }
