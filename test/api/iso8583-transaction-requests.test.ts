@@ -6,10 +6,10 @@ import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import Axios from 'axios'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
+const MLNumber = require('@mojaloop/ml-number')
 
 jest.mock('uuid/v4', () => () => '123')
 
-const MLNumber = require('@mojaloop/ml-number')
 const LPS_KEY = 'postillion:0100'
 const LPS_ID = 'postillion'
 

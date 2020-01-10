@@ -11,7 +11,6 @@ export class KnexIsoMessageService implements IsoMessageService {
   }
 
   async create (transactionRequestId: string, lpsKey: string, lpsId: string, message: any): Promise<ISOMessage> {
-
     const result = await this._knex('isoMessages').insert({
       transactionRequestId,
       lpsId,

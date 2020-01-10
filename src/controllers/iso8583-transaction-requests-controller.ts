@@ -10,7 +10,6 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     const isoMessage = request.payload as ISO0100
     const { lpsKey, lpsId } = isoMessage
     const transactionRequestId = uuid()
-
     await request.server.app.isoMessagesService.create(transactionRequestId, lpsKey, lpsId, isoMessage)
 
     const payer: Party = {
@@ -24,7 +23,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
         partyIdType: 'DEVICE',
         partyIdentifier: isoMessage[41],
         partySubIdOrType: isoMessage[42],
-        fspId: 'adaptor' // TODO: pull from env variable
+        fspId: process.env.ADAPTOR_FSP_ID || 'adaptor'
       }
     }
     const amount: Money = {

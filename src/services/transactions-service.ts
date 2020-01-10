@@ -83,6 +83,7 @@ export type TransactactionParty = {
 }
 export interface TransactionsService {
   get (id: string, idType: 'transactionId' | 'transactionRequestId'): Promise<Transaction>;
+  getByLpsKeyAndState(lpsKey: string, state: string): Promise<Transaction>;
   create (request: TransactionRequest): Promise<Transaction>;
   updatePayerFspId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
   updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
@@ -154,6 +155,15 @@ export class KnexTransactionsService implements TransactionsService {
     }
 
     return transaction
+  }
+
+  async getByLpsKeyAndState (lpsKey: string, state: string): Promise<Transaction> {
+    const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').where('state', state).where('lpsKey', lpsKey).orderBy('created_at', 'desc').first()
+    if (!dbTransaction) {
+      throw new Error('Error fetching transaction from database')
+    }
+
+    return this.get(dbTransaction.transactionRequestId, 'transactionRequestId')
   }
 
   async create (request: TransactionRequest): Promise<Transaction> {

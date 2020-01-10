@@ -1,28 +1,33 @@
-import { KnexTransactionsService } from '../../src/services/transactions-service'
-import Axios, { AxiosInstance } from 'axios'
 import Knex from 'knex'
-import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
-import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { ISO0100Factory } from '../factories/iso-messages'
-import {ISO0110Factory} from '../factories/iso-messages'
+import Axios, { AxiosInstance } from 'axios'
 import { Socket } from 'net'
+import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
+import { createApp } from '../../src/adaptor'
+import { AdaptorServicesFactory } from '../factories/adaptor-services'
+import { ISO0100Factory, ISO0200Factory } from '../factories/iso-messages'
 import { TcpIsoMessagingClient } from '../../src/services/iso-messaging-client'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
+import { QuotesPostRequestFactory, PartiesPutResponseFactory } from '../factories/mojaloop-messages'
+import { AuthorizationsIDPutResponse, Money } from '../../src/types/mojaloop'
+import { KnexQuotesService } from '../../src/services/quotes-service'
 
-const IsoParser = require('iso_8583')
 jest.mock('uuid/v4', () => () => '123')
-const LPS_KEY = 'postillion:0100'
-const LPS_ID = 'postillion'
+const lpsKey = 'postillion:0100'
+const lpsId = 'postillion'
 
-describe('Transaction Request Service', function () {
+describe('Authorizations api', function () {
   let knex: Knex
   let adaptor: Server
   const fakeHttpClient: AxiosInstance = Axios.create()
   fakeHttpClient.get = jest.fn()
+  const tcpIsoMessagingClient = new TcpIsoMessagingClient(new Socket())
+  tcpIsoMessagingClient.sendAuthorizationRequest = jest.fn()
+  const iso0100 = ISO0100Factory.build({
+    102: '0821234567'
+  })
   const services = AdaptorServicesFactory.build()
-  let tcpIsoMessagingClient: TcpIsoMessagingClient
-  let sock: Socket
+  const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
 
   beforeAll(async () => {
     knex = Knex({
@@ -33,30 +38,65 @@ describe('Transaction Request Service', function () {
       },
       useNullAsDefault: true
     })
-    const httpClient = Axios.create()
-
-    services.transactionsService = new KnexTransactionsService(knex, httpClient)
+    const fakeLogger = { log: jest.fn() }
+    services.transactionsService = new KnexTransactionsService(knex, fakeHttpClient)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
+    services.quotesService = new KnexQuotesService(knex, fakeHttpClient, 'secret', fakeLogger, 10000, calculateAdaptorFees)
+    services.quotesService.sendQuoteResponse = jest.fn()
     adaptor = await createApp(services)
 
-    sock = new Socket()
-    sock.write = jest.fn()
-    tcpIsoMessagingClient = new TcpIsoMessagingClient(sock)
-  })
+    beforeEach(async () => {
+      await knex.migrate.latest()
+      adaptor.app.isoMessagingClients.set('postillion', tcpIsoMessagingClient)
 
-  beforeEach(async () => {
+      let response = await adaptor.inject({
+        method: 'POST',
+        url: '/iso8583/transactionRequests',
+        payload: { lpsKey: lpsKey, lpsId: lpsId, ...iso0100 }
+      })
+      expect(response.statusCode).toBe(200)
 
-    adaptor.app.isoMessagingClients.set('postillion', tcpIsoMessagingClient) // Registering Client
-    await knex.migrate.latest()
-    // this is the iso0100 message first being sent
-    const iso0100 = ISO0100Factory.build()
-    const response = await adaptor.inject({
-      method: 'POST',
-      url: '/iso8583/transactionRequests',
-      payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
+      const putPartiesResponse = PartiesPutResponseFactory.build({
+        party: {
+          partyIdInfo: {
+            partyIdType: 'MSISDN',
+            partyIdentifier: '0821234567',
+            fspId: 'mojawallet'
+          }
+        }
+      })
+      response = await adaptor.inject({
+        method: 'PUT',
+        payload: putPartiesResponse,
+        url: `/parties/MSISDN/${putPartiesResponse.party.partyIdInfo.partyIdentifier}`
+      })
+      expect(response.statusCode).toBe(200)
+
+      const putTransactionRequestResponse = await adaptor.inject({
+        method: 'PUT',
+        url: '/transactionRequests/123',
+        payload: {
+          transactionId: '456',
+          transactionRequestState: 'RECEIVED'
+        }
+      })
+      expect(putTransactionRequestResponse.statusCode).toBe(200)
+
+      const quoteRequest = QuotesPostRequestFactory.build({
+        transactionId: '456'
+      })
+      response = await adaptor.inject({
+        method: 'POST',
+        url: '/quotes',
+        payload: quoteRequest,
+        headers: {
+          'fspiop-destination': 'fspiop-source',
+          'fspiop-source': 'fspiop-destination'
+        }
+      })
+      expect(response.statusCode).toBe(200)
     })
-    expect(response.statusCode).toBe(200)
   })
 
   afterEach(async () => {
@@ -68,7 +108,6 @@ describe('Transaction Request Service', function () {
   })
 
   test('returns a 200', async () => {
-
     const url = `/authorizations/${123}`
     const response1 = await adaptor.inject({
       method: 'GET',
@@ -77,40 +116,58 @@ describe('Transaction Request Service', function () {
     expect(response1.statusCode).toEqual(200)
   })
 
-  test('gives iso messaging client json 0110 and lpsKey to send', async () => {
-    const url = `/authorizations/${123}`
-    const response1 = await adaptor.inject({
-      method: 'GET',
-      url: url
+  describe('GET', () => {
+    test('gives iso messaging client json 0110 and lpsKey to send', async () => {
+      const response = await adaptor.inject({
+        method: 'GET',
+        url: `/authorizations/${123}`
+      })
+
+      const iso0110JsonMessage = await adaptor.app.isoMessagesService.get('123', lpsKey, '0110')
+      expect(response.statusCode).toBe(200)
+      expect(iso0110JsonMessage[0]).toBe('0110')
+      expect(iso0110JsonMessage[3]).toBe(iso0100[3])
+      expect(iso0110JsonMessage[4]).toBe(iso0100[4])
+      expect(iso0110JsonMessage[28]).toBe(iso0100[28])
+      expect(iso0110JsonMessage[39]).toBe('00')
+      expect(iso0110JsonMessage[49]).toBe(iso0100[49])
+      expect(iso0110JsonMessage[127.2]).toBe(iso0100[127.2])
+      expect(iso0110JsonMessage.transactionRequestId).toBe('123')
+      expect(iso0110JsonMessage.lpsKey).toBe(lpsKey)
+      expect(iso0110JsonMessage.lpsId).toBe(lpsId)
+      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith(iso0110JsonMessage)
     })
+  })
 
+  describe('PUT', () => {
+    test('sends authorization response and updates state to financialRequestSent', async () => {
+      const iso0200 = ISO0200Factory.build()
 
-    const iso0110 = ISO0110Factory.build()
-    iso0110.id = 2
-    iso0110.transactionRequestId = '123'
-    iso0110.lpsKey = 'postillion:0100'
-    iso0110.lpsId = 'postillion'
+      const response = await adaptor.inject({
+        method: 'PUT',
+        url: `/iso8583/authorizations/${lpsKey}`,
+        payload: { lpsKey: lpsKey, lpsId, ...iso0200 }
+      })
 
-    const isoMessageService = adaptor.app.isoMessagesService
-    const iso0110JsonMessage = await isoMessageService.get('123', LPS_KEY, '0110')
-    
-    expect(iso0110[0]).toBe(iso0110JsonMessage[0])
-    expect(iso0110[3]).toBe(iso0110JsonMessage[3])
-    expect(iso0110[4]).toBe(iso0110JsonMessage[4])
-    expect(iso0110[28]).toBe(iso0110JsonMessage[28])
-    expect(iso0110[39]).toBe(iso0110JsonMessage[39])
-    expect(iso0110[49]).toBe(iso0110JsonMessage[49])
-    expect(iso0110[127.2]).toBe(iso0110JsonMessage[127.2])
-    expect(iso0110.id).toBe(iso0110JsonMessage.id)
-    expect(iso0110.transactionRequestId).toBe(iso0110JsonMessage.transactionRequestId)
-    expect(iso0110.lpsKey).toBe(iso0110JsonMessage.lpsKey)
-    expect(iso0110.lpsId).toBe(iso0110JsonMessage.lpsId)
-    
-
-    const expectedBuffer = new IsoParser(iso0110JsonMessage).getBufferMessage()
-
-    expect(expectedBuffer).toBeInstanceOf(Buffer)
-    expect(sock.write).toHaveBeenCalledWith(expectedBuffer)
-
+      const isoMessageService = adaptor.app.isoMessagesService
+      const iso0200JsonMessage = await isoMessageService.get('123', lpsKey, '0200')
+      const authorizationsResponse: AuthorizationsIDPutResponse = {
+        authenticationInfo: {
+          authentication: 'OTP',
+          authenticationValue: iso0200JsonMessage[103]
+        },
+        responseType: 'ENTERED'
+      }
+      const headers = {
+        'fspiop-destination': 'mojawallet',
+        'fspiop-source': 'adaptor',
+        date: new Date().toUTCString(),
+        'content-type': 'application/vnd.interoperability.authorizations+json;version=1.0'
+      }
+      expect(response.statusCode).toEqual(200)
+      expect(services.authorizationsService.sendAuthorizationsResponse).toHaveBeenCalledWith('123', authorizationsResponse, headers)
+      const transaction = await services.transactionsService.get('123', 'transactionRequestId')
+      expect(transaction.state).toEqual(TransactionState.financialRequestSent)
+    })
   })
 })

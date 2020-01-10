@@ -8,6 +8,7 @@ import swagger from './interface/swagger.json'
 import { IsoMessagingClient } from './services/iso-messaging-client'
 import { IsoMessageService } from './services/iso-message-service'
 import { QuotesService } from './services/quotes-service'
+import { AuthorizationsService } from './services/authorizations-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 const CentralLogger = require('@mojaloop/central-services-logger')
@@ -21,6 +22,7 @@ export type AdaptorServices = {
   transactionsService: TransactionsService;
   isoMessagesService: IsoMessageService;
   quotesService: QuotesService;
+  authorizationsService: AuthorizationsService;
   MojaClient: MojaloopRequests;
   logger?: Logger;
 }
@@ -37,6 +39,7 @@ declare module 'hapi' {
     transactionsService: TransactionsService;
     isoMessagesService: IsoMessageService;
     quotesService: QuotesService;
+    authorizationsService: AuthorizationsService;
     MojaClient: MojaloopRequests;
     logger: Logger;
     isoMessagingClients: Map<string, IsoMessagingClient>;
@@ -51,6 +54,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.transactionsService = services.transactionsService
   adaptor.app.isoMessagesService = services.isoMessagesService
   adaptor.app.quotesService = services.quotesService
+  adaptor.app.authorizationsService = services.authorizationsService
   adaptor.app.MojaClient = services.MojaClient
   adaptor.app.isoMessagingClients = new Map()
   if (!services.logger) {
@@ -71,7 +75,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
           },
           authorizations: {
             '{ID}': {
-              put: () => 'dummy handler'
+              put: AuthorizationController.update
             }
           },
           transfers: {

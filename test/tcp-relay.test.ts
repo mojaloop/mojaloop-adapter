@@ -1,11 +1,12 @@
 import Knex from 'knex'
 import { createApp } from '../src/adaptor'
 import { handleIsoMessage } from '../src/tcp-relay'
-import { iso0100BinaryMessage, ISO0200 } from './factories/iso-messages'
+import { iso0100BinaryMessage, iso0200BinaryMessage } from './factories/iso-messages'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from './factories/adaptor-services'
 import Axios from 'axios'
 import { KnexTransactionsService } from '../src/services/transactions-service'
+import { KnexIsoMessageService } from '../src/services/iso-message-service'
 jest.mock('uuid/v4', () => () => '123') // used to geneate uuid for transaction request id
 const IsoParser = require('iso_8583')
 
@@ -27,6 +28,7 @@ describe('TCP relay', function () {
     const httpClient = Axios.create()
     services.transactionsService = new KnexTransactionsService(knex, httpClient)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    services.isoMessagesService = new KnexIsoMessageService(knex)
     adaptor = await createApp(services)
   })
 
@@ -56,19 +58,20 @@ describe('TCP relay', function () {
       payload: { lpsId: 'postillion', lpsKey, ...isoMessage }
     })
   })
+
   test('maps 0200 message to the authorizations endpoint', async () => {
-    const isopack = new IsoParser(ISO0200)
-    const bufferMessage = isopack.getBufferMessage()
-    const isoMessage = ISO0200
+    const iso0200 = iso0200BinaryMessage
+    const isoMessage = new IsoParser().getIsoJSON(iso0200)
     adaptor.inject = jest.fn().mockResolvedValue({ statusCode: 200 })
     const lpsKey = 'postillion' + '-' + isoMessage[41] + '-' + isoMessage[42]
 
-    await handleIsoMessage('postillion', bufferMessage, adaptor)
+    await handleIsoMessage('postillion', iso0200, adaptor)
 
     expect(adaptor.inject).toHaveBeenCalledWith({
       method: 'PUT',
       url: `/iso8583/authorizations/${lpsKey}`,
       payload: { lpsId: 'postillion', lpsKey, ...isoMessage }
     })
+
   })
 })

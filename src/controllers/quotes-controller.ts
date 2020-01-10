@@ -24,7 +24,6 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 
     return h.response().code(200)
   } catch (error) {
-    console.log(error.response)
     const quoteRequest = request.payload as QuotesPostRequest
     request.server.app.logger.error(`Quotes Controller: Failed to give quote response for quoteId: ${quoteRequest.quoteId}. ${error.toString()}`)
     return h.response().code(500)
