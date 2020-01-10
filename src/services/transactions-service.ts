@@ -36,6 +36,7 @@ export type DBTransaction = {
   lpsFeeAmount: string;
   lpsFeeCurrency: string;
   state: string;
+  previousState: string | null;
   amount: string;
   currency: string;
   expiration: string;
@@ -68,6 +69,7 @@ export type Transaction = {
   lpsKey: string;
   lpsFee: Money;
   state: string;
+  previousState: string | null;
   amount: Money;
   transactionType: TransactionType;
   authenticationType?: 'OTP' | 'QRCODE' | undefined;
@@ -134,6 +136,7 @@ export class KnexTransactionsService implements TransactionsService {
         currency: dbTransaction.lpsFeeCurrency
       },
       state: dbTransaction.state,
+      previousState: dbTransaction.previousState,
       amount: {
         amount: dbTransaction.amount,
         currency: dbTransaction.currency
@@ -221,7 +224,11 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction> {
-    await this._knex('transactions').where(idType, id).first().update('state', state)
+    const transaction = await this.get(id, idType)
+    await this._knex('transactions').where(idType, id).first().update({
+      state,
+      previousState: transaction.state
+    })
 
     return this.get(id, idType)
   }

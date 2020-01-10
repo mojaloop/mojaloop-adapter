@@ -10,7 +10,8 @@ describe('Example test', function () {
       connection: {
         filename: ':memory:',
         supportBigNumbers: true
-      }
+      },
+      useNullAsDefault: true
     })
   })
 
