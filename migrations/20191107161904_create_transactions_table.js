@@ -6,6 +6,7 @@ exports.up = function (knex) {
       table.string('lpsKey')
       table.string('lpsId')
       table.string('state')
+      table.string('previousState').nullable()
       table.string('amount')
       table.string('currency', 3)
       table.string('expiration')

@@ -82,6 +82,7 @@ describe('Transactions Service', function () {
       lpsId: 'postillion',
       lpsKey: 'postillion:aef-123',
       state: TransactionState.transactionReceived,
+      previousState: null,
       amount: '10000',
       currency: 'USD',
       expiration: '1118045717',
@@ -147,7 +148,11 @@ describe('Transactions Service', function () {
 
     const transaction = await transactionsService.get(data.transactionRequestId, 'transactionRequestId')
 
-    expect(transaction).toMatchObject(data)
+    expect(transaction).toMatchObject({
+      ...data,
+      state: TransactionState.transactionReceived,
+      previousState: null
+    })
   })
 
   test('can update transactionId', async () => {
@@ -173,6 +178,17 @@ describe('Transactions Service', function () {
     expect(freshTransaction.payer.fspId).toBe('New_bank')
   })
 
+  test('can update transaction state', async () => {
+    const transaction = await transactionsService.create(TransactionRequestFactory.build())
+    expect(transaction.state).toBe(TransactionState.transactionReceived)
+    expect(transaction.previousState).toBeNull()
+
+    const updatedTransaction = await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.authSent)
+
+    expect(updatedTransaction.state).toBe(TransactionState.authSent)
+    expect(updatedTransaction.previousState).toBe(TransactionState.transactionReceived)
+  })
+
   describe('getByPayerMsisdn', () => {
     test('can get most recent transaction with transactionReceived state by MSISDN', async () => {
       const transactionRequest1 = TransactionRequestFactory.build({
@@ -190,8 +206,8 @@ describe('Transactions Service', function () {
           partyIdentifier: '987654321'
         }
       })
-      const transaction2 = await transactionsService.create(transactionRequest2)
-      await transactionsService.updateState(transaction2.transactionRequestId, 'transactionRequestId', TransactionState.transactionReceived)
+      await transactionsService.create(transactionRequest2)
+      const transaction2 = await transactionsService.updateState(transactionRequest2.transactionRequestId, 'transactionRequestId', TransactionState.transactionReceived)
       await knex('transactions').where('transactionRequestId', transaction2.transactionRequestId).first().update('created_at', '2020-01-09 14:41:10')
 
       const transaction = await transactionsService.getByPayerMsisdn('987654321')
