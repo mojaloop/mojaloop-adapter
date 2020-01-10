@@ -10,6 +10,8 @@ steps:
       - deployment
       - adaptor
       - 'adaptor-sha256=gcr.io/stellar-river-253807/adaptor:$SHORT_SHA'
+      - --namespace
+      - mojaloop
     env:
       - 'CLOUDSDK_COMPUTE_ZONE=europe-west2-a'
       - 'CLOUDSDK_CONTAINER_CLUSTER=iso-adaptor'
