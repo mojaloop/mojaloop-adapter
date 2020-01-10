@@ -65,10 +65,9 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     if (!db200) {
       throw new Error('Cannot Insert 0200 message')
     }
-
     const headers = {
-      'fspiop-destination': request.headers[`${transaction.payer.fspId}`],
-      'fspiop-source': request.headers[`${transaction.payer.fspId}`]
+      'fspiop-destination': `${transaction.payer.fspId}`,
+      'fspiop-source': `${transaction.payer.fspId}`
     }
 
     const authorizationsResponse: AuthorizationsIDPutResponse = {
@@ -84,8 +83,6 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
 
       throw new Error('Cannot Update  transaction state to financial request sent')
     }
-
-
     return h.response().code(200)
   } catch (error) {
     request.server.app.logger.error(`iso8583 Authorizations Requests Controller: Error creating transaction request. ${error.message}`)
