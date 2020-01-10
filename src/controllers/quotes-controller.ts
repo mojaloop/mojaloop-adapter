@@ -21,8 +21,8 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     }
 
     const headers = {
-      'fspiop-destination': request.headers[`${transaction.payer.fspId}`],
-      'fspiop-source': request.headers[`${transaction.payer.fspId}`],
+      'fspiop-destination': request.headers['fspiop-source'],
+      'fspiop-source': request.headers['fspiop-destination'],
       date: new Date().toUTCString(),
       'content-type': 'application/vnd.interoperability.quotes+json;version=1.0'
     }
