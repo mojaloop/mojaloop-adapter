@@ -50,7 +50,7 @@ describe('Transactions Service', function () {
         }
       },
       amount: {
-        amount: '10000',
+        amount: '000000010000',
         currency: 'USD'
       },
       lpsId: 'postillion',
@@ -82,7 +82,7 @@ describe('Transactions Service', function () {
       lpsId: 'postillion',
       lpsKey: 'postillion:aef-123',
       state: TransactionState.transactionReceived,
-      amount: '10000',
+      amount: '000000010000',
       currency: 'USD',
       expiration: '1118045717'
     })
@@ -165,10 +165,13 @@ describe('Transactions Service', function () {
     expect(freshTransaction.payer.fspId).toBe('New_bank')
   })
 
-  test('to check getByLpsKeyAndState', async () => {
+  test('can get by lpsKey and state', async () => {
     const transactionRequest = TransactionRequestFactory.build()
     const transaction = await transactionsService.create(transactionRequest)
     const transactiondb = await transactionsService.getByLpsKeyAndState(transaction.lpsKey, transaction.state)
+    if (!transactiondb) {
+      throw new Error('transaction by getByLpsKeyAndState does not exist')
+    }
 
     expect(transaction).toStrictEqual(transactiondb)
   })
