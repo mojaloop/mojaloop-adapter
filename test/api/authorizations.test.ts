@@ -43,7 +43,6 @@ describe('Authorizations api', function () {
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
     services.quotesService = new KnexQuotesService(knex, fakeHttpClient, 'secret', fakeLogger, 10000, calculateAdaptorFees)
-    services.quotesService.sendQuoteResponse = jest.fn()
     adaptor = await createApp(services)
 
     beforeEach(async () => {
@@ -55,7 +54,7 @@ describe('Authorizations api', function () {
         url: '/iso8583/transactionRequests',
         payload: { lpsKey: lpsKey, lpsId: lpsId, ...iso0100 }
       })
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(202)
 
       const putPartiesResponse = PartiesPutResponseFactory.build({
         party: {
@@ -95,7 +94,7 @@ describe('Authorizations api', function () {
           'fspiop-source': 'fspiop-destination'
         }
       })
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(202)
     })
   })
 
@@ -113,7 +112,7 @@ describe('Authorizations api', function () {
       method: 'GET',
       url: url
     })
-    expect(response1.statusCode).toEqual(200)
+    expect(response1.statusCode).toEqual(202)
   })
 
   describe('GET', () => {
@@ -124,7 +123,7 @@ describe('Authorizations api', function () {
       })
 
       const iso0110JsonMessage = await adaptor.app.isoMessagesService.get('123', lpsKey, '0110')
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(202)
       expect(iso0110JsonMessage[0]).toBe('0110')
       expect(iso0110JsonMessage[3]).toBe(iso0100[3])
       expect(iso0110JsonMessage[4]).toBe(iso0100[4])

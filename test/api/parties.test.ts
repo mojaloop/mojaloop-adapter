@@ -43,7 +43,7 @@ describe('Parties API', function () {
       url: '/iso8583/transactionRequests',
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(202)
   })
 
   afterEach(async () => {

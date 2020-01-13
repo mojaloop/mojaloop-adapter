@@ -51,7 +51,7 @@ describe('Quotes endpoint', function () {
       url: '/iso8583/transactionRequests',
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(202)
 
     // response comes in to update transactionId
     const putTransactionRequestResponse = await adaptor.inject({
@@ -90,7 +90,7 @@ describe('Quotes endpoint', function () {
         payload: quoteRequest
       })
 
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(202)
       expect(getTransactionSpy).toHaveBeenCalledWith('456', 'transactionId')
     })
 
@@ -113,7 +113,7 @@ describe('Quotes endpoint', function () {
         }
       })
 
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(202)
       const quote = await services.quotesService.get(quoteRequest.quoteId, 'id')
       expect(quote.id).toBe(quoteRequest.quoteId)
       expect(quote.condition).toBeDefined()
@@ -139,7 +139,7 @@ describe('Quotes endpoint', function () {
         }
       })
 
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(202)
       expect(services.MojaClient.putQuotes).toHaveBeenCalled()
     })
 
@@ -158,7 +158,7 @@ describe('Quotes endpoint', function () {
         }
       })
 
-      expect(response.statusCode).toBe(200)
+      expect(response.statusCode).toBe(202)
       const transaction = await services.transactionsService.get('456', 'transactionId')
       expect(transaction.state).toEqual(TransactionState.quoteResponded)
     })

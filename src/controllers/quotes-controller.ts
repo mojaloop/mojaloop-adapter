@@ -22,7 +22,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     await request.server.app.MojaClient.putQuotes(quote.id, quoteResponse, request.headers['fspiop-source'])
     await request.server.app.transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.quoteResponded)
 
-    return h.response().code(200)
+    return h.response().code(202)
   } catch (error) {
     const quoteRequest = request.payload as QuotesPostRequest
     request.server.app.logger.error(`Quotes Controller: Failed to give quote response for quoteId: ${quoteRequest.quoteId}. ${error.toString()}`)
