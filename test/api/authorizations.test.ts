@@ -43,7 +43,6 @@ describe('Authorizations api', function () {
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
     services.quotesService = new KnexQuotesService(knex, fakeHttpClient, 'secret', fakeLogger, 10000, calculateAdaptorFees)
-    services.quotesService.sendQuoteResponse = jest.fn()
     adaptor = await createApp(services)
 
     beforeEach(async () => {
