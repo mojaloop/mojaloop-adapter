@@ -36,8 +36,8 @@ export class TcpIsoMessagingClient implements IsoMessagingClient {
   }
 
   // PT:
-  // async sendFinancialResponse (data: { [k: string]: any }): Promise<void> { call this sendFinancialResponse
-  //   const buffer: Buffer = new IsoParser(data).getBufferMessage()
-  //   this.send(buffer)
-  // }
+  async sendFinancialResponse (data: { [k: string]: any }): Promise<void> { // call this sendFinancialResponse
+    const buffer: Buffer = new IsoParser(data).getBufferMessage()
+    this.send(buffer)
+  }
 }
