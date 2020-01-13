@@ -18,7 +18,7 @@ export async function handleIsoMessage (lpsId: string, data: Buffer, adaptor: Se
         url: '/iso8583/transactionRequests',
         payload: { lpsKey: lpsKey, lpsId, ...isoMessage }
       })
-      if (response.statusCode !== 200) {
+      if (response.statusCode !== 202) {
         throw new Error(response.statusMessage)
       }
       adaptor.app.logger.debug(`${lpsId} relay: Finished handling 0100 message...`)

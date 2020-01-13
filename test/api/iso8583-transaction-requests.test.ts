@@ -6,10 +6,10 @@ import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import Axios from 'axios'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
+const MLNumber = require('@mojaloop/ml-number')
 
 jest.mock('uuid/v4', () => () => '123')
 
-const MLNumber = require('@mojaloop/ml-number')
 const LPS_KEY = 'postillion:0100'
 const LPS_ID = 'postillion'
 
@@ -56,7 +56,7 @@ describe('Transaction Requests API', function () {
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
 
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(202)
     const storedIso0100 = await knex('isoMessages').first()
     expect(storedIso0100.lpsId).toBe(LPS_ID)
     expect(storedIso0100.lpsKey).toBe(LPS_KEY)
@@ -72,7 +72,7 @@ describe('Transaction Requests API', function () {
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
 
-    expect(response.statusCode).toEqual(200)
+    expect(response.statusCode).toEqual(202)
     const transaction = await services.transactionsService.get('123', 'transactionRequestId')
     expect(transaction).toMatchObject({
       transactionRequestId: '123',
@@ -89,7 +89,7 @@ describe('Transaction Requests API', function () {
       },
       amount: {
         amount: new MLNumber(iso0100[4]).toString(),
-        currency: iso0100[49]
+        currency: 'USD' // TODO: lookup iso0100[49]
       },
       transactionType: {
         initiator: 'PAYEE',
@@ -111,8 +111,8 @@ describe('Transaction Requests API', function () {
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
 
-    expect(response.statusCode).toEqual(200)
-    expect(services.accountLookupService.requestFspIdFromMsisdn).toHaveBeenCalledWith('123', iso0100[102])
+    expect(response.statusCode).toEqual(202)
+    expect(services.MojaClient.getParties).toHaveBeenCalledWith('MSISDN', iso0100[102], null)
   })
 
 })

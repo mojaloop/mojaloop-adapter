@@ -5,13 +5,14 @@ import * as TransactionRequestsController from './controllers/transaction-reques
 import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
-import { AccountLookUpService } from './services/account-lookup-service'
 import { IsoMessagingClient } from './services/iso-messaging-client'
 import { IsoMessageService } from './services/iso-message-service'
 import { QuotesService } from './services/quotes-service'
+import { AuthorizationsService } from './services/authorizations-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
 import { TransfersService } from 'services/transfers-service'
 import * as TransfersController from './controllers/transfers-controller'
+import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {
@@ -21,9 +22,10 @@ export type AdaptorConfig = {
 
 export type AdaptorServices = {
   transactionsService: TransactionsService;
-  accountLookupService: AccountLookUpService;
   isoMessagesService: IsoMessageService;
   quotesService: QuotesService;
+  authorizationsService: AuthorizationsService;
+  MojaClient: MojaloopRequests;
   logger?: Logger;
   transfersService: TransfersService;
 }
@@ -38,9 +40,10 @@ export type Logger = {
 declare module 'hapi' {
   interface ApplicationState {
     transactionsService: TransactionsService;
-    accountLookupService: AccountLookUpService;
     isoMessagesService: IsoMessageService;
     quotesService: QuotesService;
+    authorizationsService: AuthorizationsService;
+    MojaClient: MojaloopRequests;
     logger: Logger;
     isoMessagingClients: Map<string, IsoMessagingClient>;
     transfersService: TransfersService;
@@ -53,9 +56,10 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
 
   // register services
   adaptor.app.transactionsService = services.transactionsService
-  adaptor.app.accountLookupService = services.accountLookupService
   adaptor.app.isoMessagesService = services.isoMessagesService
   adaptor.app.quotesService = services.quotesService
+  adaptor.app.authorizationsService = services.authorizationsService
+  adaptor.app.MojaClient = services.MojaClient
   adaptor.app.isoMessagingClients = new Map()
   adaptor.app.transfersService = services.transfersService
   if (!services.logger) {
@@ -76,7 +80,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
           },
           authorizations: {
             '{ID}': {
-              put: () => 'dummy handler'
+              put: AuthorizationController.update
             }
           },
           transfers: {
