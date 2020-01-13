@@ -41,7 +41,7 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
 
     await client.sendAuthorizationRequest(iso110db)
 
-    return h.response().code(200)
+    return h.response().code(202)
   } catch (error) {
     request.server.app.logger.error(`Error creating Authorization transaction request. ${error.message}`)
     return h.response().code(500)
