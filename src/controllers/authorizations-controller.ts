@@ -83,7 +83,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
 
     return h.response().code(200)
   } catch (error) {
-    request.server.app.logger.error(`iso8583 Authorizations Requests Controller: Error creating transaction request. ${error.message}`)
+    request.server.app.logger.error(`iso8583 Authorizations Requests Controller: Error handling authorization response. ${error.message}`)
     return h.response().code(500)
   }
 }

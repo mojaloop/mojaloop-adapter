@@ -163,7 +163,7 @@ export class KnexTransactionsService implements TransactionsService {
   async getByLpsKeyAndState (lpsKey: string, state: string): Promise<Transaction> {
     const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').where('state', state).where('lpsKey', lpsKey).orderBy('created_at', 'desc').first()
     if (!dbTransaction) {
-      throw new Error('Error fetching transaction from database')
+      throw new Error(`Error fetching transaction from database for lps-key=${lpsKey} and state=${state}`)
     }
 
     return this.get(dbTransaction.transactionRequestId, 'transactionRequestId')
