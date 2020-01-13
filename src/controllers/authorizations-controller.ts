@@ -5,6 +5,7 @@ import { TransactionState } from '../services/transactions-service'
 
 export async function show (request: Request, h: ResponseToolkit): Promise <ResponseObject> {
   try {
+    request.server.app.logger.info('iso8583 Authorization Controller: Received authorization request from Mojaloop. query params:' + JSON.stringify(request.query))
     const transactionRequestID = request.params.ID
     const transactionsService = request.server.app.transactionsService
     const transaction = await transactionsService.get(transactionRequestID, 'transactionRequestId')
@@ -40,6 +41,7 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
     }
 
     await client.sendAuthorizationRequest(iso110db)
+    request.server.app.logger.debug('iso8583 Authorization Controller: Successfully sent authorization reqeust to LPS.')
 
     return h.response().code(202)
   } catch (error) {
