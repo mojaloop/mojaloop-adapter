@@ -239,8 +239,20 @@ describe('Transactions Service', function () {
       })
       const transaction = await transactionsService.create(transactionRequest)
       await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.transactionSent)
-
       await expect(transactionsService.getByPayerMsisdn('987654321')).rejects.toThrow()
+
+    })
+
+    test('test for find incomplete transactions', async () => {
+
+      const transaction = await transactionsService.create(TransactionRequestFactory.build())
+      const incompleteTransaction = await transactionsService.findIncompleteTransactions(transaction.lpsKey)
+      if (incompleteTransaction != null) {
+        expect(incompleteTransaction.state).not.toBe(TransactionState.transactionCancelled)
+        expect(incompleteTransaction.state).not.toBe(TransactionState.transactionDeclined)
+        expect(incompleteTransaction.state).not.toBe(TransactionState.transactionResponded)
+
+      }
     })
   })
 })
