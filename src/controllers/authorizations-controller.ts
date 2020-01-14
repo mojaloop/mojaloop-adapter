@@ -37,8 +37,10 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
       throw new Error('Client not registered')
     }
 
+    request.server.app.logger.debug('Sending authorization request to LPS: ' + JSON.stringify(iso0110))
+
     await client.sendAuthorizationRequest(iso0110)
-    request.server.app.logger.debug('iso8583 Authorization Controller: Successfully sent authorization reqeust to LPS.')
+    request.server.app.logger.debug('iso8583 Authorization Controller: Successfully sent authorization request to LPS.')
 
     return h.response().code(202)
   } catch (error) {
