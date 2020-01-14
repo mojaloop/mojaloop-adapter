@@ -1,5 +1,4 @@
 import Knex from 'knex'
-import Axios, { AxiosInstance } from 'axios'
 import { KnexQuotesService, DBQuote } from '../../src/services/quotes-service'
 import { Money } from '../../src/types/mojaloop'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
@@ -7,8 +6,6 @@ import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 describe('Quotes service', function () {
   let knex: Knex
   let quotesService: KnexQuotesService
-  const fakeHttpClient: AxiosInstance = Axios.create()
-  fakeHttpClient.get = jest.fn()
 
   beforeAll(async () => {
     knex = Knex({
@@ -20,7 +17,7 @@ describe('Quotes service', function () {
       useNullAsDefault: true
     })
     const fakeLogger = { log: jest.fn() }
-    quotesService = new KnexQuotesService(knex, fakeHttpClient, 'secret', fakeLogger)
+    quotesService = new KnexQuotesService(knex, 'secret', fakeLogger)
   })
 
   beforeEach(async () => {
