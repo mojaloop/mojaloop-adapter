@@ -62,9 +62,11 @@ describe('Transfers Controller', function () {
   })
 
   describe('POST', () => {
-    test('can create a new transfer from Transfer Post Request', async () => {
-      // create transfer post request
-      const payload: TransfersPostRequest = TransferPostRequestFactory.build()
+    let payload: TransfersPostRequest
+    let transfer: Transfer
+
+    beforeEach(async () => {
+      payload = TransferPostRequestFactory.build()
 
       // add to request object as payload && send to create function
       const response = await adaptor.inject({
@@ -72,10 +74,14 @@ describe('Transfers Controller', function () {
         url: '/transfers',
         payload: payload
       })
+      transfer = await services.transfersService.get(payload.transferId)
 
       // verify the response code is 200
       expect(response.statusCode).toEqual(200)
 
+    })
+
+    test('can create a new transfer from Transfer Post Request', async () => {
       // verify newly created transfer matches what was expected
       const dbTransfer = await knex<DBTransfer>('transfers').where('transferId', payload.transferId).first()
       const data: DBTransfer = {
@@ -91,38 +97,11 @@ describe('Transfers Controller', function () {
     })
 
     test('returns valid fulfilment', async () => {
-      // create transfer post request
-      const payload: TransfersPostRequest = TransferPostRequestFactory.build()
-
-      // add to request object as payload && send to create function
-      const response = await adaptor.inject({
-        method: 'POST',
-        url: '/transfers',
-        payload: payload
-      })
-      const transfer = await services.transfersService.get(payload.transferId)
-
-      // verify the response code is 200
-      expect(response.statusCode).toEqual(200)
-
       // expect putTransfers to have been called once
       expect(services.MojaClient.putTransfers).toHaveBeenCalledWith(transfer.transferId, { fulfilment: transfer.fulfilment }, payload.payerFsp)
     })
 
     test('updates transactionState by transactionId', async () => {
-      // create transfer post request
-      const payload: TransfersPostRequest = TransferPostRequestFactory.build()
-
-      // add to request object as payload && send to create function
-      const response = await adaptor.inject({
-        method: 'POST',
-        url: '/transfers',
-        payload: payload
-      })
-
-      // verify the response code is 200
-      expect(response.statusCode).toEqual(200)
-
       // transactionState must be 'fulfilment sent'
       const transfer: Transfer = await services.transfersService.get(payload.transferId)
       const transaction: Transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
@@ -131,20 +110,19 @@ describe('Transfers Controller', function () {
   })
 
   describe('PUT', () => {
-    test('creates new Iso0210 message', async () => {
-      // create transfer post request
-      const payload: TransfersPostRequest = TransferPostRequestFactory.build()
+    let payload: TransfersPostRequest
+    let transfer: Transfer
+    let transaction: Transaction
 
-      // send request to POST route function
+    beforeEach(async () => {
+      payload = TransferPostRequestFactory.build()
+
+      // add to request object as payload && send to create function
       await adaptor.inject({
         method: 'POST',
         url: '/transfers',
         payload: payload
       })
-
-      // get transfer and transaction
-      const transfer: Transfer = await services.transfersService.get(payload.transferId)
-      const transaction: Transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
 
       // put transfer
       const response = await adaptor.inject({
@@ -156,6 +134,13 @@ describe('Transfers Controller', function () {
       // verify the response code is 200
       expect(response.statusCode).toEqual(200)
 
+      // get transfer and transaction
+      transfer = await services.transfersService.get(payload.transferId)
+      transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
+
+    })
+
+    test('creates new Iso0210 message', async () => {
       // must create new iso0210 message
       expect(await services.isoMessagesService.get(transfer.transactionRequestId, transaction.lpsKey, '0210')).toEqual({
         0: '0210',
@@ -169,26 +154,6 @@ describe('Transfers Controller', function () {
     })
 
     test('sends Financial Response to TCP relay', async () => {
-      // create transfer post request
-      const payload: TransfersPostRequest = TransferPostRequestFactory.build()
-
-      // send request to POST route function
-      await adaptor.inject({
-        method: 'POST',
-        url: '/transfers',
-        payload: payload
-      })
-
-      // put transfer
-      const response = await adaptor.inject({
-        method: 'PUT',
-        url: `/transfers/${payload.transferId}`,
-        payload: { transferState: '2dec0941-1345-44f4-b56d-ac5a448eb0c5' } // transfer.transactionRequestId
-      })
-
-      // verify the response code is 200
-      expect(response.statusCode).toEqual(200)
-
       // must create new iso0210 message
       expect(tcpIsoMessagingClient.sendFinancialResponse).toHaveBeenCalledWith({
         0: '0210',
@@ -198,29 +163,6 @@ describe('Transfers Controller', function () {
     })
 
     test('update Transaction State to Financial Response', async () => {
-      // create transfer post request
-      const payload: TransfersPostRequest = TransferPostRequestFactory.build()
-
-      // send request to POST route function
-      await adaptor.inject({
-        method: 'POST',
-        url: '/transfers',
-        payload: payload
-      })
-
-      // get transfer and transaction
-      const transfer: Transfer = await services.transfersService.get(payload.transferId)
-
-      // put transfer
-      const response = await adaptor.inject({
-        method: 'PUT',
-        url: `/transfers/${payload.transferId}`,
-        payload: { transferState: '2dec0941-1345-44f4-b56d-ac5a448eb0c5' } // transfer.transactionRequestId
-      })
-
-      // verify the response code is 200
-      expect(response.statusCode).toEqual(200)
-
       // must create new iso0210 message
       const transaction: Transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
       expect(transaction.state).toEqual(TransactionState.financialResponse.toString())
