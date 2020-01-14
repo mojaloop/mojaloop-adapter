@@ -42,7 +42,6 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     get: jest.fn(),
     create: jest.fn(),
     updateTransferState: jest.fn(),
-    sendFulfilment: jest.fn(),
     calculateFulfilment: jest.fn()
   },
   authorizationsService: {

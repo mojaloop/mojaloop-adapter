@@ -1,6 +1,5 @@
 import Knex from 'knex'
 import { Money } from '../types/mojaloop'
-import { AxiosInstance } from 'axios'
 const logger = require('@mojaloop/central-services-logger')
 const MojaloopSDK = require('@mojaloop/sdk-standard-components')
 
@@ -38,13 +37,12 @@ export interface TransfersService {
   get(id: string): Promise<Transfer>;
   create(request: Transfer): Promise<Transfer>;
   updateTransferState(data: Transfer): Promise<Transfer>;
-  sendFulfilment(data: Transfer, payerFspId: string): Promise<void>;
   calculateFulfilment (ilpPacket: string): string;
 }
 
 export class KnexTransfersService implements TransfersService {
   private _ilp: IlpService
-  constructor (private _knex: Knex, private _client: AxiosInstance, _ilpSecret: string, private _logger?: any) {
+  constructor (private _knex: Knex, _ilpSecret: string, private _logger?: any) {
     this._ilp = new MojaloopSDK.Ilp({ secret: _ilpSecret, logger: _logger })
   }
 
@@ -92,23 +90,6 @@ export class KnexTransfersService implements TransfersService {
       .then(result => result)
 
     return this.get(data.transferId)
-  }
-
-  async sendFulfilment (data: Transfer, payerFspId: string): Promise<void> {
-    await this._client.put(`/transfers/${data.transferId}`, {
-      fulfilment: data.fulfilment,
-      completedTimestamp: new Date().toUTCString(),
-      transferState: TransferState.RESERVED.toString()
-    }, {
-      headers: {
-        'fspiop-source': process.env.ADAPTOR_FSP_ID || 'adaptor',
-        'fspiop-destination': payerFspId,
-        'content-type': 'application/vnd.interoperability.transfers+json;version=1.0',
-        accept: 'application/vnd.interoperability.transfers+json;version=1.0',
-        date: new Date().toUTCString()
-      }
-    })
-
   }
 
   calculateFulfilment (ilpPacket: string): string {

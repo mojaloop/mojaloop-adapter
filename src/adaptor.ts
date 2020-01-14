@@ -10,7 +10,7 @@ import { IsoMessageService } from './services/iso-message-service'
 import { QuotesService } from './services/quotes-service'
 import { AuthorizationsService } from './services/authorizations-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
-import { TransfersService } from 'services/transfers-service'
+import { TransfersService } from './services/transfers-service'
 import * as TransfersController from './controllers/transfers-controller'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 const CentralLogger = require('@mojaloop/central-services-logger')

@@ -32,7 +32,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     await request.server.app.transfersService.create(transfer)
 
     // return fulfilment
-    await request.server.app.transfersService.sendFulfilment(transfer, payload.payerFsp)
+    await request.server.app.MojaClient.putTransfers(transfer.transferId, { fulfilment: transfer.fulfilment }, payload.payerFsp)
 
     // update trxState -> enum.fulfilmentSent
     await request.server.app.transactionsService.updateState(dataElement.transactionId, 'transactionId', TransactionState.fulfillmentSent.toString())
@@ -59,24 +59,10 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     // create 0210
     const iso0210 = {
       0: '0210',
-      // 3: iso0200[3],
-      // 4: iso0200[4],
-      // 7: iso0200[7],
-      // 11: iso0200[11],
-      // 28: iso0200[28],
-      // 37: iso0200[37],
       39: '00',
-      // 41: iso0200[41],
-      // 42: iso0200[42],
-      // 49: iso0200[49],
-      // 102: iso0200[102],
-      // 103: iso0200[103],
       127.2: iso0200[127.2]
     }
-    const iso210db = await request.server.app.isoMessagesService.create(transfer.transactionRequestId, transaction.lpsKey, transaction.lpsId, iso0210)
-    if (!iso210db) {
-      throw new Error('Error creating transfer.')
-    }
+    request.server.app.isoMessagesService.create(transfer.transactionRequestId, transaction.lpsKey, transaction.lpsId, iso0210)
 
     // use lspId to find correct tcp relay
     const client = request.server.app.isoMessagingClients.get(transaction.lpsId)
@@ -86,7 +72,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     }
 
     // send financial response to tcp relay
-    await client.sendFinancialResponse(iso210db)
+    await client.sendFinancialResponse(iso0210)
 
     // update transaction state to COMPLETED, ie. financialResponse
     await request.server.app.transactionsService.updateState(transfer.transactionRequestId, 'transactionRequestId', TransactionState.financialResponse.toString())

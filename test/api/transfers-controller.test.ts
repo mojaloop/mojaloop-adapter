@@ -36,8 +36,7 @@ describe('Transfers Controller', function () {
     const httpClient = Axios.create()
     services.transactionsService = new KnexTransactionsService(knex, httpClient)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
-    services.transfersService = new KnexTransfersService(knex, httpClient, 'secret')
-    services.transfersService.sendFulfilment = jest.fn().mockResolvedValue(undefined)
+    services.transfersService = new KnexTransfersService(knex, 'secret')
     services.isoMessagesService = new KnexIsoMessageService(knex)
     adaptor = await createApp(services)
   })
@@ -105,8 +104,8 @@ describe('Transfers Controller', function () {
     // verify the response code is 200
     expect(response.statusCode).toEqual(200)
 
-    // expect sendFulfilment to have been called once
-    expect(services.transfersService.sendFulfilment).toHaveBeenCalledWith(transfer, payload.payerFsp)
+    // expect putTransfers to have been called once
+    expect(services.MojaClient.putTransfers).toHaveBeenCalledWith(transfer.transferId, { fulfilment: transfer.fulfilment }, payload.payerFsp)
   })
 
   test('updates transactionState by transactionId', async () => {
@@ -191,10 +190,6 @@ describe('Transfers Controller', function () {
     expect(tcpIsoMessagingClient.sendFinancialResponse).toHaveBeenCalledWith({
       0: '0210',
       39: '00',
-      id: 2,
-      transactionRequestId: transactionRequestId,
-      lpsKey: 'postillion:aef-123',
-      lpsId: 'postillion',
       127.2: '000319562'
     })
   })

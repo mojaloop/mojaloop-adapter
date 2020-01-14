@@ -51,22 +51,19 @@ const quotesClient: AxiosInstance = axios.create({
 })
 const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET, console, Number(QUOTE_EXPIRATION_WINDOW))
 
-const transfersClient: AxiosInstance = axios.create({
-  baseURL: TRANSFERS_URL,
-  timeout: 3000
-})
-const transfersService = new KnexTransfersService(knex, transfersClient, ILP_SECRET)
+const transfersService = new KnexTransfersService(knex, ILP_SECRET)
+
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
   timeout: 3000
 })
-
 const authorizationsService = new KnexAuthorizationsService(knex, AuthorizationsClient)
 const MojaClient = new MojaloopRequests({
   logger: console,
   dfspId: ADAPTOR_FSP_ID,
   quotesEndpoint: QUOTE_REQUESTS_URL,
   alsEndpoint: ACCOUNT_LOOKUP_URL,
+  transfersEndpoint: TRANSFERS_URL,
   jwsSign: false,
   tls: { outbound: { mutualTLS: { enabled: false } } },
   wso2Auth: {
