@@ -243,16 +243,20 @@ describe('Transactions Service', function () {
 
     })
 
-    test('test for find incomplete transactions', async () => {
+    test('can find incomplete transactions', async () => {
 
       const transaction = await transactionsService.create(TransactionRequestFactory.build())
       const incompleteTransaction = await transactionsService.findIncompleteTransactions(transaction.lpsKey)
-      if (incompleteTransaction != null) {
-        expect(incompleteTransaction.state).not.toBe(TransactionState.transactionCancelled)
-        expect(incompleteTransaction.state).not.toBe(TransactionState.transactionDeclined)
-        expect(incompleteTransaction.state).not.toBe(TransactionState.transactionResponded)
+      expect(incompleteTransaction).toStrictEqual(transaction) // so yhou know it exists
+      expect(incompleteTransaction!.transactionRequestId).toEqual(transaction.transactionRequestId)
+    })
 
-      }
+    test('returns null if there are no incomplete transactions ', async () => {
+
+      const transaction = await transactionsService.create(TransactionRequestFactory.build())
+      await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.transactionResponded)
+      const incompleteTransaction = await transactionsService.findIncompleteTransactions(transaction.lpsKey)
+      expect(incompleteTransaction).toBe(null)
     })
   })
 })
