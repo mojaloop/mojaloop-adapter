@@ -78,6 +78,10 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     // send financial response to tcp relay
     await client.sendFinancialResponse(iso0210)
 
+    // todo: set transfer state to committed
+    transfer.transferState = TransferState.COMMITTED.toString()
+    await request.server.app.transfersService.updateTransferState(transfer)
+
     // update transaction state to COMPLETED, ie. financialResponse
     await request.server.app.transactionsService.updateState(transfer.transactionRequestId, 'transactionRequestId', TransactionState.financialResponse.toString())
 
