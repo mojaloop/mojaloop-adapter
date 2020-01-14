@@ -37,6 +37,10 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     // update trxState -> enum.fulfilmentSent
     await request.server.app.transactionsService.updateState(dataElement.transactionId, 'transactionId', TransactionState.fulfillmentSent.toString())
 
+    // update transfer state to committed
+    transfer.transferState = TransferState.COMMITTED.toString()
+    await request.server.app.transfersService.updateTransferState(transfer)
+
     return h.response().code(200)
 
   } catch (e) {

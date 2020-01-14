@@ -83,7 +83,7 @@ describe('Transfers Controller', function () {
         quoteId: '20508493-1458-4ac0-a824-d4b07e37d7b3',
         transactionRequestId: transactionRequestId,
         fulfilment: services.transfersService.calculateFulfilment(payload.ilpPacket),
-        transferState: TransferState.RECEIVED.toString(),
+        transferState: TransferState.COMMITTED.toString(),
         amount: payload.amount.amount,
         currency: payload.amount.currency
       }
