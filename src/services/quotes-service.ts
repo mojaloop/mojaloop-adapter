@@ -52,7 +52,7 @@ export interface QuotesService {
 
 export class KnexQuotesService implements QuotesService {
   private _ilp: IlpService
-  constructor (private _knex: Knex, private _client: AxiosInstance, _ilpSecret: string, private _logger?: any, private _expirationWindow = 10000, private _calculateAdaptorFees?: (amount: Money) => Promise<Money>) {
+  constructor (private _knex: Knex, _ilpSecret: string, private _logger?: any, private _expirationWindow = 10000, private _calculateAdaptorFees?: (amount: Money) => Promise<Money>) {
     this._ilp = new MojaloopSDK.Ilp({ secret: _ilpSecret, logger: _logger })
   }
 
