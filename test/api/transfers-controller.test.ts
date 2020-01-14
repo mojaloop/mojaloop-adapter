@@ -199,35 +199,32 @@ describe('Transfers Controller', function () {
     })
   })
 
-  // test('update Transaction State to Financial Response', async () => {
+  test('update Transaction State to Financial Response', async () => {
+    // create transfer post request
+    const payload: TransfersPostRequest = TransferPostRequestFactory.build()
 
-  // })
+    // send request to POST route function
+    await adaptor.inject({
+      method: 'POST',
+      url: '/transfers',
+      payload: payload
+    })
 
+    // get transfer and transaction
+    const transfer: Transfer = await services.transfersService.get(payload.transferId)
+
+    // put transfer
+    const response = await adaptor.inject({
+      method: 'PUT',
+      url: `/transfers/${payload.transferId}`,
+      payload: { transferState: '2dec0941-1345-44f4-b56d-ac5a448eb0c5' } // transfer.transactionRequestId
+    })
+
+    // verify the response code is 200
+    expect(response.statusCode).toEqual(200)
+
+    // must create new iso0210 message
+    const transaction: Transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
+    expect(transaction.state).toEqual(TransactionState.financialResponse.toString())
+  })
 })
-
-// export interface TransfersIDPutResponse {
-//   /**
-//    * Fulfilment of the condition specified with the transaction. Mandatory if transfer has completed successfully.
-//    */
-//   fulfilment?: string;
-//   /**
-//    * Time and date when the transaction was completed.
-//    */
-//   completedTimestamp?: string;
-//   /**
-//    * State of the transfer.
-//    */
-//   transferState: string;
-//   /**
-//    * Optional extension, specific to deployment.
-//    */
-//   extensionList?: ExtensionList;
-// }
-
-// { '0': '0210',
-// '39': '00',
-// id: 2,
-// transactionRequestId: transactionRequestId,
-// lpsKey: 'postillion:aef-123',
-// lpsId: 'postillion',
-// '127.2': '000319562' }
