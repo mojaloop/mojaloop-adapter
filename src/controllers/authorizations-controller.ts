@@ -28,11 +28,8 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
       127.2: iso0100[127.2]
     }
 
-    const iso110db = await isoMessageService.create(transactionRequestID, transaction.lpsKey, transaction.lpsId, iso0110)
+    await isoMessageService.create(transactionRequestID, transaction.lpsKey, transaction.lpsId, iso0110)
 
-    if (!iso110db) {
-      throw new Error('Error creating Authorization transaction request.')
-    }
     const client = request.server.app.isoMessagingClients.get(transaction.lpsId)
 
     if (!client) {
@@ -40,7 +37,7 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
       throw new Error('Client not registered')
     }
 
-    await client.sendAuthorizationRequest(iso110db)
+    await client.sendAuthorizationRequest(iso0110)
     request.server.app.logger.debug('iso8583 Authorization Controller: Successfully sent authorization reqeust to LPS.')
 
     return h.response().code(202)

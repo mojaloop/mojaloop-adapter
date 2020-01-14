@@ -134,7 +134,11 @@ describe('Authorizations api', function () {
       expect(iso0110JsonMessage.transactionRequestId).toBe('123')
       expect(iso0110JsonMessage.lpsKey).toBe(lpsKey)
       expect(iso0110JsonMessage.lpsId).toBe(lpsId)
-      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith(iso0110JsonMessage)
+      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith(expect.objectContaining({
+        0: '0110',
+        39: '00',
+        127.2: iso0110JsonMessage[127.2]
+      }))
     })
   })
 
