@@ -166,9 +166,38 @@ describe('Transfers Controller', function () {
     })
   })
 
-  // test('sends Financial Response to TCP relay', async () => {
+  test('sends Financial Response to TCP relay', async () => {
+    // create transfer post request
+    const payload: TransfersPostRequest = TransferPostRequestFactory.build()
 
-  // })
+    // send request to POST route function
+    await adaptor.inject({
+      method: 'POST',
+      url: '/transfers',
+      payload: payload
+    })
+
+    // put transfer
+    const response = await adaptor.inject({
+      method: 'PUT',
+      url: `/transfers/${payload.transferId}`,
+      payload: { transferState: '2dec0941-1345-44f4-b56d-ac5a448eb0c5' } // transfer.transactionRequestId
+    })
+
+    // verify the response code is 200
+    expect(response.statusCode).toEqual(200)
+
+    // must create new iso0210 message
+    expect(tcpIsoMessagingClient.sendFinancialResponse).toHaveBeenCalledWith({
+      0: '0210',
+      39: '00',
+      id: 2,
+      transactionRequestId: transactionRequestId,
+      lpsKey: 'postillion:aef-123',
+      lpsId: 'postillion',
+      127.2: '000319562'
+    })
+  })
 
   // test('update Transaction State to Financial Response', async () => {
 
