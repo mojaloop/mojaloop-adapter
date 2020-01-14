@@ -1,6 +1,7 @@
 import { Request, ResponseToolkit, ResponseObject } from 'hapi'
 import { ISO0100 } from 'types/iso-messages'
 import { Money, TransactionType, Party } from 'types/mojaloop'
+import { TransactionState } from '../../src/services/transactions-service'
 const uuid = require('uuid/v4')
 const MLNumber = require('@mojaloop/ml-number')
 
@@ -41,6 +42,10 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       currency: 'USD'
     }
 
+    const transaction = await request.server.app.transactionsService.findIncompleteTransactions(lpsKey)
+    if (transaction != null) {
+      transaction.state = TransactionState.transactionCancelled
+    }
     await request.server.app.transactionsService.create({ transactionRequestId, lpsId, lpsKey, payer: payer.partyIdInfo, payee, amount, lpsFee, transactionType, expiration, authenticationType: 'OTP' })
     await request.server.app.MojaClient.getParties(payer.partyIdInfo.partyIdType, payer.partyIdInfo.partyIdentifier, null)
     return h.response().code(202)
