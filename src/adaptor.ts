@@ -115,7 +115,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
         transfers: {
           post: TransfersController.create,
           '{ID}': {
-            put: () => 'dummy handler'
+            put: TransfersController.update
           }
         }
       }

@@ -5,7 +5,7 @@ import { KnexTransactionsService } from './services/transactions-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
-import { KnexTransfersService } from 'services/transfers-service'
+import { KnexTransfersService } from './services/transfers-service'
 import { KnexAuthorizationsService } from './services/authorizations-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 
@@ -59,6 +59,7 @@ const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
   timeout: 3000
 })
+
 const authorizationsService = new KnexAuthorizationsService(knex, AuthorizationsClient)
 const MojaClient = new MojaloopRequests({
   logger: console,

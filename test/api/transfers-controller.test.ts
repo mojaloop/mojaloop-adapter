@@ -1,4 +1,4 @@
-import Axios from 'axios'
+import Axios, { AxiosInstance } from 'axios'
 import { Server } from 'hapi'
 import Knex from 'knex'
 import { createApp } from '../../src/adaptor'
@@ -8,12 +8,20 @@ import { TransfersPostRequest } from '../../src/types/mojaloop'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
 import { TransferPostRequestFactory } from '../factories/transfer-post-request'
+import { KnexIsoMessageService } from '../../src/services/iso-message-service'
+import { ISO0200Factory } from '../factories/iso-messages'
+import { TcpIsoMessagingClient } from '../../src/services/iso-messaging-client'
+import { Socket } from 'net'
 
 describe('Transfers Controller', function () {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
   let adaptor: Server
   let transactionRequestId: string
+  const fakeHttpClient: AxiosInstance = Axios.create()
+  fakeHttpClient.get = jest.fn()
+  const tcpIsoMessagingClient = new TcpIsoMessagingClient(new Socket())
+  tcpIsoMessagingClient.sendFinancialResponse = jest.fn()
 
   beforeAll(async () => {
     knex = Knex({
@@ -30,17 +38,20 @@ describe('Transfers Controller', function () {
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.transfersService = new KnexTransfersService(knex, httpClient, 'secret')
     services.transfersService.sendFulfilment = jest.fn().mockResolvedValue(undefined)
+    services.isoMessagesService = new KnexIsoMessageService(knex)
     adaptor = await createApp(services)
-
   })
 
   beforeEach(async () => {
     await knex.migrate.latest()
     const request: TransactionRequest = TransactionRequestFactory.build()
-    await services.transactionsService.create(request)
+    const transaction: Transaction = await services.transactionsService.create(request)
     await services.transactionsService.updateTransactionId(request.transactionRequestId, 'transactionRequestId', '20508186-1458-4ac0-a824-d4b07e37d7b3')
     await services.transactionsService.updateState(request.transactionRequestId, 'transactionRequestId', TransactionState.financialRequestSent)
     transactionRequestId = request.transactionRequestId
+    const iso0200 = ISO0200Factory.build()
+    await services.isoMessagesService.create(transactionRequestId, transaction.lpsKey, transaction.lpsId, iso0200)
+    adaptor.app.isoMessagingClients.set(transaction.lpsId, tcpIsoMessagingClient)
   })
 
   afterEach(async () => {
@@ -118,4 +129,76 @@ describe('Transfers Controller', function () {
     expect(transaction.state).toEqual(TransactionState.fulfillmentSent.toString())
   })
 
+  test('creates new Iso0210 message', async () => {
+    // create transfer post request
+    const payload: TransfersPostRequest = TransferPostRequestFactory.build()
+
+    // send request to POST route function
+    await adaptor.inject({
+      method: 'POST',
+      url: '/transfers',
+      payload: payload
+    })
+
+    // get transfer and transaction
+    const transfer: Transfer = await services.transfersService.get(payload.transferId)
+    const transaction: Transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
+
+    // put transfer
+    const response = await adaptor.inject({
+      method: 'PUT',
+      url: `/transfers/${payload.transferId}`,
+      payload: { transferState: '2dec0941-1345-44f4-b56d-ac5a448eb0c5' } // transfer.transactionRequestId
+    })
+
+    // verify the response code is 200
+    expect(response.statusCode).toEqual(200)
+
+    // must create new iso0210 message
+    expect(await services.isoMessagesService.get(transfer.transactionRequestId, transaction.lpsKey, '0210')).toEqual({
+      0: '0210',
+      39: '00',
+      id: 2,
+      transactionRequestId: transactionRequestId,
+      lpsKey: 'postillion:aef-123',
+      lpsId: 'postillion',
+      127.2: '000319562'
+    })
+  })
+
+  // test('sends Financial Response to TCP relay', async () => {
+
+  // })
+
+  // test('update Transaction State to Financial Response', async () => {
+
+  // })
+
 })
+
+// export interface TransfersIDPutResponse {
+//   /**
+//    * Fulfilment of the condition specified with the transaction. Mandatory if transfer has completed successfully.
+//    */
+//   fulfilment?: string;
+//   /**
+//    * Time and date when the transaction was completed.
+//    */
+//   completedTimestamp?: string;
+//   /**
+//    * State of the transfer.
+//    */
+//   transferState: string;
+//   /**
+//    * Optional extension, specific to deployment.
+//    */
+//   extensionList?: ExtensionList;
+// }
+
+// { '0': '0210',
+// '39': '00',
+// id: 2,
+// transactionRequestId: transactionRequestId,
+// lpsKey: 'postillion:aef-123',
+// lpsId: 'postillion',
+// '127.2': '000319562' }
