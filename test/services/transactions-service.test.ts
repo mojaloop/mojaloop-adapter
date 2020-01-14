@@ -247,7 +247,7 @@ describe('Transactions Service', function () {
 
       const transaction = await transactionsService.create(TransactionRequestFactory.build())
       const incompleteTransaction = await transactionsService.findIncompleteTransactions(transaction.lpsKey)
-      expect(incompleteTransaction).toStrictEqual(transaction) // so yhou know it exists
+      expect(incompleteTransaction).toStrictEqual(transaction)
       expect(incompleteTransaction!.transactionRequestId).toEqual(transaction.transactionRequestId)
     })
 
