@@ -13,18 +13,7 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
     const iso0100 = await isoMessageService.get(transactionRequestID, transaction.lpsKey, '0100')
     const iso0110 = {
       0: '0110',
-      3: iso0100[3],
-      4: iso0100[4],
-      7: iso0100[7],
-      11: iso0100[11],
-      28: iso0100[28],
-      37: iso0100[37],
       39: '00',
-      41: iso0100[41],
-      42: iso0100[42],
-      49: iso0100[49],
-      102: iso0100[102],
-      103: iso0100[103],
       127.2: iso0100[127.2]
     }
 

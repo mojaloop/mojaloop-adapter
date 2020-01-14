@@ -125,20 +125,16 @@ describe('Authorizations api', function () {
       const iso0110JsonMessage = await adaptor.app.isoMessagesService.get('123', lpsKey, '0110')
       expect(response.statusCode).toBe(202)
       expect(iso0110JsonMessage[0]).toBe('0110')
-      expect(iso0110JsonMessage[3]).toBe(iso0100[3])
-      expect(iso0110JsonMessage[4]).toBe(iso0100[4])
-      expect(iso0110JsonMessage[28]).toBe(iso0100[28])
       expect(iso0110JsonMessage[39]).toBe('00')
-      expect(iso0110JsonMessage[49]).toBe(iso0100[49])
       expect(iso0110JsonMessage[127.2]).toBe(iso0100[127.2])
       expect(iso0110JsonMessage.transactionRequestId).toBe('123')
       expect(iso0110JsonMessage.lpsKey).toBe(lpsKey)
       expect(iso0110JsonMessage.lpsId).toBe(lpsId)
-      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith(expect.objectContaining({
+      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith({
         0: '0110',
         39: '00',
         127.2: iso0110JsonMessage[127.2]
-      }))
+      })
     })
   })
 
