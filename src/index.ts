@@ -45,11 +45,7 @@ const transcationRequestClient = axios.create({
 const transactionRequestService = new KnexTransactionsService(knex, transcationRequestClient)
 const isoMessagesService = new KnexIsoMessageService(knex)
 
-const quotesClient: AxiosInstance = axios.create({
-  baseURL: QUOTE_REQUESTS_URL,
-  timeout: 3000
-})
-const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET, console, Number(QUOTE_EXPIRATION_WINDOW))
+const quotesService = new KnexQuotesService(knex, ILP_SECRET, console, Number(QUOTE_EXPIRATION_WINDOW))
 
 const transfersService = new KnexTransfersService(knex, ILP_SECRET)
 
