@@ -5,6 +5,7 @@ import { TransactionState } from '../services/transactions-service'
 
 export async function show (request: Request, h: ResponseToolkit): Promise <ResponseObject> {
   try {
+    request.server.app.logger.info('iso8583 Authorization Controller: Received authorization request from Mojaloop. query params:' + JSON.stringify(request.query))
     const transactionRequestID = request.params.ID
     const transactionsService = request.server.app.transactionsService
     const transaction = await transactionsService.get(transactionRequestID, 'transactionRequestId')
@@ -12,26 +13,12 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
     const iso0100 = await isoMessageService.get(transactionRequestID, transaction.lpsKey, '0100')
     const iso0110 = {
       0: '0110',
-      3: iso0100[3],
-      4: iso0100[4],
-      7: iso0100[7],
-      11: iso0100[11],
-      28: iso0100[28],
-      37: iso0100[37],
       39: '00',
-      41: iso0100[41],
-      42: iso0100[42],
-      49: iso0100[49],
-      102: iso0100[102],
-      103: iso0100[103],
       127.2: iso0100[127.2]
     }
 
-    const iso110db = await isoMessageService.create(transactionRequestID, transaction.lpsKey, transaction.lpsId, iso0110)
+    await isoMessageService.create(transactionRequestID, transaction.lpsKey, transaction.lpsId, iso0110)
 
-    if (!iso110db) {
-      throw new Error('Error creating Authorization transaction request.')
-    }
     const client = request.server.app.isoMessagingClients.get(transaction.lpsId)
 
     if (!client) {
@@ -39,7 +26,10 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
       throw new Error('Client not registered')
     }
 
-    await client.sendAuthorizationRequest(iso110db)
+    request.server.app.logger.debug('Sending authorization request to LPS: ' + JSON.stringify(iso0110))
+
+    await client.sendAuthorizationRequest(iso0110)
+    request.server.app.logger.debug('iso8583 Authorization Controller: Successfully sent authorization request to LPS.')
 
     return h.response().code(202)
   } catch (error) {
@@ -81,7 +71,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
 
     return h.response().code(200)
   } catch (error) {
-    request.server.app.logger.error(`iso8583 Authorizations Requests Controller: Error creating transaction request. ${error.message}`)
+    request.server.app.logger.error(`iso8583 Authorizations Requests Controller: Error handling authorization response. ${error.message}`)
     return h.response().code(500)
   }
 }

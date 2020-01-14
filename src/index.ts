@@ -18,6 +18,7 @@ const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-reque
 const TRANSFERS_URL = process.env.TRANSFERS_URL || 'http://transfers.local'
 const AUTHORIZATIONS_URL = process.env.AUTHORIZATIONS_URL || 'http://authorizations.local'
 const ACCOUNT_LOOKUP_URL = process.env.ACCOUNT_LOOKUP_URL || 'http://account-lookup-service.local'
+const QUOTE_EXPIRATION_WINDOW = process.env.QUOTE_EXPIRATION_WINDOW || 10000
 const ILP_SECRET = process.env.ILP_SECRET || 'secret'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
@@ -48,7 +49,7 @@ const quotesClient: AxiosInstance = axios.create({
   baseURL: QUOTE_REQUESTS_URL,
   timeout: 3000
 })
-const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET)
+const quotesService = new KnexQuotesService(knex, quotesClient, ILP_SECRET, console, Number(QUOTE_EXPIRATION_WINDOW))
 
 const transfersClient: AxiosInstance = axios.create({
   baseURL: TRANSFERS_URL,
