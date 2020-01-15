@@ -93,7 +93,7 @@ describe('Transfers Controller', function () {
     })
 
     test('returns valid fulfilment', async () => {
-      // add to request object as payload && send to create function
+      Date.now = jest.fn().mockReturnValue(0)
       const response = await adaptor.inject({
         method: 'POST',
         url: '/transfers',
@@ -105,7 +105,7 @@ describe('Transfers Controller', function () {
       expect(response.statusCode).toEqual(200)
 
       // expect putTransfers to have been called once
-      expect(services.MojaClient.putTransfers).toHaveBeenCalledWith(transfer.transferId, { fulfilment: transfer.fulfilment, transferState: 'COMMITTED' }, payload.payerFsp)
+      expect(services.MojaClient.putTransfers).toHaveBeenCalledWith(transfer.transferId, { fulfilment: transfer.fulfilment, transferState: 'COMMITTED', completedTimestamp: new Date(Date.now()).toISOString() }, payload.payerFsp)
     })
 
     test('updates transactionState by transactionId', async () => {
