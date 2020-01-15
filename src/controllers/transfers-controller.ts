@@ -1,5 +1,5 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi'
-import { TransfersPostRequest } from 'types/mojaloop'
+import { TransfersPostRequest, TransfersIDPutResponse } from 'types/mojaloop'
 import { Transfer, TransferState } from '../services/transfers-service'
 import { TransactionState, Transaction } from '../services/transactions-service'
 
@@ -24,21 +24,24 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       quoteId: dataElement.quoteId,
       transactionRequestId: transactionRequestId,
       fulfilment: request.server.app.transfersService.calculateFulfilment(payload.ilpPacket),
-      transferState: TransferState.RECEIVED.toString(),
+      transferState: TransferState.received,
       amount: payload.amount
     }
 
     // persist transfer
     await request.server.app.transfersService.create(transfer)
 
-    // return fulfilment
-    await request.server.app.MojaClient.putTransfers(transfer.transferId, { fulfilment: transfer.fulfilment }, payload.payerFsp)
+    const transferResponse: TransfersIDPutResponse = {
+      fulfilment: transfer.fulfilment,
+      transferState: TransferState.committed
+    }
+    await request.server.app.MojaClient.putTransfers(transfer.transferId, transferResponse, payload.payerFsp)
 
     // update trxState -> enum.fulfilmentSent
-    await request.server.app.transactionsService.updateState(dataElement.transactionId, 'transactionId', TransactionState.fulfillmentSent.toString())
+    await request.server.app.transactionsService.updateState(dataElement.transactionId, 'transactionId', TransactionState.fulfillmentSent)
 
     // update transfer state to reserved
-    transfer.transferState = TransferState.RESERVED.toString()
+    transfer.transferState = TransferState.reserved
     await request.server.app.transfersService.updateTransferState(transfer)
 
     return h.response().code(200)
@@ -79,11 +82,11 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     await client.sendFinancialResponse(iso0210)
 
     // todo: set transfer state to committed
-    transfer.transferState = TransferState.COMMITTED.toString()
+    transfer.transferState = TransferState.committed
     await request.server.app.transfersService.updateTransferState(transfer)
 
     // update transaction state to COMPLETED, ie. financialResponse
-    await request.server.app.transactionsService.updateState(transfer.transactionRequestId, 'transactionRequestId', TransactionState.financialResponse.toString())
+    await request.server.app.transactionsService.updateState(transfer.transactionRequestId, 'transactionRequestId', TransactionState.financialResponse)
 
     return h.response().code(200)
 

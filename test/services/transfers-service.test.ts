@@ -54,7 +54,9 @@ describe('Transfers Service', function () {
   test('can fetch transfer by id', async () => {
     const data: Transfer = TransferFactory.build()
     await transfersService.create(data)
+
     const transfer = await transfersService.get(data.transferId)
+
     expect(transfer).toMatchObject(data)
   })
 
@@ -63,8 +65,10 @@ describe('Transfers Service', function () {
     await transfersService.create(data)
     const transfer = await transfersService.get(data.transferId)
     expect(transfer).toMatchObject(data)
-    data.transferState = TransferState.COMMITTED.toString()
+    data.transferState = TransferState.committed
+
     const updatedTransfer = await transfersService.updateTransferState(data)
+
     expect(updatedTransfer).toMatchObject(data)
   })
 

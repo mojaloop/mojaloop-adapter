@@ -85,7 +85,7 @@ describe('Transfers Controller', function () {
         quoteId: '20508493-1458-4ac0-a824-d4b07e37d7b3',
         transactionRequestId: transactionRequestId,
         fulfilment: services.transfersService.calculateFulfilment(payload.ilpPacket),
-        transferState: TransferState.RESERVED.toString(),
+        transferState: TransferState.reserved,
         amount: payload.amount.amount,
         currency: payload.amount.currency
       }
@@ -105,7 +105,7 @@ describe('Transfers Controller', function () {
       expect(response.statusCode).toEqual(200)
 
       // expect putTransfers to have been called once
-      expect(services.MojaClient.putTransfers).toHaveBeenCalledWith(transfer.transferId, { fulfilment: transfer.fulfilment }, payload.payerFsp)
+      expect(services.MojaClient.putTransfers).toHaveBeenCalledWith(transfer.transferId, { fulfilment: transfer.fulfilment, transferState: 'COMMITTED' }, payload.payerFsp)
     })
 
     test('updates transactionState by transactionId', async () => {
@@ -122,7 +122,7 @@ describe('Transfers Controller', function () {
 
       // transactionState must be 'fulfilment sent'
       const transaction: Transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
-      expect(transaction.state).toEqual(TransactionState.fulfillmentSent.toString())
+      expect(transaction.state).toEqual(TransactionState.fulfillmentSent)
     })
   })
 
@@ -207,7 +207,7 @@ describe('Transfers Controller', function () {
       transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
 
       // must create new iso0210 message
-      expect(transaction.state).toEqual(TransactionState.financialResponse.toString())
+      expect(transaction.state).toEqual(TransactionState.financialResponse)
     })
   })
 })

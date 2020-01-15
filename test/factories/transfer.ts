@@ -11,5 +11,5 @@ export const TransferFactory = Factory.define<Transfer>('TransferFactory').attrs
   fulfilment: () => Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10),
   transferId: () => Faker.random.uuid(),
   quoteId: () => Faker.random.uuid(),
-  transferState: TransferState.RECEIVED.toString()
+  transferState: TransferState.received
 })

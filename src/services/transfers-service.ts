@@ -4,10 +4,10 @@ const logger = require('@mojaloop/central-services-logger')
 const MojaloopSDK = require('@mojaloop/sdk-standard-components')
 
 export enum TransferState {
-  'RECEIVED',
-  'RESERVED',
-  'COMMITTED',
-  'ABORTED'
+  received = 'RECEIVED',
+  reserved = 'RESERVED',
+  committed = 'COMMITTED',
+  aborted = 'ABORTED'
 }
 
 export type DBTransfer = {
