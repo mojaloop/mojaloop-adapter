@@ -6,6 +6,7 @@ import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import Axios from 'axios'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
+import { TransactionRequestFactory } from '../factories/transaction-requests'
 const MLNumber = require('@mojaloop/ml-number')
 
 jest.mock('uuid/v4', () => () => '123')
@@ -110,9 +111,22 @@ describe('Transaction Requests API', function () {
       url: '/iso8583/transactionRequests',
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
-
     expect(response.statusCode).toEqual(202)
     expect(services.MojaClient.getParties).toHaveBeenCalledWith('MSISDN', iso0100[102], null)
   })
 
+  test('check for incomplete transactions', async () => {
+    const transaction = await services.transactionsService.create(TransactionRequestFactory.build())
+    const iso0100 = ISO0100Factory.build()
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/iso8583/transactionRequests',
+      payload: { lpsKey: 'postillion:aef-123', lpsId: LPS_ID, ...iso0100 }
+    })
+    expect(response.statusCode).toEqual(202)
+
+    const transactionIncomplete = await services.transactionsService.get(transaction.transactionRequestId, 'transactionRequestId')
+
+    expect(transactionIncomplete.state).toBe(TransactionState.transactionCancelled)
+  })
 })
