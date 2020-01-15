@@ -44,7 +44,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 
     const transaction = await request.server.app.transactionsService.findIncompleteTransactions(lpsKey)
     if (transaction != null) {
-      transaction.state = TransactionState.transactionCancelled
+      await request.server.app.transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.transactionCancelled)
     }
     await request.server.app.transactionsService.create({ transactionRequestId, lpsId, lpsKey, payer: payer.partyIdInfo, payee, amount, lpsFee, transactionType, expiration, authenticationType: 'OTP' })
     await request.server.app.MojaClient.getParties(payer.partyIdInfo.partyIdType, payer.partyIdInfo.partyIdentifier, null)
