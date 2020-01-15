@@ -1,7 +1,7 @@
 import { Request, ResponseToolkit, ResponseObject } from 'hapi'
-import { ISO0100 } from 'types/iso-messages'
-import { Money, TransactionType, Party } from 'types/mojaloop'
-import { TransactionState } from '../../src/services/transactions-service'
+import { ISO0100 } from '../types/iso-messages'
+import { Money, TransactionType, Party } from '../types/mojaloop'
+import { TransactionState } from '../services/transactions-service'
 const uuid = require('uuid/v4')
 const MLNumber = require('@mojaloop/ml-number')
 
