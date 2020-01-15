@@ -33,7 +33,8 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 
     const transferResponse: TransfersIDPutResponse = {
       fulfilment: transfer.fulfilment,
-      transferState: TransferState.committed
+      transferState: TransferState.committed,
+      completedTimestamp: (new Date(Date.now())).toUTCString()
     }
     await request.server.app.MojaClient.putTransfers(transfer.transferId, transferResponse, payload.payerFsp)
 
