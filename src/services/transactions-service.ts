@@ -16,7 +16,9 @@ export enum TransactionState {
   transferReceived = '0A',
   fulfillmentSent = '0B',
   fulfillmentResponse = '0C',
-  financialResponse = '0D'
+  financialResponse = '0D',
+  transactionDeclined = '0E',
+  transactionCancelled = '0F'
 }
 
 export type DBTransactionParty = {
@@ -92,6 +94,7 @@ export interface TransactionsService {
   updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
   getByPayerMsisdn (msisdn: string): Promise<Transaction>;
+  findIncompleteTransactions (lpsKey: string): Promise<Transaction|null>;
 }
 export class KnexTransactionsService implements TransactionsService {
   constructor (private _knex: Knex, private _client: AxiosInstance) {
@@ -263,5 +266,13 @@ export class KnexTransactionsService implements TransactionsService {
     }
 
     return this.get(transaction.transactionRequestId, 'transactionRequestId')
+  }
+
+  async findIncompleteTransactions (lpsKey: string): Promise<Transaction|null> {
+    const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').whereNot('state', TransactionState.transactionDeclined).whereNot('state', TransactionState.transactionCancelled).whereNot('state', TransactionState.transactionResponded).where('lpsKey', lpsKey).orderBy('created_at', 'desc').first()
+    if (!dbTransaction) {
+      return null
+    }
+    return this.get(dbTransaction.transactionRequestId, 'transactionRequestId')
   }
 }
