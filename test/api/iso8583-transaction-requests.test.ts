@@ -118,15 +118,15 @@ describe('Transaction Requests API', function () {
   test('check for incomplete transactions', async () => {
     const transaction = await services.transactionsService.create(TransactionRequestFactory.build())
     const iso0100 = ISO0100Factory.build()
-
     const response = await adaptor.inject({
       method: 'POST',
       url: '/iso8583/transactionRequests',
       payload: { lpsKey: 'postillion:aef-123', lpsId: LPS_ID, ...iso0100 }
     })
     expect(response.statusCode).toEqual(202)
+
     const transactionIncomplete = await services.transactionsService.get(transaction.transactionRequestId, 'transactionRequestId')
+
     expect(transactionIncomplete.state).toBe(TransactionState.transactionCancelled)
   })
-
 })
