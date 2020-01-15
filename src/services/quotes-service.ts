@@ -1,4 +1,3 @@
-import { AxiosInstance } from 'axios'
 import Knex from 'knex'
 import { QuotesPostRequest, Money } from '../types/mojaloop'
 const MlNumber = require('@mojaloop/ml-number')
