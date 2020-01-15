@@ -2,6 +2,7 @@ import { Socket } from 'net'
 const IsoParser = require('iso_8583')
 export interface IsoMessagingClient {
   sendAuthorizationRequest: (data: { [k: string]: any }) => Promise<void>;
+  sendFinancialResponse (data: { [k: string]: any }): Promise<void>;
 }
 
 export class TcpIsoMessagingClient implements IsoMessagingClient {
@@ -31,6 +32,11 @@ export class TcpIsoMessagingClient implements IsoMessagingClient {
   }
 
   async sendAuthorizationRequest (data: { [k: string]: any }): Promise<void> {
+    const buffer: Buffer = new IsoParser(data).getBufferMessage()
+    this.send(buffer)
+  }
+
+  async sendFinancialResponse (data: { [k: string]: any }): Promise<void> {
     const buffer: Buffer = new IsoParser(data).getBufferMessage()
     this.send(buffer)
   }

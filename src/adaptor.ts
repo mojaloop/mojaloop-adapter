@@ -10,6 +10,8 @@ import { IsoMessageService } from './services/iso-message-service'
 import { QuotesService } from './services/quotes-service'
 import { AuthorizationsService } from './services/authorizations-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
+import { TransfersService } from './services/transfers-service'
+import * as TransfersController from './controllers/transfers-controller'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 const CentralLogger = require('@mojaloop/central-services-logger')
 
@@ -25,6 +27,7 @@ export type AdaptorServices = {
   authorizationsService: AuthorizationsService;
   MojaClient: MojaloopRequests;
   logger?: Logger;
+  transfersService: TransfersService;
 }
 
 export type Logger = {
@@ -43,6 +46,7 @@ declare module 'hapi' {
     MojaClient: MojaloopRequests;
     logger: Logger;
     isoMessagingClients: Map<string, IsoMessagingClient>;
+    transfersService: TransfersService;
   }
 }
 
@@ -57,6 +61,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.authorizationsService = services.authorizationsService
   adaptor.app.MojaClient = services.MojaClient
   adaptor.app.isoMessagingClients = new Map()
+  adaptor.app.transfersService = services.transfersService
   if (!services.logger) {
     adaptor.app.logger = CentralLogger
   }
@@ -108,9 +113,9 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
           }
         },
         transfers: {
-          post: () => 'dummy handler',
+          post: TransfersController.create,
           '{ID}': {
-            put: () => 'dummy handler'
+            put: TransfersController.update
           }
         }
       }
