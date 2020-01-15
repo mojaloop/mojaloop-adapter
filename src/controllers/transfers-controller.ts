@@ -7,6 +7,7 @@ const IlpPacket = require('ilp-packet')
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
+    request.server.app.logger.info('Transfers Controller: Received transfer request response. transferId: ' + request.params.ID + ' payload: ' + JSON.stringify(request.payload))
     const payload: TransfersPostRequest = request.payload as TransfersPostRequest
     const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
     const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
@@ -39,8 +40,8 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 
     return h.response().code(200)
 
-  } catch (e) {
-    console.log(e)
+  } catch (error) {
+    request.server.app.logger.error(`Transfers Controller: Error handling transfer request. ${error.message}`)
     return h.response().code(500)
   }
 
@@ -48,6 +49,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
 
 export async function update (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
+    request.server.app.logger.info('Transfers Controller: Received put transfer response. transferId: ' + request.params.ID + ' payload: ' + JSON.stringify(request.payload))
     const transferId = request.params.ID
     const transfer: Transfer = await request.server.app.transfersService.get(transferId)
     const transaction: Transaction = await request.server.app.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
@@ -66,6 +68,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
       throw new Error('Client not registered')
     }
 
+    request.server.app.logger.debug('Transfers Controller: Sending 0210 to LPS. ' + JSON.stringify(iso0210))
     await client.sendFinancialResponse(iso0210)
 
     transfer.transferState = TransferState.committed
@@ -76,7 +79,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     return h.response().code(200)
 
   } catch (error) {
-    request.server.app.logger.error(`Error creating financial response. ${error.message}`)
+    request.server.app.logger.error(`Transfers Controller: Error handling transfers put response. ${error.message}`)
     return h.response().code(500)
   }
 
