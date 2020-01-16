@@ -24,6 +24,7 @@ describe('Authorizations api', function () {
   const tcpIsoMessagingClient = new TcpIsoMessagingClient(new Socket())
   tcpIsoMessagingClient.sendAuthorizationRequest = jest.fn()
   const iso0100 = ISO0100Factory.build({
+    4: '000000010000',
     102: '0821234567'
   })
   const services = AdaptorServicesFactory.build()
@@ -83,6 +84,10 @@ describe('Authorizations api', function () {
       expect(putTransactionRequestResponse.statusCode).toBe(200)
 
       const quoteRequest = QuotesPostRequestFactory.build({
+        amount: {
+          amount: '100',
+          currency: 'USD'
+        },
         transactionId: '456'
       })
       response = await adaptor.inject({
@@ -132,7 +137,9 @@ describe('Authorizations api', function () {
       expect(iso0110JsonMessage.lpsId).toBe(lpsId)
       expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith({
         0: '0110',
+        30: 'D00000300',
         39: '00',
+        48: '100',
         127.2: iso0110JsonMessage[127.2]
       })
     })

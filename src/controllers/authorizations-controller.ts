@@ -2,22 +2,27 @@ import { Request, ResponseToolkit, ResponseObject } from 'hapi'
 import { ISO0200 } from 'types/iso-messages'
 import { AuthorizationsIDPutResponse } from 'types/mojaloop'
 import { TransactionState } from '../services/transactions-service'
+import { pad } from '../utils/util'
+
+const MLNumber = require('@mojaloop/ml-number')
 
 export async function show (request: Request, h: ResponseToolkit): Promise <ResponseObject> {
   try {
     request.server.app.logger.info('iso8583 Authorization Controller: Received authorization request from Mojaloop. query params:' + JSON.stringify(request.query))
     const transactionRequestID = request.params.ID
-    const transactionsService = request.server.app.transactionsService
+    const { transactionsService, quotesService, isoMessagesService } = request.server.app
     const transaction = await transactionsService.get(transactionRequestID, 'transactionRequestId')
-    const isoMessageService = request.server.app.isoMessagesService
-    const iso0100 = await isoMessageService.get(transactionRequestID, transaction.lpsKey, '0100')
-    const iso0110 = {
+    const quote = await quotesService.get(transaction.transactionRequestId, 'transactionRequestId')
+    const iso0100 = await isoMessagesService.get(transactionRequestID, transaction.lpsKey, '0100')
+    const iso0110 = { // TODO: this format is specific to the ATM driver we are using now. The DB and adaptor-tcp-client interface need to be refactored.
       0: '0110',
+      30: 'D' + pad(new MLNumber(quote.fees.amount).add(quote.commission.amount).multiply(100).toString(), 8, '0'),
       39: '00',
+      48: quote.amount.amount,
       127.2: iso0100[127.2]
     }
 
-    await isoMessageService.create(transactionRequestID, transaction.lpsKey, transaction.lpsId, iso0110)
+    await isoMessagesService.create(transactionRequestID, transaction.lpsKey, transaction.lpsId, iso0110)
 
     const client = request.server.app.isoMessagingClients.get(transaction.lpsId)
 

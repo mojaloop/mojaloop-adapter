@@ -1,21 +1,7 @@
 import { Factory } from 'rosie'
 import Faker from 'faker'
 import { ISO0100, ISO0110, ISO0200 } from '../../src/types/iso-messages'
-
-function pad (value: string, length: number, char: string) {
-  if (value.length >= length) {
-    return value.substring(0, length)
-  }
-
-  const diff = length - value.length
-  let padding = ''
-
-  for (let i = 0; i < diff; i++) {
-    padding += char
-  }
-
-  return padding + value
-}
+import { pad } from '../../src/utils/util'
 
 function generateField7 (): string {
   const now = new Date(Date.now())
