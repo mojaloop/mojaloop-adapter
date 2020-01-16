@@ -90,7 +90,7 @@ export interface TransactionsService {
   getByLpsKeyAndState(lpsKey: string, state: string): Promise<Transaction>;
   create (request: TransactionRequest): Promise<Transaction>;
   updatePayerFspId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
-  updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
+  updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', transactionId: string): Promise<Transaction>;
   updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
   getByPayerMsisdn (msisdn: string): Promise<Transaction>;

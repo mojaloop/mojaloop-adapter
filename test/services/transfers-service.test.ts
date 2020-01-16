@@ -1,4 +1,4 @@
-import { KnexTransfersService, Transfer } from '../../src/services/transfers-service'
+import { KnexTransfersService, Transfer, TransferState } from '../../src/services/transfers-service'
 import Axios, { AxiosInstance } from 'axios'
 import Knex from 'knex'
 import { TransferFactory } from '../factories/transfer'
@@ -19,7 +19,7 @@ describe('Transfers Service', function () {
       useNullAsDefault: true
     })
 
-    transfersService = new KnexTransfersService(knex, fakeHttpClient)
+    transfersService = new KnexTransfersService(knex, 'secret')
   })
 
   beforeEach(async () => {
@@ -35,36 +35,40 @@ describe('Transfers Service', function () {
   })
 
   test('can create a transfer request', async () => {
-    const data: Transfer = TransferFactory.build();
+    const data: Transfer = TransferFactory.build()
     const transfer = await transfersService.create(data)
-    const dbTransfer = await knex('transfers').where('id', data.id).first()
+    const dbTransfer = await knex('transfers').where('transferId', data.transferId).first()
     expect(dbTransfer).toBeDefined()
     expect(dbTransfer).toMatchObject({
       transactionRequestId: data.transactionRequestId,
       amount: data.amount.amount,
       currency: data.amount.currency,
-      id: data.id,
+      transferId: data.transferId,
       quoteId: data.quoteId,
       fulfilment: data.fulfilment,
-      transferState: data.transferState,
+      transferState: data.transferState
     })
     expect(transfer).toMatchObject(data)
   })
 
   test('can fetch transfer by id', async () => {
-    const data: Transfer = TransferFactory.build();
+    const data: Transfer = TransferFactory.build()
     await transfersService.create(data)
-    const transfer = await transfersService.get(data.id)
+
+    const transfer = await transfersService.get(data.transferId)
+
     expect(transfer).toMatchObject(data)
   })
 
   test('can update the transfer state', async () => {
     const data: Transfer = TransferFactory.build()
     await transfersService.create(data)
-    const transfer = await transfersService.get(data.id)
+    const transfer = await transfersService.get(data.transferId)
     expect(transfer).toMatchObject(data)
-    data.transferState = 'must be modified'
+    data.transferState = TransferState.committed
+
     const updatedTransfer = await transfersService.updateTransferState(data)
+
     expect(updatedTransfer).toMatchObject(data)
   })
 

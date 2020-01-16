@@ -2,7 +2,7 @@
 exports.up = function (knex) {
   return knex.schema
     .createTable('transfers', function (table) {
-      table.string('id').primary()
+      table.string('transferId').primary()
       table.string('quoteId')
       table.foreign('quoteId').references('id').inTable('quotes')
       table.string('transactionRequestId')
