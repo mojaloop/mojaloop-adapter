@@ -5,9 +5,10 @@ import { TransactionState } from '../services/transactions-service'
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
     request.server.app.logger.info('Received POST quote request. headers: ' + JSON.stringify(request.headers) + ' payload: ' + JSON.stringify(request.payload))
-    const quoteRequest = request.payload as QuotesPostRequest
+    const payload = request.payload as QuotesPostRequest
 
-    const transaction = await request.server.app.transactionsService.get(quoteRequest.transactionId, 'transactionId')
+    const transaction = await request.server.app.transactionsService.get(payload.transactionId, 'transactionId')
+    const quoteRequest = { transactionRequestId: transaction.transactionRequestId, ...payload }
     const lpsFees = transaction.lpsFee
     const adaptorFees = await request.server.app.quotesService.calculateAdaptorFees(transaction.amount) // TODO: should it be calculated on transaction amount + lpsFee?
 

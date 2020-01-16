@@ -2,6 +2,7 @@ exports.up = function (knex) {
   return knex.schema
     .createTable('quotes', function (table) {
       table.string('id').primary()
+      table.string('transactionRequestId')
       table.string('transactionId')
       table.string('amount')
       table.string('amountCurrency', 3)

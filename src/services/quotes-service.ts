@@ -1,4 +1,3 @@
-import { AxiosInstance } from 'axios'
 import Knex from 'knex'
 import { QuotesPostRequest, Money } from '../types/mojaloop'
 const MlNumber = require('@mojaloop/ml-number')
@@ -6,6 +5,7 @@ const MojaloopSDK = require('@mojaloop/sdk-standard-components')
 
 export type DBQuote = {
   id: string;
+  transactionRequestId: string;
   transactionId: string;
   state: string;
   amount: string;
@@ -23,6 +23,7 @@ export type DBQuote = {
 
 export type Quote = {
   id: string;
+  transactionRequestId: string;
   transactionId: string;
   state: string;
   amount: Money;
@@ -67,6 +68,7 @@ export class KnexQuotesService implements QuotesService {
 
     await this._knex<DBQuote>('quotes').insert({
       id: request.quoteId,
+      transactionRequestId: request.transactionRequestId,
       transactionId: request.transactionId,
       amount: request.amount.amount,
       amountCurrency: request.amount.currency,
@@ -93,6 +95,7 @@ export class KnexQuotesService implements QuotesService {
 
     const quote: Quote = {
       id: dbQuote.id,
+      transactionRequestId: dbQuote.transactionRequestId,
       transactionId: dbQuote.transactionId,
       amount: {
         amount: dbQuote.amount,

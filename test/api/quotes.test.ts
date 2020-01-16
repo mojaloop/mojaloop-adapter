@@ -94,7 +94,7 @@ describe('Quotes endpoint', function () {
       expect(getTransactionSpy).toHaveBeenCalledWith('456', 'transactionId')
     })
 
-    test('creates quote with lpsFee and adaptor fee', async () => {
+    test('creates quote with transactionRequestId, lpsFee and adaptor fee', async () => {
       const quoteRequest = QuotesPostRequestFactory.build({
         transactionId: '456',
         amount: {
@@ -116,6 +116,8 @@ describe('Quotes endpoint', function () {
       expect(response.statusCode).toBe(202)
       const quote = await services.quotesService.get(quoteRequest.quoteId, 'id')
       expect(quote.id).toBe(quoteRequest.quoteId)
+      expect(quote.transactionRequestId).toBe('123')
+      expect(quote.transactionId).toBe('456')
       expect(quote.condition).toBeDefined()
       expect(quote.ilpPacket).toBeDefined()
       expect(quote.amount).toMatchObject({ amount: '100', currency: 'USD' })
