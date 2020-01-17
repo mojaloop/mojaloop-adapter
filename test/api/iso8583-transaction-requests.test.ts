@@ -65,7 +65,10 @@ describe('Transaction Requests API', function () {
   })
 
   test('creates a transaction request from the ISO0100 message', async () => {
-    const iso0100 = ISO0100Factory.build()
+    const iso0100 = ISO0100Factory.build({
+      4: '000000080000', // transaction amount
+      28: 'D00000500' // lps fee
+    })
 
     const response = await adaptor.inject({
       method: 'POST',
@@ -89,8 +92,12 @@ describe('Transaction Requests API', function () {
         }
       },
       amount: {
-        amount: new MLNumber(iso0100[4]).divide(100).toString(),
+        amount: '800',
         currency: 'USD' // TODO: lookup iso0100[49]
+      },
+      lpsFee: {
+        amount: '5',
+        currency: 'USD'
       },
       transactionType: {
         initiator: 'PAYEE',

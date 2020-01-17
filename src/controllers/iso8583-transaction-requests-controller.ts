@@ -38,7 +38,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     }
     const expiration: string = isoMessage[7]
     const lpsFee: Money = {
-      amount: '1',
+      amount: new MLNumber(isoMessage[28].slice(1)).divide(100).toString(),
       currency: 'USD'
     }
 
