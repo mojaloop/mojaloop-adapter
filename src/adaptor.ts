@@ -13,6 +13,11 @@ import * as AuthorizationController from './controllers/authorizations-controlle
 import { TransfersService } from './services/transfers-service'
 import * as TransfersController from './controllers/transfers-controller'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
+import * as TransactionRequestErrorsController from './controllers/transaction-request-errors-controller'
+import * as AuthorizationErrorsController from './controllers/authorization-errors-controller'
+import * as QuoteErrorsController from './controllers/quote-errors-controller'
+import * as TransferErrorsController from './controllers/transfer-errors-controller'
+
 const CentralLogger = require('@mojaloop/central-services-logger')
 
 export type AdaptorConfig = {
@@ -91,12 +96,18 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
         },
         transactionRequests: {
           '{ID}': {
-            put: TransactionRequestsController.update
+            put: TransactionRequestsController.update,
+            error: {
+              put: TransactionRequestErrorsController.create
+            }
           }
         },
         authorizations: {
           '{ID}': {
-            get: AuthorizationController.show
+            get: AuthorizationController.show,
+            error: {
+              put: AuthorizationErrorsController.create
+            }
           }
         },
         parties: {
@@ -109,13 +120,19 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
         quotes: {
           post: QuotesController.create,
           '{ID}': {
-            put: () => 'dummy handler'
+            put: () => 'dummy handler',
+            error: {
+              put: QuoteErrorsController.create
+            }
           }
         },
         transfers: {
           post: TransfersController.create,
           '{ID}': {
-            put: TransfersController.update
+            put: TransfersController.update,
+            error: {
+              put: TransferErrorsController.create
+            }
           }
         }
       }
