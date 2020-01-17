@@ -21,7 +21,7 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
       0: '0110',
       30: 'D' + pad(new MLNumber(quote.fees.amount).add(quote.commission.amount).multiply(100).toString(), 8, '0'),
       39: '00',
-      48: quote.amount.amount
+      48: quote.transferAmount.amount
     }
 
     await isoMessagesService.create(transactionRequestID, transaction.lpsKey, transaction.lpsId, iso0110)

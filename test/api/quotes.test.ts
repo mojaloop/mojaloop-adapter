@@ -43,7 +43,8 @@ describe('Quotes endpoint', function () {
     await knex.migrate.latest()
     // send initial transfer request
     const iso0100 = ISO0100Factory.build({
-      28: '1' // LPS fee
+      4: '000000080000', // transaction amount
+      28: 'D00000100' // lps fee
     })
     LPS_KEY = `${LPS_ID}-${iso0100[41]}-${iso0100[42]}`
     const response = await adaptor.inject({

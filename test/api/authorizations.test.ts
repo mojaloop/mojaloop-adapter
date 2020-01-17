@@ -25,6 +25,7 @@ describe('Authorizations api', function () {
   tcpIsoMessagingClient.sendAuthorizationRequest = jest.fn()
   const iso0100 = ISO0100Factory.build({
     4: '000000010000',
+    28: 'D00000500', // lps fee
     102: '0821234567'
   })
   const services = AdaptorServicesFactory.build()
@@ -140,13 +141,13 @@ describe('Authorizations api', function () {
       delete iso0110JsonMessage.lpsKey
       delete iso0110JsonMessage.id
       delete iso0110JsonMessage.transactionRequestId
-      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith(expect.objectContaining({
+      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith({
         ...iso0110JsonMessage,
         0: '0110',
-        30: 'D00000300',
+        30: 'D00000700',
         39: '00',
-        48: '100'
-      }))
+        48: '107' // 2 for adaptor fee and 5 for lps fee from 0100 message
+      })
     })
   })
 
