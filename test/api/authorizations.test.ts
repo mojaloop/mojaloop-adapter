@@ -135,13 +135,18 @@ describe('Authorizations api', function () {
       expect(iso0110JsonMessage.transactionRequestId).toBe('123')
       expect(iso0110JsonMessage.lpsKey).toBe(lpsKey)
       expect(iso0110JsonMessage.lpsId).toBe(lpsId)
-      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith({
+      // TODO: refactor iso0110 creation and sanitization before sending
+      delete iso0110JsonMessage.lpsId
+      delete iso0110JsonMessage.lpsKey
+      delete iso0110JsonMessage.id
+      delete iso0110JsonMessage.transactionRequestId
+      expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith(expect.objectContaining({
+        ...iso0110JsonMessage,
         0: '0110',
         30: 'D00000300',
         39: '00',
-        48: '100',
-        127.2: iso0110JsonMessage[127.2]
-      })
+        48: '100'
+      }))
     })
   })
 
