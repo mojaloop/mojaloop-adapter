@@ -15,6 +15,7 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
     const quote = await quotesService.get(transaction.transactionRequestId, 'transactionRequestId')
     const iso0100 = await isoMessagesService.get(transactionRequestID, transaction.lpsKey, '0100')
     // TODO: Fix creating of 0110 message
+    delete iso0100.id
     const iso0110 = {
       ...iso0100,
       0: '0110',
