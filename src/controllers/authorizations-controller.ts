@@ -14,12 +14,13 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
     const transaction = await transactionsService.get(transactionRequestID, 'transactionRequestId')
     const quote = await quotesService.get(transaction.transactionRequestId, 'transactionRequestId')
     const iso0100 = await isoMessagesService.get(transactionRequestID, transaction.lpsKey, '0100')
-    const iso0110 = { // TODO: this format is specific to the ATM driver we are using now. The DB and adaptor-tcp-client interface need to be refactored.
+    // TODO: Fix creating of 0110 message
+    const iso0110 = {
+      ...iso0100,
       0: '0110',
       30: 'D' + pad(new MLNumber(quote.fees.amount).add(quote.commission.amount).multiply(100).toString(), 8, '0'),
       39: '00',
-      48: quote.amount.amount,
-      127.2: iso0100[127.2]
+      48: quote.amount.amount
     }
 
     await isoMessagesService.create(transactionRequestID, transaction.lpsKey, transaction.lpsId, iso0110)
@@ -30,6 +31,12 @@ export async function show (request: Request, h: ResponseToolkit): Promise <Resp
       request.server.app.logger.error('cant get any client here !')
       throw new Error('Client not registered')
     }
+
+    // TODO: Fix sanitizing of 0110 message
+    delete iso0110.lpsId
+    delete iso0110.lpsKey
+    delete iso0110.id
+    delete iso0110.transactionRequestId
 
     request.server.app.logger.debug('Sending authorization request to LPS: ' + JSON.stringify(iso0110))
 
