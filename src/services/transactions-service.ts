@@ -174,6 +174,24 @@ export class KnexTransactionsService implements TransactionsService {
 
   async create (request: TransactionRequest): Promise<Transaction> {
     logger.debug('Transaction Requests Service: Creating transaction request ' + request.transactionRequestId)
+
+    await this._knex<DBTransaction>('transactions').insert({
+      transactionRequestId: request.transactionRequestId,
+      lpsId: request.lpsId,
+      lpsKey: request.lpsKey,
+      lpsFeeAmount: request.lpsFee.amount,
+      lpsFeeCurrency: request.lpsFee.currency,
+      state: TransactionState.transactionReceived,
+      amount: request.amount.amount,
+      currency: request.amount.currency,
+      expiration: request.expiration,
+      initiator: request.transactionType.initiator,
+      initiatorType: request.transactionType.initiatorType,
+      scenario: request.transactionType.scenario,
+      originalTransactionId: request.transactionType.refundInfo?.originalTransactionId,
+      refundReason: request.transactionType.refundInfo?.refundReason
+    }).then(result => result[0])
+
     await this._knex<DBTransactionParty>('transactionParties').insert({
       transactionRequestId: request.transactionRequestId,
       type: 'payee',
@@ -191,23 +209,6 @@ export class KnexTransactionsService implements TransactionsService {
       identifierValue: request.payer.partyIdentifier,
       fspId: request.payer.fspId,
       subIdorType: request.payer.partySubIdOrType
-    }).then(result => result[0])
-
-    await this._knex<DBTransaction>('transactions').insert({
-      transactionRequestId: request.transactionRequestId,
-      lpsId: request.lpsId,
-      lpsKey: request.lpsKey,
-      lpsFeeAmount: request.lpsFee.amount,
-      lpsFeeCurrency: request.lpsFee.currency,
-      state: TransactionState.transactionReceived,
-      amount: request.amount.amount,
-      currency: request.amount.currency,
-      expiration: request.expiration,
-      initiator: request.transactionType.initiator,
-      initiatorType: request.transactionType.initiatorType,
-      scenario: request.transactionType.scenario,
-      originalTransactionId: request.transactionType.refundInfo?.originalTransactionId,
-      refundReason: request.transactionType.refundInfo?.refundReason
     }).then(result => result[0])
 
     return this.get(request.transactionRequestId, 'transactionRequestId')
