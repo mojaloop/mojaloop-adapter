@@ -5,7 +5,7 @@ import { TransactionState } from '../services/transactions-service'
 const uuid = require('uuid/v4')
 const MLNumber = require('@mojaloop/ml-number')
 
-function generateTransactionType (code: string): TransactionType {
+export function generateTransactionType (code: string): TransactionType {
   const ATM_PROCESSING_CODE = process.env.ATM_PROCESSING_CODE || '039000'
   const POS_PROCESSING_CODE = process.env.POS_PROCESSING_CODE || '040000'
   switch (code) {
