@@ -153,7 +153,7 @@ describe('Transaction Requests API', function () {
   })
 
   test('assigns originator type AGENT correctly', async () => {
-    const iso0100ATM = ISO0100Factory.build({ 3: '040000' })
+    const iso0100ATM = ISO0100Factory.build({ 123: '999999999901' })
 
     const response = await adaptor.inject({
       method: 'POST',
