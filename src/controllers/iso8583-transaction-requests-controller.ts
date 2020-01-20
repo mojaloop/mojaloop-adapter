@@ -6,22 +6,21 @@ const uuid = require('uuid/v4')
 const MLNumber = require('@mojaloop/ml-number')
 
 export function generateTransactionType (code: string): TransactionType {
-  const originator = code.slice(-2)
   const POS_PROCESSING_CODE = process.env.POS_PROCESSING_CODE || '01'
-  const ATM_PROCESSING_CODE = process.env.ATM_PROCESSING_CODE || '02' // field 123 from 0100 slice off last two characters
-  switch (originator) {
-    case ATM_PROCESSING_CODE: {
-      const transactionType = {
-        initiator: 'PAYEE',
-        initiatorType: 'DEVICE',
-        scenario: 'WITHDRAWAL'
-      }
-      return transactionType
-    }
+  const ATM_PROCESSING_CODE = process.env.ATM_PROCESSING_CODE || '02'
+  switch (code) {
     case POS_PROCESSING_CODE: {
       const transactionType = {
         initiator: 'PAYEE',
         initiatorType: 'AGENT',
+        scenario: 'WITHDRAWAL'
+      }
+      return transactionType
+    }
+    case ATM_PROCESSING_CODE: {
+      const transactionType = {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
         scenario: 'WITHDRAWAL'
       }
       return transactionType
@@ -58,7 +57,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       amount: new MLNumber(isoMessage[4]).divide(100).toString(), // TODO: take into account asset scale properly
       currency: 'USD' // TODO: hard-coded to USD for now. Should look up isoMessage[49] to convert to mojaloop currency format
     }
-    const transactionType: TransactionType = generateTransactionType(isoMessage[123])
+    const transactionType: TransactionType = generateTransactionType(isoMessage[123].slice(-2))
     const expiration: string = isoMessage[7]
     const lpsFee: Money = {
       amount: new MLNumber(isoMessage[28].slice(1)).divide(100).toString(),

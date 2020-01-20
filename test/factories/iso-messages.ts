@@ -27,7 +27,7 @@ export const ISO0100Factory = Factory.define <Partial<ISO0100>>('Iso0100Factory'
   28: 'C00000001',
   103: () => '04' + Faker.internet.password(6, false, /[0-9]/),
   11: Faker.internet.password(6, false, /[0-9]/),
-  123: () => Faker.internet.password(40, false, /[0-9a-z]/) + '0201010101',
+  123: () => Faker.internet.password(40, false, /[0-9a-z]/) + '02',
   127.2: '000319562' // Postillion switchKey
 })
 
