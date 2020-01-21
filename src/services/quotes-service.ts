@@ -60,7 +60,6 @@ export class KnexQuotesService implements QuotesService {
 
   async create (request: QuotesPostRequest, fees: Money, commission: Money): Promise<Quote> {
     this._logger.debug('Quotes Service: creating Quote: ' + request.quoteId)
-    // this._logger.debug('Quotes Service: creating Quote ' + request.quoteId + 'with Transaction Request ' + request.transactionRequestId)
     const transferAmount: Money = {
       // TODO: support different currencies ??
       amount: new MlNumber(request.amount.amount).add(fees.amount).add(commission.amount).toString(),
@@ -127,7 +126,7 @@ export class KnexQuotesService implements QuotesService {
   }
 
   async calculateAdaptorFees (amount: Money): Promise<Money> {
-    this._logger.debug('Quotes Service: calculating adaptor fees ' + amount)
+    this._logger.debug('Quotes Service: calculating Adaptor Fees ' + amount)
     return this._calculateAdaptorFees ? this._calculateAdaptorFees(amount) : { amount: '0', currency: amount.currency }
   }
 }

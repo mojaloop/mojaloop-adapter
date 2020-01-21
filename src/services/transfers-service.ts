@@ -47,7 +47,7 @@ export class KnexTransfersService implements TransfersService {
   }
 
   async get (id: string): Promise<Transfer> {
-    this._logger.debug('Transfers Service: getting transfer ' + id)
+    this._logger.debug('Transfers Service: getting Transfer ' + id)
     const dbTransfer: DBTransfer | undefined = await this._knex<DBTransfer>('transfers').where('transferId', id).first()
     if (!dbTransfer) {
       throw new Error('Error fetching transfer from database')
@@ -69,7 +69,7 @@ export class KnexTransfersService implements TransfersService {
   }
 
   async create (request: Transfer): Promise<Transfer> {
-    this._logger.debug('Transfers Service: Creating transfer ' + request.transferId)
+    this._logger.debug('Transfers Service: creating Transfer ' + request.transferId)
     await this._knex<DBTransfer>('transfers').insert({
       transferId: request.transferId,
       quoteId: request.quoteId,
@@ -84,7 +84,7 @@ export class KnexTransfersService implements TransfersService {
   }
 
   async updateTransferState (data: Transfer): Promise<Transfer> {
-    this._logger.debug('Transfer Service: Updating state of transfer ' + data.transferId)
+    this._logger.debug('Transfer Service: updating Transfer State ' + data.transferId)
     await this._knex<DBTransfer>('transfers')
       .update('transferState', data.transferState)
       .where('transferId', data.transferId)
@@ -94,7 +94,7 @@ export class KnexTransfersService implements TransfersService {
   }
 
   calculateFulfilment (ilpPacket: string): string {
-    this._logger.debug('Transfer Service: calculating fulfilment ' + ilpPacket)
+    this._logger.debug('Transfer Service: calculating Fulfilment ' + ilpPacket)
     return this._ilp.caluclateFulfil(ilpPacket).replace('"', '')
   }
 
