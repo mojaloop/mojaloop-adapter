@@ -60,6 +60,10 @@ export function createTcpRelay (lpsId: string, adaptor: Server): net.Server {
       }
     })
 
+    sock.on('error', error => {
+      adaptor.app.logger.error(`${lpsId} relay: Error: ` + error.message)
+    })
+
   })
 
 }
