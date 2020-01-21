@@ -32,7 +32,7 @@ describe('Quotes endpoint', function () {
     })
     const httpClient = Axios.create()
     const fakeLogger = { log: jest.fn() }
-    services.transactionsService = new KnexTransactionsService(knex, httpClient)
+    services.transactionsService = new KnexTransactionsService(knex, httpClient, console)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
     services.quotesService = new KnexQuotesService(knex, 'secret', fakeLogger, 10000, calculateAdaptorFees)

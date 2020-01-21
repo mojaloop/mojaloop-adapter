@@ -24,7 +24,7 @@ describe('Transaction Requests API', function () {
       useNullAsDefault: true
     })
     const httpClient = Axios.create()
-    services.transactionsService = new KnexTransactionsService(knex, httpClient)
+    services.transactionsService = new KnexTransactionsService(knex, httpClient, console)
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     adaptor = await createApp(services)
   })
