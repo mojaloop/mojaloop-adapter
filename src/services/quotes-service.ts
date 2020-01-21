@@ -1,5 +1,6 @@
 import Knex from 'knex'
 import { QuotesPostRequest, Money } from '../types/mojaloop'
+import { Logger } from 'adaptor'
 const MlNumber = require('@mojaloop/ml-number')
 const MojaloopSDK = require('@mojaloop/sdk-standard-components')
 
@@ -53,11 +54,13 @@ export interface QuotesService {
 
 export class KnexQuotesService implements QuotesService {
   private _ilp: IlpService
-  constructor (private _knex: Knex, _ilpSecret: string, private _logger?: any, private _expirationWindow = 10000, private _calculateAdaptorFees?: (amount: Money) => Promise<Money>) {
+  constructor (private _knex: Knex, _ilpSecret: string, private _logger: Logger = console, private _expirationWindow = 10000, private _calculateAdaptorFees?: (amount: Money) => Promise<Money>) {
     this._ilp = new MojaloopSDK.Ilp({ secret: _ilpSecret, logger: _logger })
   }
 
   async create (request: QuotesPostRequest, fees: Money, commission: Money): Promise<Quote> {
+    this._logger.debug('Quotes Service: creating Quote: ' + request.quoteId)
+    // this._logger.debug('Quotes Service: creating Quote ' + request.quoteId + 'with Transaction Request ' + request.transactionRequestId)
     const transferAmount: Money = {
       // TODO: support different currencies ??
       amount: new MlNumber(request.amount.amount).add(fees.amount).add(commission.amount).toString(),
@@ -87,6 +90,7 @@ export class KnexQuotesService implements QuotesService {
   }
 
   async get (id: string, idType: string): Promise<Quote> {
+    this._logger.debug('Quotes Service: getting Quote by ' + idType + id)
     const dbQuote = await this._knex<DBQuote>('quotes').where(idType, id).first()
 
     if (!dbQuote) {
@@ -123,6 +127,7 @@ export class KnexQuotesService implements QuotesService {
   }
 
   async calculateAdaptorFees (amount: Money): Promise<Money> {
+    this._logger.debug('Quotes Service: calculating adaptor fees ' + amount)
     return this._calculateAdaptorFees ? this._calculateAdaptorFees(amount) : { amount: '0', currency: amount.currency }
   }
 }
