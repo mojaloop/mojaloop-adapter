@@ -46,7 +46,7 @@ const isoMessagesService = new KnexIsoMessageService(knex)
 
 const quotesService = new KnexQuotesService(knex, ILP_SECRET, console, Number(QUOTE_EXPIRATION_WINDOW))
 
-const transfersService = new KnexTransfersService(knex, ILP_SECRET)
+const transfersService = new KnexTransfersService(knex, ILP_SECRET, console)
 
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,

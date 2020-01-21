@@ -1,6 +1,6 @@
 import Knex from 'knex'
 import { Money } from '../types/mojaloop'
-const logger = require('@mojaloop/central-services-logger')
+import { Logger } from 'adaptor'
 const MojaloopSDK = require('@mojaloop/sdk-standard-components')
 
 export enum TransferState {
@@ -42,11 +42,12 @@ export interface TransfersService {
 
 export class KnexTransfersService implements TransfersService {
   private _ilp: IlpService
-  constructor (private _knex: Knex, _ilpSecret: string, private _logger?: any) {
+  constructor (private _knex: Knex, _ilpSecret: string, private _logger: Logger = console) {
     this._ilp = new MojaloopSDK.Ilp({ secret: _ilpSecret, logger: _logger })
   }
 
   async get (id: string): Promise<Transfer> {
+    this._logger.debug('Transfers Service: getting transfer ' + id)
     const dbTransfer: DBTransfer | undefined = await this._knex<DBTransfer>('transfers').where('transferId', id).first()
     if (!dbTransfer) {
       throw new Error('Error fetching transfer from database')
@@ -68,7 +69,7 @@ export class KnexTransfersService implements TransfersService {
   }
 
   async create (request: Transfer): Promise<Transfer> {
-    logger.debug('Transfers Service: Creating transfer ' + request.transferId)
+    this._logger.debug('Transfers Service: Creating transfer ' + request.transferId)
     await this._knex<DBTransfer>('transfers').insert({
       transferId: request.transferId,
       quoteId: request.quoteId,
@@ -83,7 +84,7 @@ export class KnexTransfersService implements TransfersService {
   }
 
   async updateTransferState (data: Transfer): Promise<Transfer> {
-    logger.debug('Transfer Service: Updating state of transfer ' + data.transferId)
+    this._logger.debug('Transfer Service: Updating state of transfer ' + data.transferId)
     await this._knex<DBTransfer>('transfers')
       .update('transferState', data.transferState)
       .where('transferId', data.transferId)
@@ -93,6 +94,7 @@ export class KnexTransfersService implements TransfersService {
   }
 
   calculateFulfilment (ilpPacket: string): string {
+    this._logger.debug('Transfer Service: calculating fulfilment ' + ilpPacket)
     return this._ilp.caluclateFulfil(ilpPacket).replace('"', '')
   }
 
