@@ -9,6 +9,7 @@ import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { KnexQuotesService } from '../../src/services/quotes-service'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { Money } from '../../src/types/mojaloop'
+import { quotesHandler } from '../../src/handlers/quotes-handler'
 
 jest.mock('uuid/v4', () => () => '123')
 
@@ -76,6 +77,10 @@ describe('Quotes endpoint', function () {
   describe('POST', function () {
     test('retrieves transaction using quote requests transactionId', async () => {
       const getTransactionSpy = jest.spyOn(services.transactionsService, 'get')
+      const headers = {
+        'fspiop-source': 'payer',
+        'fspiop-destination': 'payee'
+      }
       const quoteRequest = QuotesPostRequestFactory.build({
         transactionId: '456',
         amount: {
@@ -91,6 +96,7 @@ describe('Quotes endpoint', function () {
       })
 
       expect(response.statusCode).toBe(202)
+      await quotesHandler(services, quoteRequest, headers)
       expect(getTransactionSpy).toHaveBeenCalledWith('456', 'transactionId')
     })
 
@@ -102,18 +108,11 @@ describe('Quotes endpoint', function () {
           currency: 'USD'
         }
       })
-
-      const response = await adaptor.inject({
-        method: 'POST',
-        url: '/quotes',
-        payload: quoteRequest,
-        headers: {
-          'fspiop-source': 'payer',
-          'fspiop-destination': 'payee'
-        }
-      })
-
-      expect(response.statusCode).toBe(202)
+      const headers = {
+        'fspiop-source': 'payer',
+        'fspiop-destination': 'payee'
+      }
+      await quotesHandler(services, quoteRequest, headers)
       const quote = await services.quotesService.get(quoteRequest.quoteId, 'id')
       expect(quote.id).toBe(quoteRequest.quoteId)
       expect(quote.condition).toBeDefined()
@@ -128,18 +127,11 @@ describe('Quotes endpoint', function () {
       const quoteRequest = QuotesPostRequestFactory.build({
         transactionId: '456'
       })
-
-      const response = await adaptor.inject({
-        method: 'POST',
-        url: '/quotes',
-        payload: quoteRequest,
-        headers: {
-          'fspiop-source': 'payer',
-          'fspiop-destination': 'payee'
-        }
-      })
-
-      expect(response.statusCode).toBe(202)
+      const headers = {
+        'fspiop-source': 'payer',
+        'fspiop-destination': 'payee'
+      }
+      await quotesHandler(services, quoteRequest, headers)
       expect(services.MojaClient.putQuotes).toHaveBeenCalled()
     })
 
@@ -147,18 +139,11 @@ describe('Quotes endpoint', function () {
       const quoteRequest = QuotesPostRequestFactory.build({
         transactionId: '456'
       })
-
-      const response = await adaptor.inject({
-        method: 'POST',
-        url: '/quotes',
-        payload: quoteRequest,
-        headers: {
-          'fspiop-source': 'payer',
-          'fspiop-destination': 'payee'
-        }
-      })
-
-      expect(response.statusCode).toBe(202)
+      const headers = {
+        'fspiop-source': 'payer',
+        'fspiop-destination': 'payee'
+      }
+      await quotesHandler(services, quoteRequest, headers)
       const transaction = await services.transactionsService.get('456', 'transactionId')
       expect(transaction.state).toEqual(TransactionState.quoteResponded)
     })

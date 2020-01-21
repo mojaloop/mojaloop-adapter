@@ -1,13 +1,19 @@
 import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
-import { createApp } from './adaptor'
+import { createApp, AdaptorServices } from './adaptor'
 import { KnexTransactionsService } from './services/transactions-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
 import { KnexTransfersService } from './services/transfers-service'
 import { KnexAuthorizationsService } from './services/authorizations-service'
+import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
+import { Queue, Worker, Job } from 'bullmq'
+import { quotesHandler } from './handlers/quotes-handler'
+
+const postQuotesQueue = new Queue('postQuotesQueue')
+const queueService = new BullQueueService(postQuotesQueue)
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -68,6 +74,28 @@ const MojaClient = new MojaloopRequests({
   jwsSigningKey: 'string',
   peerEndpoint: 'string'
 })
+const app = {
+  transactionsService: transactionRequestService,
+  isoMessagesService,
+  quotesService,
+  authorizationsService,
+  MojaClient,
+  transfersService,
+  queueService
+}
+
+const handlerFactory = (services: AdaptorServices): (job: Job<any, any>) => Promise<void> => {
+  return async (job): Promise<void> => {
+    try {
+      await quotesHandler(services, job.data.payload, job.data.headers)
+    } catch (error) {
+      console.log('worker error')
+    }
+  }
+}
+
+const handler = handlerFactory(app)
+const postQuotesQueueWorker = new Worker('postQuotesQueue', handler)
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
@@ -78,7 +106,7 @@ const start = async (): Promise<void> => {
     console.log('Migrations finished...')
   }
 
-  const adaptor = await createApp({ transactionsService: transactionRequestService, isoMessagesService, quotesService, authorizationsService, MojaClient, transfersService }, { port: HTTP_PORT })
+  const adaptor = await createApp({ transactionsService: transactionRequestService, isoMessagesService, quotesService, authorizationsService, MojaClient, transfersService, queueService }, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
