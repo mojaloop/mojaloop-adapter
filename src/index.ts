@@ -36,17 +36,18 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
   },
   useNullAsDefault: true
 })
+const logger = require('@mojaloop/central-services-logger')
 
 const transcationRequestClient = axios.create({
   baseURL: TRANSACTION_REQUESTS_URL,
   timeout: 3000
 })
-const transactionRequestService = new KnexTransactionsService(knex, transcationRequestClient, console)
+const transactionRequestService = new KnexTransactionsService(knex, transcationRequestClient, logger)
 const isoMessagesService = new KnexIsoMessageService(knex)
 
-const quotesService = new KnexQuotesService(knex, ILP_SECRET, console, Number(QUOTE_EXPIRATION_WINDOW))
+const quotesService = new KnexQuotesService(knex, ILP_SECRET, logger, Number(QUOTE_EXPIRATION_WINDOW))
 
-const transfersService = new KnexTransfersService(knex, ILP_SECRET, console)
+const transfersService = new KnexTransfersService(knex, ILP_SECRET, logger)
 
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
@@ -54,7 +55,7 @@ const AuthorizationsClient: AxiosInstance = axios.create({
 })
 const authorizationsService = new KnexAuthorizationsService(knex, AuthorizationsClient)
 const MojaClient = new MojaloopRequests({
-  logger: console,
+  logger: logger,
   dfspId: ADAPTOR_FSP_ID,
   quotesEndpoint: QUOTE_REQUESTS_URL,
   alsEndpoint: ACCOUNT_LOOKUP_URL,

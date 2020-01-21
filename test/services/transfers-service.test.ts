@@ -8,6 +8,7 @@ describe('Transfers Service', function () {
   let transfersService: KnexTransfersService
   const fakeHttpClient: AxiosInstance = Axios.create()
   fakeHttpClient.get = jest.fn()
+  const logger = console
 
   beforeAll(async () => {
     knex = Knex({
@@ -19,7 +20,7 @@ describe('Transfers Service', function () {
       useNullAsDefault: true
     })
 
-    transfersService = new KnexTransfersService(knex, 'secret', console)
+    transfersService = new KnexTransfersService(knex, 'secret', logger)
   })
 
   beforeEach(async () => {
