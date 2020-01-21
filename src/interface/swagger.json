@@ -1096,6 +1096,534 @@
                   "type": "string"
               }
           ]
+      },
+      "/transactionRequests/{ID}/error": {
+          "put": {
+              "parameters": [
+                  {
+                      "name": "body",
+                      "schema": {
+                          "$ref": "#/definitions/ErrorInformationObject"
+                      },
+                      "in": "body",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "$ref": "#/responses/Response200"
+                  },
+                  "400": {
+                      "$ref": "#/responses/ErrorResponse400"
+                  },
+                  "401": {
+                      "$ref": "#/responses/ErrorResponse401"
+                  },
+                  "403": {
+                      "$ref": "#/responses/ErrorResponse403"
+                  },
+                  "404": {
+                      "$ref": "#/responses/ErrorResponse404"
+                  },
+                  "405": {
+                      "$ref": "#/responses/ErrorResponse405"
+                  },
+                  "406": {
+                      "$ref": "#/responses/ErrorResponse406"
+                  },
+                  "501": {
+                      "$ref": "#/responses/ErrorResponse501"
+                  },
+                  "503": {
+                      "$ref": "#/responses/ErrorResponse503"
+                  }
+              },
+              "summary": "/transactionRequests/{ID}/error",
+              "description": "If the server is unable to find or create a transaction request, or another processing error occurs, the error callback PUT /transactionRequests//error is used. The in the URI should contain the transactionRequestId that was used for the creation of the transaction request, or the that was used in the GET /transactionRequests/."
+          },
+          "parameters": [
+              {
+                  "name": "content-length",
+                  "description": "The Content-Length header field indicates the anticipated size of the payload body. Only sent if there is a body. Note - The API supports a maximum size of 5242880 bytes (5 Megabytes)",
+                  "in": "header",
+                  "required": false,
+                  "type": "integer"
+              },
+              {
+                  "name": "content-type",
+                  "description": "The Content-Type header indicates the specific version of the API used to send the payload body.",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "date",
+                  "description": "The Date header field indicates the date when the request was sent.",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "x-forwarded-for",
+                  "description": "The X-Forwarded-For header field is an unofficially accepted standard used for informational purposes of the originating client IP address, as a request might pass multiple proxies, firewalls, and so on. Multiple X-Forwarded-For values as in the example shown here should be expected and supported by implementers of the API. Note - An alternative to X-Forwarded-For is defined in RFC 7239. However, to this point RFC 7239 is less-used and supported than X-Forwarded-For.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-source",
+                  "description": "The FSPIOP-Source header field is a non-HTTP standard field used by the API for identifying the sender of the HTTP request. The field should be set by the original sender of the request. Required for routing and signature verification (see header field FSPIOP-Signature).",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-destination",
+                  "description": "The FSPIOP-Destination header field is a non-HTTP standard field used by the API for HTTP header based routing of requests and responses to the destination. The field should be set by the original sender of the request (if known), so that any entities between the client and the server do not need to parse the payload for routing purposes.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-encryption",
+                  "description": "The FSPIOP-Encryption header field is a non-HTTP standard field used by the API for applying end-to-end encryption of the request.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-signature",
+                  "description": "The FSPIOP-Signature header field is a non-HTTP standard field used by the API for applying an end-to-end request signature.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-uri",
+                  "description": "The FSPIOP-URI header field is a non-HTTP standard field used by the API for signature verification, should contain the service URI. Required if signature verification is used, for more information see API Signature document.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-http-method",
+                  "description": "The FSPIOP-HTTP-Method header field is a non-HTTP standard field used by the API for signature verification, should contain the service HTTP method. Required if signature verification is used, for more information see API Signature document.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "body",
+                  "schema": {
+                      "$ref": "#/definitions/ErrorInformationObject"
+                  },
+                  "in": "body",
+                  "required": true
+              },
+              {
+                  "name": "ID",
+                  "description": "Unique ID of the transactionRequest",
+                  "in": "path",
+                  "required": true,
+                  "type": "string"
+              }
+          ]
+      },
+      "/quotes/{ID}/error": {
+          "put": {
+              "parameters": [
+                  {
+                      "name": "body",
+                      "schema": {
+                          "$ref": "#/definitions/ErrorInformationObject"
+                      },
+                      "in": "body",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "$ref": "#/responses/Response200"
+                  },
+                  "400": {
+                      "$ref": "#/responses/ErrorResponse400"
+                  },
+                  "401": {
+                      "$ref": "#/responses/ErrorResponse401"
+                  },
+                  "403": {
+                      "$ref": "#/responses/ErrorResponse403"
+                  },
+                  "404": {
+                      "$ref": "#/responses/ErrorResponse404"
+                  },
+                  "405": {
+                      "$ref": "#/responses/ErrorResponse405"
+                  },
+                  "406": {
+                      "$ref": "#/responses/ErrorResponse406"
+                  },
+                  "501": {
+                      "$ref": "#/responses/ErrorResponse501"
+                  },
+                  "503": {
+                      "$ref": "#/responses/ErrorResponse503"
+                  }
+              },
+              "summary": "/quotes/{ID}/error",
+              "description": "If the server is unable to find or create a quote, or some other processing error occurs, the error callback PUT /quotes//error is used. The in the URI should contain the quoteId that was used for the creation of the quote, or the that was used in the GET /quotes/."
+          },
+          "parameters": [
+              {
+                  "name": "content-length",
+                  "description": "The Content-Length header field indicates the anticipated size of the payload body. Only sent if there is a body. Note - The API supports a maximum size of 5242880 bytes (5 Megabytes)",
+                  "in": "header",
+                  "required": false,
+                  "type": "integer"
+              },
+              {
+                  "name": "content-type",
+                  "description": "The Content-Type header indicates the specific version of the API used to send the payload body.",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "date",
+                  "description": "The Date header field indicates the date when the request was sent.",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "x-forwarded-for",
+                  "description": "The X-Forwarded-For header field is an unofficially accepted standard used for informational purposes of the originating client IP address, as a request might pass multiple proxies, firewalls, and so on. Multiple X-Forwarded-For values as in the example shown here should be expected and supported by implementers of the API. Note - An alternative to X-Forwarded-For is defined in RFC 7239. However, to this point RFC 7239 is less-used and supported than X-Forwarded-For.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-source",
+                  "description": "The FSPIOP-Source header field is a non-HTTP standard field used by the API for identifying the sender of the HTTP request. The field should be set by the original sender of the request. Required for routing and signature verification (see header field FSPIOP-Signature).",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-destination",
+                  "description": "The FSPIOP-Destination header field is a non-HTTP standard field used by the API for HTTP header based routing of requests and responses to the destination. The field should be set by the original sender of the request (if known), so that any entities between the client and the server do not need to parse the payload for routing purposes.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-encryption",
+                  "description": "The FSPIOP-Encryption header field is a non-HTTP standard field used by the API for applying end-to-end encryption of the request.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-signature",
+                  "description": "The FSPIOP-Signature header field is a non-HTTP standard field used by the API for applying an end-to-end request signature.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-uri",
+                  "description": "The FSPIOP-URI header field is a non-HTTP standard field used by the API for signature verification, should contain the service URI. Required if signature verification is used, for more information see API Signature document.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-http-method",
+                  "description": "The FSPIOP-HTTP-Method header field is a non-HTTP standard field used by the API for signature verification, should contain the service HTTP method. Required if signature verification is used, for more information see API Signature document.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "body",
+                  "schema": {
+                      "$ref": "#/definitions/ErrorInformationObject"
+                  },
+                  "in": "body",
+                  "required": true
+              },
+              {
+                  "name": "ID",
+                  "description": "Quote ID",
+                  "in": "path",
+                  "required": true,
+                  "type": "string"
+              }
+          ]
+      },
+      "/authorizations/{ID}/error": {
+          "put": {
+              "parameters": [
+                  {
+                      "name": "body",
+                      "schema": {
+                          "$ref": "#/definitions/ErrorInformationObject"
+                      },
+                      "in": "body",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "$ref": "#/responses/Response200"
+                  },
+                  "400": {
+                      "$ref": "#/responses/ErrorResponse400"
+                  },
+                  "401": {
+                      "$ref": "#/responses/ErrorResponse401"
+                  },
+                  "403": {
+                      "$ref": "#/responses/ErrorResponse403"
+                  },
+                  "404": {
+                      "$ref": "#/responses/ErrorResponse404"
+                  },
+                  "405": {
+                      "$ref": "#/responses/ErrorResponse405"
+                  },
+                  "406": {
+                      "$ref": "#/responses/ErrorResponse406"
+                  },
+                  "501": {
+                      "$ref": "#/responses/ErrorResponse501"
+                  },
+                  "503": {
+                      "$ref": "#/responses/ErrorResponse503"
+                  }
+              },
+              "summary": "/authorizations/{ID}/error",
+              "description": "If the server is unable to find the transaction request, or another processing error occurs, the error callback PUT /authorizations//error is used. The in the URI should contain the that was used in the GET /authorizations/."
+          },
+          "parameters": [
+              {
+                  "name": "content-length",
+                  "description": "The Content-Length header field indicates the anticipated size of the payload body. Only sent if there is a body. Note - The API supports a maximum size of 5242880 bytes (5 Megabytes)",
+                  "in": "header",
+                  "required": false,
+                  "type": "integer"
+              },
+              {
+                  "name": "content-type",
+                  "description": "The Content-Type header indicates the specific version of the API used to send the payload body.",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "date",
+                  "description": "The Date header field indicates the date when the request was sent.",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "x-forwarded-for",
+                  "description": "The X-Forwarded-For header field is an unofficially accepted standard used for informational purposes of the originating client IP address, as a request might pass multiple proxies, firewalls, and so on. Multiple X-Forwarded-For values as in the example shown here should be expected and supported by implementers of the API. Note - An alternative to X-Forwarded-For is defined in RFC 7239. However, to this point RFC 7239 is less-used and supported than X-Forwarded-For.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-source",
+                  "description": "The FSPIOP-Source header field is a non-HTTP standard field used by the API for identifying the sender of the HTTP request. The field should be set by the original sender of the request. Required for routing and signature verification (see header field FSPIOP-Signature).",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-destination",
+                  "description": "The FSPIOP-Destination header field is a non-HTTP standard field used by the API for HTTP header based routing of requests and responses to the destination. The field should be set by the original sender of the request (if known), so that any entities between the client and the server do not need to parse the payload for routing purposes.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-encryption",
+                  "description": "The FSPIOP-Encryption header field is a non-HTTP standard field used by the API for applying end-to-end encryption of the request.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-signature",
+                  "description": "The FSPIOP-Signature header field is a non-HTTP standard field used by the API for applying an end-to-end request signature.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-uri",
+                  "description": "The FSPIOP-URI header field is a non-HTTP standard field used by the API for signature verification, should contain the service URI. Required if signature verification is used, for more information see API Signature document.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-http-method",
+                  "description": "The FSPIOP-HTTP-Method header field is a non-HTTP standard field used by the API for signature verification, should contain the service HTTP method. Required if signature verification is used, for more information see API Signature document.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "body",
+                  "schema": {
+                      "$ref": "#/definitions/ErrorInformationObject"
+                  },
+                  "in": "body",
+                  "required": true
+              },
+              {
+                  "name": "ID",
+                  "description": "Transaction Request ID",
+                  "in": "path",
+                  "required": true,
+                  "type": "string"
+              }
+          ]
+      },
+      "/transfers/{ID}/error": {
+          "put": {
+              "parameters": [
+                  {
+                      "name": "body",
+                      "schema": {
+                          "$ref": "#/definitions/ErrorInformationObject"
+                      },
+                      "in": "body",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "$ref": "#/responses/Response200"
+                  },
+                  "400": {
+                      "$ref": "#/responses/ErrorResponse400"
+                  },
+                  "401": {
+                      "$ref": "#/responses/ErrorResponse401"
+                  },
+                  "403": {
+                      "$ref": "#/responses/ErrorResponse403"
+                  },
+                  "404": {
+                      "$ref": "#/responses/ErrorResponse404"
+                  },
+                  "405": {
+                      "$ref": "#/responses/ErrorResponse405"
+                  },
+                  "406": {
+                      "$ref": "#/responses/ErrorResponse406"
+                  },
+                  "501": {
+                      "$ref": "#/responses/ErrorResponse501"
+                  },
+                  "503": {
+                      "$ref": "#/responses/ErrorResponse503"
+                  }
+              },
+              "summary": "/transfers/{ID}/error",
+              "description": "If the server is unable to find or create a transfer, or another processing error occurs, the error callback PUT /transfers//error is used. The in the URI should contain the transferId that was used for the creation of the transfer, or the that was used in the GET /transfers/."
+          },
+          "parameters": [
+              {
+                  "name": "content-length",
+                  "description": "The Content-Length header field indicates the anticipated size of the payload body. Only sent if there is a body. Note - The API supports a maximum size of 5242880 bytes (5 Megabytes)",
+                  "in": "header",
+                  "required": false,
+                  "type": "integer"
+              },
+              {
+                  "name": "content-type",
+                  "description": "The Content-Type header indicates the specific version of the API used to send the payload body.",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "date",
+                  "description": "The Date header field indicates the date when the request was sent.",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "x-forwarded-for",
+                  "description": "The X-Forwarded-For header field is an unofficially accepted standard used for informational purposes of the originating client IP address, as a request might pass multiple proxies, firewalls, and so on. Multiple X-Forwarded-For values as in the example shown here should be expected and supported by implementers of the API. Note - An alternative to X-Forwarded-For is defined in RFC 7239. However, to this point RFC 7239 is less-used and supported than X-Forwarded-For.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-source",
+                  "description": "The FSPIOP-Source header field is a non-HTTP standard field used by the API for identifying the sender of the HTTP request. The field should be set by the original sender of the request. Required for routing and signature verification (see header field FSPIOP-Signature).",
+                  "in": "header",
+                  "required": true,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-destination",
+                  "description": "The FSPIOP-Destination header field is a non-HTTP standard field used by the API for HTTP header based routing of requests and responses to the destination. The field should be set by the original sender of the request (if known), so that any entities between the client and the server do not need to parse the payload for routing purposes.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-encryption",
+                  "description": "The FSPIOP-Encryption header field is a non-HTTP standard field used by the API for applying end-to-end encryption of the request.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-signature",
+                  "description": "The FSPIOP-Signature header field is a non-HTTP standard field used by the API for applying an end-to-end request signature.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-uri",
+                  "description": "The FSPIOP-URI header field is a non-HTTP standard field used by the API for signature verification, should contain the service URI. Required if signature verification is used, for more information see API Signature document.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "fspiop-http-method",
+                  "description": "The FSPIOP-HTTP-Method header field is a non-HTTP standard field used by the API for signature verification, should contain the service HTTP method. Required if signature verification is used, for more information see API Signature document.",
+                  "in": "header",
+                  "required": false,
+                  "type": "string"
+              },
+              {
+                  "name": "body",
+                  "schema": {
+                      "$ref": "#/definitions/ErrorInformationObject"
+                  },
+                  "in": "body",
+                  "required": true
+              },
+              {
+                  "name": "ID",
+                  "description": "Transfer ID",
+                  "in": "path",
+                  "required": true,
+                  "type": "string"
+              }
+          ]
       }
   },
   "definitions": {

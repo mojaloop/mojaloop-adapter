@@ -5,6 +5,32 @@ import { TransactionState } from '../services/transactions-service'
 const uuid = require('uuid/v4')
 const MLNumber = require('@mojaloop/ml-number')
 
+export function generateTransactionType (code: string): TransactionType {
+  const POS_PROCESSING_CODE = process.env.POS_PROCESSING_CODE || '01'
+  const ATM_PROCESSING_CODE = process.env.ATM_PROCESSING_CODE || '02'
+  switch (code) {
+    case POS_PROCESSING_CODE: {
+      const transactionType = {
+        initiator: 'PAYEE',
+        initiatorType: 'AGENT',
+        scenario: 'WITHDRAWAL'
+      }
+      return transactionType
+    }
+    case ATM_PROCESSING_CODE: {
+      const transactionType = {
+        initiator: 'PAYEE',
+        initiatorType: 'DEVICE',
+        scenario: 'WITHDRAWAL'
+      }
+      return transactionType
+    }
+    default: {
+      throw new Error('ISO0100 processing code not valid')
+    }
+  }
+}
+
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
     request.server.app.logger.info('iso8583 Transaction Requests Controller: Received create transactionsRequest request. payload:' + JSON.stringify(request.payload))
@@ -28,17 +54,13 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       }
     }
     const amount: Money = {
-      amount: new MLNumber(isoMessage[4]).toString(),
+      amount: new MLNumber(isoMessage[4]).divide(100).toString(), // TODO: take into account asset scale properly
       currency: 'USD' // TODO: hard-coded to USD for now. Should look up isoMessage[49] to convert to mojaloop currency format
     }
-    const transactionType: TransactionType = {
-      initiator: 'PAYEE',
-      initiatorType: 'DEVICE',
-      scenario: 'WITHDRAWAL'
-    }
+    const transactionType: TransactionType = generateTransactionType(isoMessage[123].slice(-2))
     const expiration: string = isoMessage[7]
     const lpsFee: Money = {
-      amount: '1',
+      amount: new MLNumber(isoMessage[28].slice(1)).divide(100).toString(),
       currency: 'USD'
     }
 

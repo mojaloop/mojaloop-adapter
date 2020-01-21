@@ -36,6 +36,7 @@ describe('Quotes service', function () {
     test('stores quote', async () => {
       Date.now = jest.fn().mockReturnValue(0)
       const quoteRequest = QuotesPostRequestFactory.build({
+        transactionRequestId: '123',
         amount: {
           amount: '100',
           currency: 'USD'
@@ -54,6 +55,7 @@ describe('Quotes service', function () {
       }
       expect(dbQuote.id).toBe(quoteRequest.quoteId)
       expect(dbQuote.transactionId).toBe(quoteRequest.transactionId)
+      expect(dbQuote.transactionRequestId).toBe(quoteRequest.transactionRequestId)
       expect(dbQuote.amount).toBe(quoteRequest.amount.amount)
       expect(dbQuote.amountCurrency).toBe(quoteRequest.amount.currency)
       expect(dbQuote.feeAmount).toBe(fees.amount)
@@ -102,6 +104,7 @@ describe('Quotes service', function () {
 
   test('can get a quote', async () => {
     const quoteRequest = QuotesPostRequestFactory.build({
+      transactionRequestId: '123',
       amount: {
         amount: '100',
         currency: 'USD'
@@ -119,6 +122,7 @@ describe('Quotes service', function () {
     expect(quote.commission).toMatchObject(commission)
     expect(quote.id).toEqual(quoteRequest.quoteId)
     expect(quote.transactionId).toEqual(quoteRequest.transactionId)
+    expect(quote.transactionRequestId).toEqual(quoteRequest.transactionRequestId)
     expect(quote.transferAmount).toEqual(transferAmount)
   })
 

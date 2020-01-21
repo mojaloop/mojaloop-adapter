@@ -127,8 +127,8 @@ describe('Transfers Controller', function () {
   })
 
   describe('PUT', () => {
+    const iso0200 = ISO0200Factory.build()
     beforeEach(async () => {
-      const iso0200 = ISO0200Factory.build()
       await services.isoMessagesService.create(transactionRequestId, transaction.lpsKey, transaction.lpsId, iso0200)
       adaptor.app.isoMessagingClients.set(transaction.lpsId, tcpIsoMessagingClient)
 
@@ -152,12 +152,10 @@ describe('Transfers Controller', function () {
       // verify the response code is 200
       expect(response.statusCode).toEqual(200)
 
-      // get transfer and transaction
       transfer = await services.transfersService.get(payload.transferId)
       transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
-
-      // must create new iso0210 message
       expect(await services.isoMessagesService.get(transfer.transactionRequestId, transaction.lpsKey, '0210')).toEqual({
+        ...iso0200,
         0: '0210',
         39: '00',
         id: 2,
@@ -169,25 +167,26 @@ describe('Transfers Controller', function () {
     })
 
     test('sends Financial Response to TCP relay', async () => {
-      // put transfer
       const response = await adaptor.inject({
         method: 'PUT',
         url: `/transfers/${payload.transferId}`,
         payload: { transferState: '2dec0941-1345-44f4-b56d-ac5a448eb0c5' } // transfer.transactionRequestId
       })
-
-      // verify the response code is 200
       expect(response.statusCode).toEqual(200)
 
-      // get transfer and transaction
       transfer = await services.transfersService.get(payload.transferId)
       transaction = await services.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
 
-      // must create new iso0210 message
+      const iso0210 = await services.isoMessagesService.get(transfer.transactionRequestId, transaction.lpsKey, '0210')
+      // TODO: refactor iso0210 creation and sanitization before sending
+      delete iso0210.lpsId
+      delete iso0210.lpsKey
+      delete iso0210.id
+      delete iso0210.transactionRequestId
       expect(tcpIsoMessagingClient.sendFinancialResponse).toHaveBeenCalledWith({
+        ...iso0210,
         0: '0210',
-        39: '00',
-        127.2: '000319562'
+        39: '00'
       })
     })
 

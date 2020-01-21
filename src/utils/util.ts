@@ -19,6 +19,22 @@
  - Renjith Palamattom  <renjith@coil.com>
  --------------
  ******/
+
+export function pad (value: string, length: number, char: string): string {
+  if (value.length >= length) {
+    return value.substring(0, length)
+  }
+
+  const diff = length - value.length
+  let padding = ''
+
+  for (let i = 0; i < diff; i++) {
+    padding += char
+  }
+
+  return padding + value
+}
+
 export const guid = () => {
   function s4 () {
     return Math.floor((1 + Math.random()) * 0x10000)
@@ -39,14 +55,6 @@ export const guid = () => {
     s4() +
     s4()
   )
-}
-
-// console.log(guid());
-
-export function pad (num: any, size: number) {
-  let s = num + ''
-  while (s.length < size) s = '0' + s
-  return s
 }
 
 export function guid1 (stan: any) {

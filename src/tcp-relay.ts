@@ -7,6 +7,7 @@ export async function handleIsoMessage (lpsId: string, data: Buffer, adaptor: Se
   const mti = data.slice(2, 6).toString()
   const isoMessage = new IsoParser().getIsoJSON(data)
   const lpsKey: string = lpsId + '-' + isoMessage[41] + '-' + isoMessage[42]
+  adaptor.app.logger.debug('TCPRelay: Received message from: ' + lpsId + ' lpsKey: ' + lpsKey)
   adaptor.app.logger.debug('TCPRelay: Message mti: ' + mti)
   adaptor.app.logger.debug('TCPRelay: Message converted to JSON: ' + JSON.stringify(isoMessage))
   let response: ServerInjectResponse
@@ -57,6 +58,10 @@ export function createTcpRelay (lpsId: string, adaptor: Server): net.Server {
         adaptor.app.logger.error(`${lpsId} relay: Failed to handle iso message.`)
         adaptor.app.logger.error(error)
       }
+    })
+
+    sock.on('error', error => {
+      adaptor.app.logger.error(`${lpsId} relay: Error: ` + error.message)
     })
 
   })

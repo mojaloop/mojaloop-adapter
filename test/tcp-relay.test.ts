@@ -47,12 +47,12 @@ describe('TCP relay', function () {
   test('maps 0100 message to the transactionRequests endpoint', async () => {
     const iso0100 = iso0100BinaryMessage
     const isoMessage = new IsoParser().getIsoJSON(iso0100)
-    const injectSpy = jest.spyOn(adaptor, 'inject')
+    adaptor.inject = jest.fn().mockResolvedValue({ statusCode: 202 })
     const lpsKey = 'postillion' + '-' + isoMessage[41] + '-' + isoMessage[42]
 
     await handleIsoMessage('postillion', iso0100, adaptor)
 
-    expect(injectSpy).toHaveBeenCalledWith({
+    expect(adaptor.inject).toHaveBeenCalledWith({
       method: 'POST',
       url: '/iso8583/transactionRequests',
       payload: { lpsId: 'postillion', lpsKey, ...isoMessage }

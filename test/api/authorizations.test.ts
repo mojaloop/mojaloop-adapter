@@ -25,6 +25,8 @@ describe('Authorizations api', function () {
   const tcpIsoMessagingClient = new TcpIsoMessagingClient(new Socket())
   tcpIsoMessagingClient.sendAuthorizationRequest = jest.fn()
   const iso0100 = ISO0100Factory.build({
+    4: '000000010000',
+    28: 'D00000500', // lps fee
     102: '0821234567'
   })
   const services = AdaptorServicesFactory.build()
@@ -84,6 +86,10 @@ describe('Authorizations api', function () {
       expect(putTransactionRequestResponse.statusCode).toBe(200)
 
       const quoteRequest = QuotesPostRequestFactory.build({
+        amount: {
+          amount: '100',
+          currency: 'USD'
+        },
         transactionId: '456'
       })
       const headers = {
@@ -126,10 +132,17 @@ describe('Authorizations api', function () {
       expect(iso0110JsonMessage.transactionRequestId).toBe('123')
       expect(iso0110JsonMessage.lpsKey).toBe(lpsKey)
       expect(iso0110JsonMessage.lpsId).toBe(lpsId)
+      // TODO: refactor iso0110 creation and sanitization before sending
+      delete iso0110JsonMessage.lpsId
+      delete iso0110JsonMessage.lpsKey
+      delete iso0110JsonMessage.id
+      delete iso0110JsonMessage.transactionRequestId
       expect(tcpIsoMessagingClient.sendAuthorizationRequest).toHaveBeenCalledWith({
+        ...iso0110JsonMessage,
         0: '0110',
+        30: 'D00000700',
         39: '00',
-        127.2: iso0110JsonMessage[127.2]
+        48: '107' // 2 for adaptor fee and 5 for lps fee from 0100 message
       })
     })
   })

@@ -1,21 +1,7 @@
 import { Factory } from 'rosie'
 import Faker from 'faker'
 import { ISO0100, ISO0110, ISO0200 } from '../../src/types/iso-messages'
-
-function pad (value: string, length: number, char: string) {
-  if (value.length >= length) {
-    return value.substring(0, length)
-  }
-
-  const diff = length - value.length
-  let padding = ''
-
-  for (let i = 0; i < diff; i++) {
-    padding += char
-  }
-
-  return padding + value
-}
+import { pad } from '../../src/utils/util'
 
 function generateField7 (): string {
   const now = new Date(Date.now())
@@ -30,7 +16,7 @@ function generateField7 (): string {
 
 export const ISO0100Factory = Factory.define <Partial<ISO0100>>('Iso0100Factory').attrs({
   0: '0100',
-  3: '012000',
+  3: '039000',
   4: '000000010000',
   49: '820',
   7: generateField7(),
@@ -41,12 +27,13 @@ export const ISO0100Factory = Factory.define <Partial<ISO0100>>('Iso0100Factory'
   28: 'C00000001',
   103: () => '04' + Faker.internet.password(6, false, /[0-9]/),
   11: Faker.internet.password(6, false, /[0-9]/),
+  123: () => Faker.internet.password(40, false, /[0-9a-z]/) + '02',
   127.2: '000319562' // Postillion switchKey
 })
 
 export const ISO0110Factory = Factory.define<Partial<ISO0110>>('Iso0110Factory').attrs({
   0: '0110',
-  3: '012000',
+  3: '039000',
   4: '000000010000',
   7: generateField7(),
   11: Faker.internet.password(6, false, /[0-9]/),
@@ -64,7 +51,7 @@ export const ISO0110Factory = Factory.define<Partial<ISO0110>>('Iso0110Factory')
 
 export const ISO0200Factory = Factory.define <Partial<ISO0200>>('Iso0200Factory').attrs({
   0: '0200',
-  3: '012000',
+  3: '039000',
   4: '000000010000',
   49: '820',
   7: generateField7(),

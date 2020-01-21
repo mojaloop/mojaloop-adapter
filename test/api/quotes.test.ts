@@ -44,7 +44,8 @@ describe('Quotes endpoint', function () {
     await knex.migrate.latest()
     // send initial transfer request
     const iso0100 = ISO0100Factory.build({
-      28: '1' // LPS fee
+      4: '000000080000', // transaction amount
+      28: 'D00000100' // lps fee
     })
     LPS_KEY = `${LPS_ID}-${iso0100[41]}-${iso0100[42]}`
     const response = await adaptor.inject({
@@ -100,7 +101,7 @@ describe('Quotes endpoint', function () {
       expect(getTransactionSpy).toHaveBeenCalledWith('456', 'transactionId')
     })
 
-    test('creates quote with lpsFee and adaptor fee', async () => {
+    test('creates quote with transactionRequestId, lpsFee and adaptor fee', async () => {
       const quoteRequest = QuotesPostRequestFactory.build({
         transactionId: '456',
         amount: {
@@ -115,6 +116,8 @@ describe('Quotes endpoint', function () {
       await quotesHandler(services, quoteRequest, headers)
       const quote = await services.quotesService.get(quoteRequest.quoteId, 'id')
       expect(quote.id).toBe(quoteRequest.quoteId)
+      expect(quote.transactionRequestId).toBe('123')
+      expect(quote.transactionId).toBe('456')
       expect(quote.condition).toBeDefined()
       expect(quote.ilpPacket).toBeDefined()
       expect(quote.amount).toMatchObject({ amount: '100', currency: 'USD' })

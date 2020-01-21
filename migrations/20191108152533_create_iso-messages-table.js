@@ -4,7 +4,7 @@ exports.up = function (knex, Promise) {
     .createTable('isoMessages', function (table) {
       table.increments('id').unsigned().primary()
       table.string('transactionRequestId')
-      table.foreign('transactionRequestId').references('transactionRequestId').inTable('transactions')
+      table.foreign('transactionRequestId')
       table.string('mti')
       table.string('lpsKey')
       table.string('lpsId')

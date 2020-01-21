@@ -1,5 +1,5 @@
 export type ISO0100 = { id: number } & {
-  transactionPK: string;
+  transactionRequestId: string;
   lpsId: string;
   lpsKey: string;
   0: string; // MTI
@@ -24,7 +24,7 @@ export type ISO0100 = { id: number } & {
 }
 
 export type ISO0110 = { id: number } & {
-  transactionPK: string;
+  transactionRequestId: string;
   lpsId: string;
   lpsKey: string;
   0: string; // MTI
@@ -43,7 +43,7 @@ export type ISO0110 = { id: number } & {
 }
 
 export type ISO0200 = { id: number } & {
-  transactionPK: string;
+  transactionRequestId: string;
   lpsId: string;
   lpsKey: string;
   0: string; // MTI

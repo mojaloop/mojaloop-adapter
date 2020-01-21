@@ -18,7 +18,6 @@ const queueService = new BullQueueService(postQuotesQueue)
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
 const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
-const ML_API_ADAPTOR_URL = process.env.ML_API_ADAPTOR_URL || 'http://ml-api-adaptor.local'
 const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
 const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
 const TRANSFERS_URL = process.env.TRANSFERS_URL || 'http://transfers.local'
@@ -100,11 +99,8 @@ const postQuotesQueueWorker = new Worker('postQuotesQueue', handler)
 const start = async (): Promise<void> => {
   let shuttingDown = false
   console.log('LOG_LEVEL: ', process.env.LOG_LEVEL)
-  if (KNEX_CLIENT === 'sqlite3') {
-    console.log('in memory sqlite3 is being used. Running migrations....')
-    await knex.migrate.latest()
-    console.log('Migrations finished...')
-  }
+
+  await knex.migrate.latest()
 
   const adaptor = await createApp({ transactionsService: transactionRequestService, isoMessagesService, quotesService, authorizationsService, MojaClient, transfersService, queueService }, { port: HTTP_PORT })
 

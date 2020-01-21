@@ -7,6 +7,7 @@ import { KnexTransactionsService, TransactionState } from '../../src/services/tr
 import Axios from 'axios'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
+import { generateTransactionType } from '../../src/controllers/iso8583-transaction-requests-controller'
 const MLNumber = require('@mojaloop/ml-number')
 
 jest.mock('uuid/v4', () => () => '123')
@@ -65,7 +66,10 @@ describe('Transaction Requests API', function () {
   })
 
   test('creates a transaction request from the ISO0100 message', async () => {
-    const iso0100 = ISO0100Factory.build()
+    const iso0100 = ISO0100Factory.build({
+      4: '000000080000', // transaction amount
+      28: 'D00000500' // lps fee
+    })
 
     const response = await adaptor.inject({
       method: 'POST',
@@ -89,8 +93,12 @@ describe('Transaction Requests API', function () {
         }
       },
       amount: {
-        amount: new MLNumber(iso0100[4]).toString(),
+        amount: '800',
         currency: 'USD' // TODO: lookup iso0100[49]
+      },
+      lpsFee: {
+        amount: '5',
+        currency: 'USD'
       },
       transactionType: {
         initiator: 'PAYEE',
@@ -129,4 +137,37 @@ describe('Transaction Requests API', function () {
 
     expect(transactionIncomplete.state).toBe(TransactionState.transactionCancelled)
   })
+
+  test('assigns originator type DEVICE correctly', async () => {
+    const iso0100ATM = ISO0100Factory.build()
+
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/iso8583/transactionRequests',
+      payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100ATM }
+    })
+
+    expect(response.statusCode).toBe(202)
+    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
+    expect(transaction.transactionType.initiatorType).toEqual('DEVICE')
+  })
+
+  test('assigns originator type AGENT correctly', async () => {
+    const iso0100ATM = ISO0100Factory.build({ 123: '999999999901' })
+
+    const response = await adaptor.inject({
+      method: 'POST',
+      url: '/iso8583/transactionRequests',
+      payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100ATM }
+    })
+
+    expect(response.statusCode).toBe(202)
+    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
+    expect(transaction.transactionType.initiatorType).toEqual('AGENT')
+  })
+
+  test('throws error on invalid processing code', async () => {
+    expect(() => generateTransactionType('009000')).toThrow(Error)
+  })
+
 })

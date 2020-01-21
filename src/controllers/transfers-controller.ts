@@ -54,8 +54,10 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
     const transfer: Transfer = await request.server.app.transfersService.get(transferId)
     const transaction: Transaction = await request.server.app.transactionsService.get(transfer.transactionRequestId, 'transactionRequestId')
     const iso0200 = await request.server.app.isoMessagesService.get(transfer.transactionRequestId, transaction.lpsKey, '0200')
-
+    // TODO: Fix creating of 0210 message
+    delete iso0200.id
     const iso0210 = {
+      ...iso0200,
       0: '0210',
       39: '00',
       127.2: iso0200[127.2]
@@ -68,6 +70,11 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
       throw new Error('Client not registered')
     }
 
+    // TODO: Fix sanitizing of 0210 message
+    delete iso0210.lpsId
+    delete iso0210.lpsKey
+    delete iso0210.id
+    delete iso0210.transactionRequestId
     request.server.app.logger.debug('Transfers Controller: Sending 0210 to LPS. ' + JSON.stringify(iso0210))
     await client.sendFinancialResponse(iso0210)
 
