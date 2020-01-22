@@ -17,7 +17,7 @@ describe('Quotes service', function () {
       },
       useNullAsDefault: true
     })
-    quotesService = new KnexQuotesService(knex, 'secret', logger)
+    quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger })
   })
 
   beforeEach(async () => {

@@ -43,19 +43,40 @@ type QuoteIlpResponse = {
 }
 
 interface IlpService {
-  getQuoteResponseIlp (quoteRequest: any, quoteResponse: any): QuoteIlpResponse;
+  getQuoteResponseIlp(quoteRequest: any, quoteResponse: any): QuoteIlpResponse;
 }
 
 export interface QuotesService {
-  create (request: QuotesPostRequest, fees: Money, commission: Money): Promise<Quote>;
-  get (id: string, idType: 'id' | 'transactionRequestId'): Promise<Quote>;
-  calculateAdaptorFees (amount: Money): Promise<Money>;
+  create(request: QuotesPostRequest, fees: Money, commission: Money): Promise<Quote>;
+  get(id: string, idType: 'id' | 'transactionRequestId'): Promise<Quote>;
+  calculateAdaptorFees(amount: Money): Promise<Money>;
+}
+
+export type QuotesServiceOptions = {
+  knex: Knex;
+  ilpSecret: string;
+  logger: Logger;
+  expirationWindow?: number;
+  calculateAdaptorFees?: (amount: Money) => Promise<Money>;
+}
+
+async function defaultCalculateAdaptorFees (amount: Money): Promise<Money> {
+  const fee: Money = { amount: '0', currency: amount.currency }
+  return fee
 }
 
 export class KnexQuotesService implements QuotesService {
+  private _knex: Knex
+  private _logger: Logger
+  private _expirationWindow: number
+  private _calculateAdaptorFees: (amount: Money) => Promise<Money>
   private _ilp: IlpService
-  constructor (private _knex: Knex, _ilpSecret: string, private _logger: Logger = console, private _expirationWindow = 10000, private _calculateAdaptorFees?: (amount: Money) => Promise<Money>) {
-    this._ilp = new MojaloopSDK.Ilp({ secret: _ilpSecret, logger: _logger })
+  constructor (options: QuotesServiceOptions) {
+    this._knex = options.knex
+    this._logger = options.logger || console
+    this._expirationWindow = options.expirationWindow || 10000
+    this._calculateAdaptorFees = options.calculateAdaptorFees || defaultCalculateAdaptorFees
+    this._ilp = new MojaloopSDK.Ilp({ secret: options.ilpSecret, logger: this._logger })
   }
 
   async create (request: QuotesPostRequest, fees: Money, commission: Money): Promise<Quote> {
@@ -127,6 +148,6 @@ export class KnexQuotesService implements QuotesService {
 
   async calculateAdaptorFees (amount: Money): Promise<Money> {
     this._logger.debug('Quotes Service: calculating Adaptor Fees ' + amount)
-    return this._calculateAdaptorFees ? this._calculateAdaptorFees(amount) : { amount: '0', currency: amount.currency }
+    return this._calculateAdaptorFees(amount)
   }
 }

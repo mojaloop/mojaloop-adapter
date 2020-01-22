@@ -45,7 +45,7 @@ const transcationRequestClient = axios.create({
 const transactionRequestService = new KnexTransactionsService({ knex, client: transcationRequestClient, logger })
 const isoMessagesService = new KnexIsoMessageService(knex)
 
-const quotesService = new KnexQuotesService(knex, ILP_SECRET, logger, Number(QUOTE_EXPIRATION_WINDOW))
+const quotesService = new KnexQuotesService({ knex, ilpSecret: ILP_SECRET, logger, expirationWindow: Number(QUOTE_EXPIRATION_WINDOW) })
 
 const transfersService = new KnexTransfersService({ knex, ilpSecret: ILP_SECRET, logger })
 

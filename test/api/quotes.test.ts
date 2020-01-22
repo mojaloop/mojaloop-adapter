@@ -35,7 +35,7 @@ describe('Quotes endpoint', function () {
     services.transactionsService = new KnexTransactionsService({ knex, client: httpClient, logger })
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
-    services.quotesService = new KnexQuotesService(knex, 'secret', logger, 10000, calculateAdaptorFees)
+    services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger, calculateAdaptorFees })
     adaptor = await createApp(services)
   })
 
