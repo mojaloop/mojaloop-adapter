@@ -26,6 +26,7 @@ describe('Transfers Controller', function () {
   let transfer: Transfer
   let transaction: Transaction
   let request: TransactionRequest
+  const logger = console
 
   beforeAll(async () => {
     knex = Knex({
@@ -38,9 +39,9 @@ describe('Transfers Controller', function () {
     })
 
     const httpClient = Axios.create()
-    services.transactionsService = new KnexTransactionsService(knex, httpClient)
+    services.transactionsService = new KnexTransactionsService({ knex, client: httpClient, logger })
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
-    services.transfersService = new KnexTransfersService(knex, 'secret')
+    services.transfersService = new KnexTransfersService({ knex, ilpSecret: 'secret', logger })
     services.isoMessagesService = new KnexIsoMessageService(knex)
     adaptor = await createApp(services)
   })

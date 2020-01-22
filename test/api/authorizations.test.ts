@@ -30,6 +30,7 @@ describe('Authorizations api', function () {
   })
   const services = AdaptorServicesFactory.build()
   const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
+  const logger = console
 
   beforeAll(async () => {
     knex = Knex({
@@ -40,11 +41,10 @@ describe('Authorizations api', function () {
       },
       useNullAsDefault: true
     })
-    const fakeLogger = { log: jest.fn() }
-    services.transactionsService = new KnexTransactionsService(knex, fakeHttpClient)
+    services.transactionsService = new KnexTransactionsService({ knex, client: fakeHttpClient, logger })
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
-    services.quotesService = new KnexQuotesService(knex, 'secret', fakeLogger, 10000, calculateAdaptorFees)
+    services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger, calculateAdaptorFees })
     adaptor = await createApp(services)
 
     beforeEach(async () => {
