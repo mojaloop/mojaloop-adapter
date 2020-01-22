@@ -68,4 +68,16 @@ describe('Transaction Requests API', function () {
     expect(transaction.state).toBe(TransactionState.transactionResponded)
   })
 
+  test('updates transaction state to transactionCancelled if transactionRequestState is \'REJECTED\'', async () => {
+    const response = await adaptor.inject({
+      method: 'PUT',
+      url: '/transactionRequests/123',
+      payload: { transactionId: '456', transactionRequestState: 'REJECTED' }
+    })
+
+    expect(response.statusCode).toEqual(200)
+    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
+    expect(transaction.state).toBe(TransactionState.transactionCancelled)
+  })
+
 })

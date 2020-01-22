@@ -13,6 +13,10 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
       await request.server.app.transactionsService.updateState(request.params.ID, 'transactionRequestId', TransactionState.transactionResponded)
     }
 
+    if (transactionRequestResponse.transactionRequestState === 'REJECTED') {
+      await request.server.app.transactionsService.updateState(request.params.ID, 'transactionRequestId', TransactionState.transactionCancelled)
+    }
+
     return h.response().code(200)
   } catch (error) {
     request.server.app.logger.error('Transaction Requests Controller: Could not process transaction request response. TransactionRequestId: ' + request.params.ID)
