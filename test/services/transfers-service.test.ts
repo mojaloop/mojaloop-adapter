@@ -20,7 +20,7 @@ describe('Transfers Service', function () {
       useNullAsDefault: true
     })
 
-    transfersService = new KnexTransfersService(knex, 'secret', logger)
+    transfersService = new KnexTransfersService({ knex, ilpSecret: 'secret', logger })
   })
 
   beforeEach(async () => {

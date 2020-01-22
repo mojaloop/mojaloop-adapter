@@ -40,10 +40,20 @@ export interface TransfersService {
   calculateFulfilment (ilpPacket: string): string;
 }
 
+export type TransferServiceOptions = {
+  knex: Knex;
+  ilpSecret: string;
+  logger: Logger;
+}
+
 export class KnexTransfersService implements TransfersService {
+  private _knex: Knex
+  private _logger: Logger = console
   private _ilp: IlpService
-  constructor (private _knex: Knex, _ilpSecret: string, private _logger: Logger = console) {
-    this._ilp = new MojaloopSDK.Ilp({ secret: _ilpSecret, logger: _logger })
+  constructor (options: TransferServiceOptions) {
+    this._knex = options.knex
+    this._logger = options.logger
+    this._ilp = new MojaloopSDK.Ilp({ secret: options.ilpSecret, logger: this._logger })
   }
 
   async get (id: string): Promise<Transfer> {

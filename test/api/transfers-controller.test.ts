@@ -41,7 +41,7 @@ describe('Transfers Controller', function () {
     const httpClient = Axios.create()
     services.transactionsService = new KnexTransactionsService({ knex, client: httpClient, logger })
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
-    services.transfersService = new KnexTransfersService(knex, 'secret', logger)
+    services.transfersService = new KnexTransfersService({ knex, ilpSecret: 'secret', logger })
     services.isoMessagesService = new KnexIsoMessageService(knex)
     adaptor = await createApp(services)
   })
