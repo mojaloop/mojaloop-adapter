@@ -47,7 +47,7 @@ interface IlpService {
 
 export interface QuotesService {
   create (request: QuotesPostRequest, fees: Money, commission: Money): Promise<Quote>;
-  get (id: string, idType: string): Promise<Quote>;
+  get (id: string, idType: 'id' | 'transactionRequestId'): Promise<Quote>;
   calculateAdaptorFees (amount: Money): Promise<Money>;
 }
 
@@ -86,7 +86,7 @@ export class KnexQuotesService implements QuotesService {
     return this.get(request.quoteId, 'id')
   }
 
-  async get (id: string, idType: string): Promise<Quote> {
+  async get (id: string, idType: 'id' | 'transactionRequestId'): Promise<Quote> {
     const dbQuote = await this._knex<DBQuote>('quotes').where(idType, id).first()
 
     if (!dbQuote) {
