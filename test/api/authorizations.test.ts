@@ -41,7 +41,7 @@ describe('Authorizations api', function () {
       },
       useNullAsDefault: true
     })
-    services.transactionsService = new KnexTransactionsService(knex, fakeHttpClient, logger)
+    services.transactionsService = new KnexTransactionsService({ knex, client: fakeHttpClient, logger })
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
     services.quotesService = new KnexQuotesService(knex, 'secret', logger, 10000, calculateAdaptorFees)

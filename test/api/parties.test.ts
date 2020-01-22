@@ -28,7 +28,7 @@ describe('Parties API', function () {
       useNullAsDefault: true
     })
     const httpClient = Axios.create()
-    services.transactionsService = new KnexTransactionsService(knex, httpClient, logger)
+    services.transactionsService = new KnexTransactionsService({ knex, client: httpClient, logger })
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     adaptor = await createApp(services)
   })

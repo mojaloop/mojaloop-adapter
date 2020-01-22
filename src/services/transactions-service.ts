@@ -96,8 +96,21 @@ export interface TransactionsService {
   getByPayerMsisdn (msisdn: string): Promise<Transaction>;
   findIncompleteTransactions (lpsKey: string): Promise<Transaction|null>;
 }
+
+export type TransactionServiceOptions = {
+  knex: Knex;
+  client: AxiosInstance;
+  logger: Logger;
+}
+
 export class KnexTransactionsService implements TransactionsService {
-  constructor (private _knex: Knex, private _client: AxiosInstance, private _logger: Logger = console) {
+  private _knex: Knex
+  private _client: AxiosInstance
+  private _logger: Logger = console
+  constructor (options: TransactionServiceOptions) {
+    this._knex = options.knex
+    this._client = options.client
+    this._logger = options.logger || console
   }
 
   async get (id: string, idType: 'transactionId' | 'transactionRequestId'): Promise<Transaction> {

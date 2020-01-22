@@ -20,7 +20,7 @@ describe('Transactions Service', function () {
       useNullAsDefault: true
     })
 
-    transactionsService = new KnexTransactionsService(knex, fakeHttpClient, logger)
+    transactionsService = new KnexTransactionsService({ knex, client: fakeHttpClient, logger })
   })
 
   beforeEach(async () => {
