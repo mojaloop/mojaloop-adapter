@@ -7,8 +7,20 @@ export interface AuthorizationsService {
   sendAuthorizationsResponse (transactionRequestId: string, response: AuthorizationsIDPutResponse, headers: { [k: string]: string }): Promise<void>;
 }
 
+export type AuthorizationsServiceOptions = {
+  knex: Knex;
+  client: AxiosInstance;
+  logger: Logger;
+}
+
 export class KnexAuthorizationsService implements AuthorizationsService {
-  constructor (private _knex: Knex, private _client: AxiosInstance, private _logger: Logger = console) {
+  private _knex: Knex
+  private _client: AxiosInstance
+  private _logger: Logger = console
+  constructor (options: AuthorizationsServiceOptions) {
+    this._knex = options.knex
+    this._client = options.client
+    this._logger = options.logger
   }
 
   async sendAuthorizationsResponse (transactionRequestId: string, request: AuthorizationsIDPutResponse, headers: { [k: string]: string }): Promise<void> {
