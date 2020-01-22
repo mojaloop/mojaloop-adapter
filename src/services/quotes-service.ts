@@ -1,6 +1,6 @@
 import Knex from 'knex'
 import { QuotesPostRequest, Money } from '../types/mojaloop'
-import { Logger } from 'adaptor'
+import { Logger } from '../adaptor'
 const MlNumber = require('@mojaloop/ml-number')
 const MojaloopSDK = require('@mojaloop/sdk-standard-components')
 

@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import { Party, PartyIdInfo, Money, TransactionType, TransactionRequestsPostRequest } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
-import { Logger } from 'adaptor'
+import { Logger } from '../adaptor'
 
 export enum TransactionState {
   transactionReceived = '01',

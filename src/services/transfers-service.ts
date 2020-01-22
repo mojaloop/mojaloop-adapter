@@ -1,6 +1,6 @@
 import Knex from 'knex'
 import { Money } from '../types/mojaloop'
-import { Logger } from 'adaptor'
+import { Logger } from '../adaptor'
 const MojaloopSDK = require('@mojaloop/sdk-standard-components')
 
 export enum TransferState {

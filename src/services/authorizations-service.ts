@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios'
 import Knex from 'knex'
 import { AuthorizationsIDPutResponse } from '../types/mojaloop'
-import { Logger } from 'adaptor'
+import { Logger } from '../adaptor'
 
 export interface AuthorizationsService {
   sendAuthorizationsResponse (transactionRequestId: string, response: AuthorizationsIDPutResponse, headers: { [k: string]: string }): Promise<void>;
