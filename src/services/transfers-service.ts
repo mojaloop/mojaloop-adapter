@@ -43,7 +43,7 @@ export interface TransfersService {
 export type TransferServiceOptions = {
   knex: Knex;
   ilpSecret: string;
-  logger: Logger;
+  logger?: Logger;
 }
 
 export class KnexTransfersService implements TransfersService {
@@ -52,7 +52,7 @@ export class KnexTransfersService implements TransfersService {
   private _ilp: IlpService
   constructor (options: TransferServiceOptions) {
     this._knex = options.knex
-    this._logger = options.logger
+    this._logger = options.logger || console
     this._ilp = new MojaloopSDK.Ilp({ secret: options.ilpSecret, logger: this._logger })
   }
 

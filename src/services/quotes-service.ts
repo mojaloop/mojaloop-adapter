@@ -55,7 +55,7 @@ export interface QuotesService {
 export type QuotesServiceOptions = {
   knex: Knex;
   ilpSecret: string;
-  logger: Logger;
+  logger?: Logger;
   expirationWindow?: number;
   calculateAdaptorFees?: (amount: Money) => Promise<Money>;
 }

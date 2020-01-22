@@ -100,7 +100,7 @@ export interface TransactionsService {
 export type TransactionServiceOptions = {
   knex: Knex;
   client: AxiosInstance;
-  logger: Logger;
+  logger?: Logger;
 }
 
 export class KnexTransactionsService implements TransactionsService {

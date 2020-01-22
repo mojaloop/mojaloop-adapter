@@ -10,7 +10,7 @@ export interface AuthorizationsService {
 export type AuthorizationsServiceOptions = {
   knex: Knex;
   client: AxiosInstance;
-  logger: Logger;
+  logger?: Logger;
 }
 
 export class KnexAuthorizationsService implements AuthorizationsService {
@@ -20,7 +20,7 @@ export class KnexAuthorizationsService implements AuthorizationsService {
   constructor (options: AuthorizationsServiceOptions) {
     this._knex = options.knex
     this._client = options.client
-    this._logger = options.logger
+    this._logger = options.logger || console
   }
 
   async sendAuthorizationsResponse (transactionRequestId: string, request: AuthorizationsIDPutResponse, headers: { [k: string]: string }): Promise<void> {
