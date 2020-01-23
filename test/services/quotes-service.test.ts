@@ -6,6 +6,7 @@ import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 describe('Quotes service', function () {
   let knex: Knex
   let quotesService: KnexQuotesService
+  const logger = console
 
   beforeAll(async () => {
     knex = Knex({
@@ -16,8 +17,7 @@ describe('Quotes service', function () {
       },
       useNullAsDefault: true
     })
-    const fakeLogger = { log: jest.fn() }
-    quotesService = new KnexQuotesService(knex, 'secret', fakeLogger)
+    quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger })
   })
 
   beforeEach(async () => {

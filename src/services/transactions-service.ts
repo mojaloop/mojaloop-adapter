@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import { Party, PartyIdInfo, Money, TransactionType, TransactionRequestsPostRequest } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
-const logger = require('@mojaloop/central-services-logger')
+import { Logger } from '../adaptor'
 
 export enum TransactionState {
   transactionReceived = '01',
@@ -96,11 +96,25 @@ export interface TransactionsService {
   getByPayerMsisdn (msisdn: string): Promise<Transaction>;
   findIncompleteTransactions (lpsKey: string): Promise<Transaction|null>;
 }
+
+export type TransactionServiceOptions = {
+  knex: Knex;
+  client: AxiosInstance;
+  logger?: Logger;
+}
+
 export class KnexTransactionsService implements TransactionsService {
-  constructor (private _knex: Knex, private _client: AxiosInstance) {
+  private _knex: Knex
+  private _client: AxiosInstance
+  private _logger: Logger = console
+  constructor (options: TransactionServiceOptions) {
+    this._knex = options.knex
+    this._client = options.client
+    this._logger = options.logger || console
   }
 
   async get (id: string, idType: 'transactionId' | 'transactionRequestId'): Promise<Transaction> {
+    this._logger.debug('Transaction Requests Service: getting Transaction Request by ' + idType + id)
     const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').where(idType, id).first()
     if (!dbTransaction) {
       throw new Error('Error fetching transaction from database')
@@ -164,6 +178,7 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async getByLpsKeyAndState (lpsKey: string, state: string): Promise<Transaction> {
+    this._logger.debug('Transaction Requests Service: getting Transaction Request by LPS Key ' + lpsKey + ' and State ' + state)
     const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').where('state', state).where('lpsKey', lpsKey).orderBy('created_at', 'desc').first()
     if (!dbTransaction) {
       throw new Error(`Error fetching transaction from database for lps-key=${lpsKey} and state=${state}`)
@@ -173,7 +188,7 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async create (request: TransactionRequest): Promise<Transaction> {
-    logger.debug('Transaction Requests Service: Creating transaction request ' + request.transactionRequestId)
+    this._logger.debug('Transaction Requests Service: creating Transaction Request ' + request.transactionRequestId)
 
     await this._knex<DBTransaction>('transactions').insert({
       transactionRequestId: request.transactionRequestId,
@@ -215,6 +230,7 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async updatePayerFspId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction> {
+    this._logger.debug('Transaction Request Service: updating Payer FSP ID on ' + idType + id + ' to ' + fspId)
     const dbTransaction = await this.get(id, idType)
     await this._knex('transactionParties').where('transactionRequestId', dbTransaction.transactionRequestId).where('type', 'payer').first().update('fspId', fspId)
 
@@ -228,6 +244,7 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction> {
+    this._logger.debug('Transaction Request Service: updating State on ' + idType + id + ' to ' + state)
     const transaction = await this.get(id, idType)
     await this._knex('transactions').where(idType, id).first().update({
       state,
@@ -238,6 +255,7 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async sendToMojaHub (request: TransactionRequest): Promise<void> {
+    this._logger.debug('Transaction Request Service: sending Transaction Request ' + request.transactionRequestId + ' to MojaHub')
     // TODO: use mojaSDK
     const headers = {
       accept: 'application/json',
@@ -257,6 +275,7 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async getByPayerMsisdn (msisdn: string): Promise<Transaction> {
+    this._logger.debug('Transaction Request Service: getting Transaction Request by Payer MSISDN ' + msisdn)
     const transaction = await this._knex('transactionParties').select('transactionParties.transactionRequestId').where('identifierValue', msisdn)
       .leftJoin('transactions', function () {
         this.on('transactions.transactionRequestId', '=', 'transactionParties.transactionRequestId')
@@ -270,6 +289,7 @@ export class KnexTransactionsService implements TransactionsService {
   }
 
   async findIncompleteTransactions (lpsKey: string): Promise<Transaction|null> {
+    this._logger.debug('Transaction Request Service: getting incomplete Transaction by LPS Key ' + lpsKey)
     const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').whereNot('state', TransactionState.transactionDeclined).whereNot('state', TransactionState.transactionCancelled).whereNot('state', TransactionState.transactionResponded).where('lpsKey', lpsKey).orderBy('created_at', 'desc').first()
     if (!dbTransaction) {
       return null

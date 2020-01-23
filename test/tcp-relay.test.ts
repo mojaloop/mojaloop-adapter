@@ -7,6 +7,7 @@ import { AdaptorServicesFactory } from './factories/adaptor-services'
 import Axios from 'axios'
 import { KnexTransactionsService } from '../src/services/transactions-service'
 import { KnexIsoMessageService } from '../src/services/iso-message-service'
+
 jest.mock('uuid/v4', () => () => '123') // used to geneate uuid for transaction request id
 const IsoParser = require('iso_8583')
 
@@ -15,6 +16,7 @@ describe('TCP relay', function () {
   let knex: Knex
   let adaptor: Server
   const services = AdaptorServicesFactory.build()
+  const logger = console
 
   beforeAll(async () => {
     knex = Knex({
@@ -26,7 +28,7 @@ describe('TCP relay', function () {
       useNullAsDefault: true
     })
     const httpClient = Axios.create()
-    services.transactionsService = new KnexTransactionsService(knex, httpClient)
+    services.transactionsService = new KnexTransactionsService({ knex, client: httpClient, logger })
     services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     services.isoMessagesService = new KnexIsoMessageService(knex)
     adaptor = await createApp(services)
