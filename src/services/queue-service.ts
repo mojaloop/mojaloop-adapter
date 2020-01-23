@@ -4,12 +4,22 @@ export interface QueueService {
     addToQueue(qName: string, payload: any): Promise<void>;
 }
 
+export type RedisConnection = {
+  host: string;
+  port: number;
+}
+
 export class BullQueueService implements QueueService {
   private _queue: Map<string, Queue> = new Map()
 
-  constructor (queue: string[]) {
+  constructor (queue: string[], options: RedisConnection) {
     for (const i in queue) {
-      this._queue.set(queue[i], new Queue(queue[i]))
+      this._queue.set(queue[i], new Queue(queue[i], {
+        connection: {
+          host: options.host,
+          port: options.port
+        }
+      }))
     }
   }
 

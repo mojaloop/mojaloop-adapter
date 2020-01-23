@@ -4,7 +4,7 @@ describe('queueService', function () {
 
   const queueName1 = 'queue1'
   const queueName2 = 'queue2'
-  const queueService = new BullQueueService([queueName1, queueName2])
+  const queueService = new BullQueueService([queueName1, queueName2], { host: 'localhost', port: 6379 })
 
   afterAll(async () => {
     await queueService.shutdown()
