@@ -150,6 +150,29 @@ describe('Quotes endpoint', function () {
       const transaction = await services.transactionsService.get('456', 'transactionId')
       expect(transaction.state).toEqual(TransactionState.quoteResponded)
     })
+
+    test('should return 500 upon failure to add to a queue', async () => {
+      adaptor.app.queueService.addToQueue = jest.fn().mockImplementationOnce(() => {
+        throw Error
+      })
+
+      const quoteRequest = QuotesPostRequestFactory.build({
+        transactionId: '456',
+        amount: {
+          amount: '100',
+          currency: 'USD'
+        }
+      })
+
+      const response = await adaptor.inject({
+        method: 'POST',
+        url: '/quotes',
+        payload: quoteRequest
+      })
+
+      expect(response.statusCode).toBe(500)
+
+    })
   })
 
 })
