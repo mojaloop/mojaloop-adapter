@@ -290,7 +290,7 @@ export class KnexTransactionsService implements TransactionsService {
 
   async findIncompleteTransactions (lpsKey: string): Promise<Transaction|null> {
     this._logger.debug('Transaction Request Service: getting incomplete Transaction by LPS Key ' + lpsKey)
-    const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').whereNot('state', TransactionState.transactionDeclined).whereNot('state', TransactionState.transactionCancelled).whereNot('state', TransactionState.transactionResponded).where('lpsKey', lpsKey).orderBy('created_at', 'desc').first()
+    const dbTransaction: DBTransaction | undefined = await this._knex<DBTransaction>('transactions').whereNot('state', TransactionState.transactionDeclined).whereNot('state', TransactionState.transactionCancelled).whereNot('state', TransactionState.financialResponse).where('lpsKey', lpsKey).orderBy('created_at', 'desc').first()
     if (!dbTransaction) {
       return null
     }

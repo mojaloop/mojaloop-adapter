@@ -246,7 +246,7 @@ describe('Transactions Service', function () {
 
     test('can find incomplete transactions', async () => {
       const transaction = await transactionsService.create(TransactionRequestFactory.build())
-      expect(transaction.state).not.toBe(TransactionState.transactionResponded)
+      expect(transaction.state).not.toBe(TransactionState.financialResponse)
       expect(transaction.state).not.toBe(!TransactionState.transactionCancelled)
       expect(transaction.state).not.toBe(!TransactionState.transactionDeclined)
 
@@ -257,7 +257,7 @@ describe('Transactions Service', function () {
 
     test('returns null if there are no incomplete transactions ', async () => {
       const transaction = await transactionsService.create(TransactionRequestFactory.build())
-      await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.transactionResponded)
+      await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.financialResponse)
 
       const incompleteTransaction = await transactionsService.findIncompleteTransactions(transaction.lpsKey)
 
