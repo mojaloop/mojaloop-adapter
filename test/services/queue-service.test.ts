@@ -10,7 +10,7 @@ describe('queueService', function () {
     await queueService.shutdown()
   })
 
-  test('should set queue', async () => {
+  test('can create queues mapped to the keys provided', async () => {
     const queue = await queueService.getQueue()
     const queue1 = queue.has(queueName1)
     const queue2 = queue.has(queueName2)
@@ -20,7 +20,7 @@ describe('queueService', function () {
     expect(queue2).toBeTruthy()
     expect(queueSize).toEqual(2)
   })
-  test('should add to correct queue', async () => {
+  test('throws error if trying to add to a queue that does not exist', async () => {
     const queueName = 'someName'
     let errorMessage = ''
 
