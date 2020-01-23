@@ -90,7 +90,7 @@ export interface TransactionsService {
   getByLpsKeyAndState(lpsKey: string, state: string): Promise<Transaction>;
   create (request: TransactionRequest): Promise<Transaction>;
   updatePayerFspId (id: string, idType: 'transactionId' | 'transactionRequestId', fspId: string): Promise<Transaction>;
-  updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', transactionId: string): Promise<Transaction>;
+  updateTransactionId (transactionRequestId: string, transactionId: string): Promise<Transaction>;
   updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction>;
   sendToMojaHub (request: TransactionRequest): Promise<void>;
   getByPayerMsisdn (msisdn: string): Promise<Transaction>;
@@ -237,10 +237,10 @@ export class KnexTransactionsService implements TransactionsService {
     return this.get(id, idType)
   }
 
-  async updateTransactionId (id: string, idType: 'transactionId' | 'transactionRequestId', transactionId: string): Promise<Transaction> {
-    await this._knex('transactions').where(idType, id).first().update('transactionId', transactionId)
+  async updateTransactionId (transactionRequestId: string, transactionId: string): Promise<Transaction> {
+    await this._knex('transactions').where('transactionRequestId', transactionRequestId).first().update('transactionId', transactionId)
 
-    return this.get(id, idType)
+    return this.get(transactionRequestId, 'transactionRequestId')
   }
 
   async updateState (id: string, idType: 'transactionId' | 'transactionRequestId', state: string): Promise<Transaction> {

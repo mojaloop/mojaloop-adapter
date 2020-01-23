@@ -161,7 +161,7 @@ describe('Transactions Service', function () {
     const transaction = await transactionsService.create(transactionRequest)
     expect(transaction.transactionId).toBeNull()
 
-    await transactionsService.updateTransactionId(transactionRequest.transactionRequestId, 'transactionRequestId', '1234')
+    await transactionsService.updateTransactionId(transactionRequest.transactionRequestId, '1234')
 
     const freshTransaction = await transactionsService.get(transactionRequest.transactionRequestId, 'transactionRequestId')
     expect(freshTransaction.transactionId).toBe('1234')
