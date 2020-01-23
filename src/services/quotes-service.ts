@@ -73,7 +73,7 @@ export class KnexQuotesService implements QuotesService {
   private _ilp: IlpService
   constructor (options: QuotesServiceOptions) {
     this._knex = options.knex
-    this._logger = options.logger || console
+    this._logger = console
     this._expirationWindow = options.expirationWindow || 10000
     this._calculateAdaptorFees = options.calculateAdaptorFees || defaultCalculateAdaptorFees
     this._ilp = new MojaloopSDK.Ilp({ secret: options.ilpSecret, logger: this._logger })
@@ -147,7 +147,7 @@ export class KnexQuotesService implements QuotesService {
   }
 
   async calculateAdaptorFees (amount: Money): Promise<Money> {
-    this._logger.debug('Quotes Service: calculating Adaptor Fees ' + amount)
+    this._logger.debug('Quotes Service: calculating Adaptor Fees ' + JSON.stringify(amount))
     return this._calculateAdaptorFees(amount)
   }
 }
