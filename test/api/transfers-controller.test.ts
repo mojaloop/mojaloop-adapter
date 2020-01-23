@@ -50,7 +50,7 @@ describe('Transfers Controller', function () {
     await knex.migrate.latest()
     request = TransactionRequestFactory.build()
     transaction = await services.transactionsService.create(request)
-    await services.transactionsService.updateTransactionId(request.transactionRequestId, 'transactionRequestId', '20508186-1458-4ac0-a824-d4b07e37d7b3')
+    await services.transactionsService.updateTransactionId(request.transactionRequestId, '20508186-1458-4ac0-a824-d4b07e37d7b3')
     await services.transactionsService.updateState(request.transactionRequestId, 'transactionRequestId', TransactionState.financialRequestSent)
     transactionRequestId = request.transactionRequestId
     payload = TransferPostRequestFactory.build()

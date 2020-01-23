@@ -9,7 +9,7 @@ export async function update (request: Request, h: ResponseToolkit): Promise<Res
 
     if (transactionRequestResponse.transactionId) {
       // TODO: refactor update functions
-      await request.server.app.transactionsService.updateTransactionId(request.params.ID, 'transactionRequestId', transactionRequestResponse.transactionId)
+      await request.server.app.transactionsService.updateTransactionId(request.params.ID, transactionRequestResponse.transactionId)
       await request.server.app.transactionsService.updateState(request.params.ID, 'transactionRequestId', TransactionState.transactionResponded)
     }
 
