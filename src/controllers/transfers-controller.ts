@@ -7,7 +7,7 @@ const IlpPacket = require('ilp-packet')
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {
-    request.server.app.logger.info('Transfers Controller: Received transfer request response. transferId: ' + request.params.ID + ' payload: ' + JSON.stringify(request.payload))
+    request.server.app.logger.info('Transfers Controller: Received transfer request. payload: ' + JSON.stringify(request.payload))
     const payload: TransfersPostRequest = request.payload as TransfersPostRequest
     const binaryPacket = Buffer.from(payload.ilpPacket, 'base64')
     const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
