@@ -9,11 +9,10 @@ import { KnexTransfersService } from './services/transfers-service'
 import { KnexAuthorizationsService } from './services/authorizations-service'
 import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
-import { Queue, Worker, Job } from 'bullmq'
+import { Worker } from 'bullmq'
 import { quotesHandler } from './handlers/quotes-handler'
 
-const postQuotesQueue = new Queue('postQuotesQueue')
-const queueService = new BullQueueService(postQuotesQueue)
+const queueService = new BullQueueService(['QuotesPost'])
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -73,7 +72,7 @@ const MojaClient = new MojaloopRequests({
   jwsSigningKey: 'string',
   peerEndpoint: 'string'
 })
-const app = {
+const adaptorServices = {
   transactionsService: transactionRequestService,
   isoMessagesService,
   quotesService,
@@ -83,18 +82,9 @@ const app = {
   queueService
 }
 
-const handlerFactory = (services: AdaptorServices): (job: Job<any, any>) => Promise<void> => {
-  return async (job): Promise<void> => {
-    try {
-      await quotesHandler(services, job.data.payload, job.data.headers)
-    } catch (error) {
-      console.log('worker error')
-    }
-  }
-}
-
-const handler = handlerFactory(app)
-const postQuotesQueueWorker = new Worker('postQuotesQueue', handler)
+const worker = new Worker('QuotesPost', async job => {
+  await quotesHandler(adaptorServices, job.data.payload, job.data.headers)
+})
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
@@ -102,7 +92,7 @@ const start = async (): Promise<void> => {
 
   await knex.migrate.latest()
 
-  const adaptor = await createApp({ transactionsService: transactionRequestService, isoMessagesService, quotesService, authorizationsService, MojaClient, transfersService, queueService }, { port: HTTP_PORT })
+  const adaptor = await createApp(adaptorServices, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
