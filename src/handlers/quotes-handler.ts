@@ -1,5 +1,5 @@
 import { Request } from 'hapi'
-import { QuotesIDPutResponse, QuotesPostRequest } from '../types/mojaloop'
+import { QuotesIDPutResponse, QuotesPostRequest, ErrorInformation } from '../types/mojaloop'
 import { TransactionState } from '../services/transactions-service'
 import { AdaptorServices } from '../adaptor'
 
@@ -21,6 +21,6 @@ export async function quotesHandler (app: AdaptorServices, payload: QuotesPostRe
     await app.MojaClient.putQuotes(quote.id, quoteResponse, headers['fspiop-source'])
     await app.transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.quoteResponded)
   } catch (error) {
-    app.MojaClient.putQuotesError(payload.quoteId, error, headers['fspiop-source'])
+    app.MojaClient.putQuotesError(payload.quoteId, error.messag, headers['fspiop-source'])
   }
 }

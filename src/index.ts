@@ -14,8 +14,8 @@ import { quotesHandler } from './handlers/quotes-handler'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
-const REDIS_PORT = process.env.IOREDIS_PORT || 6379
-const REDIS_HOST = process.env.IOREDIS_HOST || 'localhost'
+const REDIS_PORT = process.env.REDIS_PORT || 6379
+const REDIS_HOST = process.env.REDIS_HOST || 'localhost'
 const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
 const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
 const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
