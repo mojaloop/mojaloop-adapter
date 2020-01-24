@@ -1,5 +1,5 @@
 import { Request, ResponseToolkit, ResponseObject } from 'hapi'
-import { QuotesPostRequest } from 'types/mojaloop'
+import { QuotesPostRequest } from '../types/mojaloop'
 
 export async function create (request: Request, h: ResponseToolkit): Promise<ResponseObject> {
   try {

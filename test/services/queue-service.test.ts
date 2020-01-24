@@ -1,17 +1,18 @@
 import { BullQueueService } from '../../src/services/queue-service'
+import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 
 describe('queueService', function () {
 
   const queueName1 = 'queue1'
   const queueName2 = 'queue2'
-  const queueService = new BullQueueService([queueName1, queueName2], { host: 'localhost', port: 6379 })
+  const queueService = new BullQueueService([queueName1, queueName2])
 
   afterAll(async () => {
     await queueService.shutdown()
   })
 
   test('can create queues mapped to the keys provided', async () => {
-    const queue = await queueService.getQueue()
+    const queue = await queueService.getQueues()
     const queue1 = queue.has(queueName1)
     const queue2 = queue.has(queueName2)
     const queueSize = queue.size
@@ -24,8 +25,19 @@ describe('queueService', function () {
     const queueName = 'someName'
     let errorMessage = ''
 
+    const quoteRequest = QuotesPostRequestFactory.build()
+    const headers = {
+      'fspiop-source': 'payer',
+      'fspiop-destination': 'payee'
+    }
+
+    const quotesObject = {
+      payload: quoteRequest,
+      headers: headers
+    }
+
     try {
-      await queueService.addToQueue(queueName, 'payload')
+      await queueService.addToQueue(queueName, quotesObject)
     } catch (error) {
       errorMessage = error.message
     }
