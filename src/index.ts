@@ -10,7 +10,7 @@ import { KnexAuthorizationsService } from './services/authorizations-service'
 import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 import { Worker } from 'bullmq'
-import { quotesHandler } from './handlers/quotes-handler'
+import { quotesRequestHandler } from './handlers/quotes-handler'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -86,7 +86,7 @@ const adaptorServices: AdaptorServices = {
 }
 
 const worker = new Worker('QuotesPost', async job => {
-  await quotesHandler(adaptorServices, job.data.payload, job.data.headers)
+  await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
 })
 
 const start = async (): Promise<void> => {

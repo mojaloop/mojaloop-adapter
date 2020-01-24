@@ -11,7 +11,7 @@ import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { QuotesPostRequestFactory, PartiesPutResponseFactory } from '../factories/mojaloop-messages'
 import { AuthorizationsIDPutResponse, Money } from '../../src/types/mojaloop'
 import { KnexQuotesService } from '../../src/services/quotes-service'
-import { quotesHandler } from '../../src/handlers/quotes-handler'
+import { quotesRequestHandler } from '../../src/handlers/quotes-handler'
 
 jest.mock('uuid/v4', () => () => '123')
 const lpsKey = 'postillion:0100'
@@ -96,7 +96,7 @@ describe('Authorizations api', function () {
         'fspiop-destination': 'fspiop-source',
         'fspiop-source': 'fspiop-destination'
       }
-      await quotesHandler(services, quoteRequest, headers)
+      await quotesRequestHandler(services, quoteRequest, headers)
     })
   })
 
