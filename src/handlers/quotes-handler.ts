@@ -1,5 +1,5 @@
 import { Request } from 'hapi'
-import { QuotesIDPutResponse, QuotesPostRequest } from 'types/mojaloop'
+import { QuotesIDPutResponse, QuotesPostRequest } from '../types/mojaloop'
 import { TransactionState } from '../services/transactions-service'
 import { AdaptorServices } from '../adaptor'
 
