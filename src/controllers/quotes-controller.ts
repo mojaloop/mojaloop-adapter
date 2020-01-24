@@ -10,7 +10,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       headers: request.headers
     }
 
-    await request.server.app.queueService.addToQueue('QuotesPost', quotesObject)
+    await request.server.app.queueService.addToQueue('QuoteRequests', quotesObject)
 
     return h.response().code(202)
   } catch (error) {

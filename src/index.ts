@@ -43,7 +43,7 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 })
 const logger = require('@mojaloop/central-services-logger')
 
-const queueService = new BullQueueService(['QuotesPost'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
+const queueService = new BullQueueService(['QuoteRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
 
 const transacationRequestClient = axios.create({
   baseURL: TRANSACTION_REQUESTS_URL,
@@ -85,7 +85,7 @@ const adaptorServices: AdaptorServices = {
   queueService
 }
 
-const worker = new Worker('QuotesPost', async job => {
+const worker = new Worker('QuoteRequests', async job => {
   await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
 })
 
