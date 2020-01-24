@@ -23,7 +23,7 @@ describe('queueService', function () {
   })
   test('throws error if trying to add to a queue that does not exist', async () => {
     const queueName = 'someName'
-    let errorMessage = ''
+    const errorMessage = ''
 
     const quoteRequest = QuotesPostRequestFactory.build()
     const headers = {
@@ -36,12 +36,6 @@ describe('queueService', function () {
       headers: headers
     }
 
-    try {
-      await queueService.addToQueue(queueName, quotesObject)
-    } catch (error) {
-      errorMessage = error.message
-    }
-
-    expect(errorMessage).toBe(`Cannot find queue with name: ${queueName}`)
+    await expect(queueService.addToQueue(queueName, quotesObject)).rejects.toThrowError(`Cannot find queue with name: ${queueName}`)
   })
 })
