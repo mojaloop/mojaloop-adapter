@@ -49,6 +49,7 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     sendAuthorizationsResponse: jest.fn().mockResolvedValue(undefined)
   },
   queueService: {
-    addToQueue: jest.fn()
+    addToQueue: jest.fn(),
+    shutdown: jest.fn()
   }
 })
