@@ -23,8 +23,6 @@ describe('queueService', function () {
   })
   test('throws error if trying to add to a queue that does not exist', async () => {
     const queueName = 'someName'
-    const errorMessage = ''
-
     const quoteRequest = QuotesPostRequestFactory.build()
     const headers = {
       'fspiop-source': 'payer',
