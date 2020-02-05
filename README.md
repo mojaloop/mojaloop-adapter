@@ -1,7 +1,7 @@
 WIP: Adapter that accepts messages from legacy payment systems (ISO8583) over TCP and converts it to Mojaloop Open API requests.
 
 ## Architecture
-<img src="./media/iso-adaptor-architecture.png" style="background: white"/>
+<img src="./media/iso-adapter-architecture.png" style="background: white"/>
 
 ### TCP Relay
 This is a TCP server that accepts incoming connections from a Legacy Payment System. This connection is given a manually configured LPS Id. Any messages received on this connection are decoded into JSON representation of the original message and tagged with the LPS Id. It then routes this to the appropriate endpoint on the Adaptor according to the MTI.
@@ -12,7 +12,7 @@ This is an HTTP server that exposes endpoints that accept a JSON representation 
 The API surface that the adaptor exposes can be found in the [swagger file](./src/interface/swagger.json).
 
 ### DB Schema
-<img src="./media/Adaptor-database-schema.png" style="background: white"/>
+<img src="./media/Adapter-database-schema.png" style="background: white"/>
 
 ### Configuration
 Some environment variables are required:
