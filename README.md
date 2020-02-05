@@ -1,4 +1,4 @@
-WIP: Adaptor that accepts messages from legacy payment systems (ISO8583) over TCP and converts it to Mojaloop Open API requests.
+WIP: Adapter that accepts messages from legacy payment systems (ISO8583) over TCP and converts it to Mojaloop Open API requests.
 
 ## Architecture
 <img src="./media/iso-adaptor-architecture.png" style="background: white"/>
@@ -17,14 +17,23 @@ The API surface that the adaptor exposes can be found in the [swagger file](./sr
 ### Configuration
 Some environment variables are required:
 
-| FIELD                    | DEFAULT                           |
-| ------------------------ | --------------------------------- |
-| HTTP_PORT                | 3000                              |
-| TCP_PORT                 | 3001                              |
-| ML_API_ADAPTOR_URL       | http://ml-api-adaptor.local       |
-| TRANSACTION_REQUESTS_URL | http://transaction-requests.local |
-| QUOTE_REQUESTS_URL       | http://quote-requests.local       |
-| KNEX_CLIENT              | sqlite3                           |
+| FIELD                    | DEFAULT                             |
+| ------------------------ | ----------------------------------- |
+| HTTP_PORT                | 3000                                |
+| TCP_PORT                 | 3001                                |
+| ACCOUNT_LOOKUP_URL       | http://account-lookup-service.local |
+| TRANSACTION_REQUESTS_URL | http://transaction-requests.local   |
+| QUOTE_REQUESTS_URL       | http://quote-requests.local         |
+| AUTHORIZATIONS_URL       | http://authorizations.local         |
+| TRANSFERS_URL            | http://transfers.local              |
+| ADAPTOR_FSP_ID           | adaptor                             |
+| QUOTE_EXPIRATION_WINDOW (seconds) | 10000                      |
+| ILP_SECRET               | secret                              |
+| KNEX_CLIENT              | sqlite3                             |
+| MYSQL_HOST (optional)    | -                                   |
+| MYSQL_USER (optional)    | -                                   |
+| MYSQL_PASSWORD (optional)| -                                   |
+| MYSQL_DATABASE (optional)| -                                   |
 
 
 ### Flow
