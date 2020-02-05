@@ -11,6 +11,7 @@ import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 import { Worker } from 'bullmq'
 import { quotesRequestHandler } from './handlers/quotes-handler'
+import { transactionRequestHandler } from './handlers/transaction-requests-handler'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -43,7 +44,7 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 })
 const logger = require('@mojaloop/central-services-logger')
 
-const queueService = new BullQueueService(['QuoteRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
+const queueService = new BullQueueService(['QuoteRequests', 'TransactionRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
 
 const transacationRequestClient = axios.create({
   baseURL: TRANSACTION_REQUESTS_URL,
@@ -85,8 +86,12 @@ const adaptorServices: AdaptorServices = {
   queueService
 }
 
-const worker = new Worker('QuoteRequests', async job => {
+const QuoteRequests = new Worker('QuoteRequests', async job => {
   await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
+})
+
+const TransactionRequests = new Worker('TransactionRequests', async job => {
+  await transactionRequestHandler(adaptorServices, job.data.payload, job.data.ID)
 })
 
 const start = async (): Promise<void> => {
