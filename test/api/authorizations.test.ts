@@ -12,6 +12,7 @@ import { QuotesPostRequestFactory, PartiesPutResponseFactory } from '../factorie
 import { AuthorizationsIDPutResponse, Money } from '../../src/types/mojaloop'
 import { KnexQuotesService } from '../../src/services/quotes-service'
 import { quotesRequestHandler } from '../../src/handlers/quotes-handler'
+import { transactionRequestHandler } from '../../src/handlers/transaction-requests-handler'
 
 jest.mock('uuid/v4', () => () => '123')
 const lpsKey = 'postillion:0100'
@@ -75,15 +76,7 @@ describe('Authorizations api', function () {
       })
       expect(response.statusCode).toBe(200)
 
-      const putTransactionRequestResponse = await adaptor.inject({
-        method: 'PUT',
-        url: '/transactionRequests/123',
-        payload: {
-          transactionId: '456',
-          transactionRequestState: 'RECEIVED'
-        }
-      })
-      expect(putTransactionRequestResponse.statusCode).toBe(200)
+      await transactionRequestHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, '123')
 
       const quoteRequest = QuotesPostRequestFactory.build({
         amount: {
