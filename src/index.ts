@@ -1,16 +1,22 @@
 import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
-import { createApp } from './adaptor'
+import { createApp, AdaptorServices } from './adaptor'
 import { KnexTransactionsService } from './services/transactions-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
 import { KnexTransfersService } from './services/transfers-service'
 import { KnexAuthorizationsService } from './services/authorizations-service'
+import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
+import { Worker } from 'bullmq'
+import { quotesRequestHandler } from './handlers/quotes-handler'
+import { transactionRequestHandler } from './handlers/transaction-requests-handler'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
+const REDIS_PORT = process.env.REDIS_PORT || 6379
+const REDIS_HOST = process.env.REDIS_HOST || 'localhost'
 const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
 const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
 const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
@@ -37,6 +43,8 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
   useNullAsDefault: true
 })
 const logger = require('@mojaloop/central-services-logger')
+
+const queueService = new BullQueueService(['QuoteRequests', 'TransactionRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
 
 const transacationRequestClient = axios.create({
   baseURL: TRANSACTION_REQUESTS_URL,
@@ -68,6 +76,23 @@ const MojaClient = new MojaloopRequests({
   jwsSigningKey: 'string',
   peerEndpoint: 'string'
 })
+const adaptorServices: AdaptorServices = {
+  transactionsService: transactionRequestService,
+  isoMessagesService,
+  quotesService,
+  authorizationsService,
+  MojaClient,
+  transfersService,
+  queueService
+}
+
+const QuoteRequests = new Worker('QuoteRequests', async job => {
+  await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
+})
+
+const TransactionRequests = new Worker('TransactionRequests', async job => {
+  await transactionRequestHandler(adaptorServices, job.data.payload, job.data.ID)
+})
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
@@ -75,7 +100,7 @@ const start = async (): Promise<void> => {
 
   await knex.migrate.latest()
 
-  const adaptor = await createApp({ transactionsService: transactionRequestService, isoMessagesService, quotesService, authorizationsService, MojaClient, transfersService }, { port: HTTP_PORT })
+  const adaptor = await createApp(adaptorServices, { port: HTTP_PORT })
 
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)

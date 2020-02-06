@@ -13,6 +13,7 @@ import * as AuthorizationController from './controllers/authorizations-controlle
 import { TransfersService } from './services/transfers-service'
 import * as TransfersController from './controllers/transfers-controller'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
+import { QueueService } from './services/queue-service'
 import * as TransactionRequestErrorsController from './controllers/transaction-request-errors-controller'
 import * as AuthorizationErrorsController from './controllers/authorization-errors-controller'
 import * as QuoteErrorsController from './controllers/quote-errors-controller'
@@ -33,6 +34,7 @@ export type AdaptorServices = {
   MojaClient: MojaloopRequests;
   logger?: Logger;
   transfersService: TransfersService;
+  queueService: QueueService;
 }
 
 export type Logger = {
@@ -52,6 +54,7 @@ declare module 'hapi' {
     logger: Logger;
     isoMessagingClients: Map<string, IsoMessagingClient>;
     transfersService: TransfersService;
+    queueService: QueueService;
   }
 }
 
@@ -67,6 +70,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.MojaClient = services.MojaClient
   adaptor.app.isoMessagingClients = new Map()
   adaptor.app.transfersService = services.transfersService
+  adaptor.app.queueService = services.queueService
   if (!services.logger) {
     adaptor.app.logger = CentralLogger
   }
