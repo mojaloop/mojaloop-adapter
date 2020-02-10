@@ -10,6 +10,7 @@ describe('Transaction Requests API', function () {
   beforeAll(async () => {
     adaptor = await createApp(services)
   })
+
   describe('PUT', function () {
     test('returns response code 200', async () => {
       const response = await adaptor.inject({
@@ -22,10 +23,10 @@ describe('Transaction Requests API', function () {
     })
 
     test('returns response code 500 upon failure to add to a queue', async () => {
-
       adaptor.app.queueService.addToQueue = jest.fn().mockImplementationOnce(() => {
-        throw Error
+        throw new Error('failed')
       })
+
       const response = await adaptor.inject({
         method: 'PUT',
         url: '/transactionRequests/123',

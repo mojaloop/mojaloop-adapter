@@ -2,7 +2,7 @@ import { TransactionRequestsIDPutResponse } from 'types/mojaloop'
 import { TransactionState } from '../services/transactions-service'
 import { AdaptorServices } from '../adaptor'
 
-export async function transactionRequestHandler ({ transactionsService }: AdaptorServices, transactionRequestResponse: TransactionRequestsIDPutResponse, ID: string): Promise<void> {
+export async function transactionRequestResponseHandler ({ transactionsService }: AdaptorServices, transactionRequestResponse: TransactionRequestsIDPutResponse, ID: string): Promise<void> {
   try {
 
     if (transactionRequestResponse.transactionId) {

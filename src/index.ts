@@ -11,7 +11,7 @@ import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 import { Worker } from 'bullmq'
 import { quotesRequestHandler } from './handlers/quotes-handler'
-import { transactionRequestHandler } from './handlers/transaction-requests-handler'
+import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -91,7 +91,7 @@ const QuoteRequests = new Worker('QuoteRequests', async job => {
 })
 
 const TransactionRequests = new Worker('TransactionRequests', async job => {
-  await transactionRequestHandler(adaptorServices, job.data.payload, job.data.ID)
+  await transactionRequestResponseHandler(adaptorServices, job.data.payload, job.data.ID)
 })
 
 const start = async (): Promise<void> => {

@@ -10,7 +10,7 @@ import { KnexQuotesService } from '../../src/services/quotes-service'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { Money } from '../../src/types/mojaloop'
 import { quotesRequestHandler } from '../../src/handlers/quotes-handler'
-import { transactionRequestHandler } from '../../src/handlers/transaction-requests-handler'
+import { transactionRequestResponseHandler } from '../../src/handlers/transaction-request-response-handler'
 
 jest.mock('uuid/v4', () => () => '123')
 
@@ -60,7 +60,7 @@ describe('Quotes Handler', function () {
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
     expect(response.statusCode).toBe(202)
-    await transactionRequestHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, '123')
+    await transactionRequestResponseHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, '123')
   })
 
   afterEach(async () => {
