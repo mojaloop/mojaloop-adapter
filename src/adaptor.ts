@@ -31,7 +31,7 @@ export type AdaptorServices = {
   isoMessagesService: IsoMessageService;
   quotesService: QuotesService;
   authorizationsService: AuthorizationsService;
-  MojaClient: MojaloopRequests;
+  mojaClient: MojaloopRequests;
   logger?: Logger;
   transfersService: TransfersService;
   queueService: QueueService;
@@ -50,7 +50,7 @@ declare module 'hapi' {
     isoMessagesService: IsoMessageService;
     quotesService: QuotesService;
     authorizationsService: AuthorizationsService;
-    MojaClient: MojaloopRequests;
+    mojaClient: MojaloopRequests;
     logger: Logger;
     isoMessagingClients: Map<string, IsoMessagingClient>;
     transfersService: TransfersService;
@@ -67,7 +67,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.isoMessagesService = services.isoMessagesService
   adaptor.app.quotesService = services.quotesService
   adaptor.app.authorizationsService = services.authorizationsService
-  adaptor.app.MojaClient = services.MojaClient
+  adaptor.app.mojaClient = services.mojaClient
   adaptor.app.isoMessagingClients = new Map()
   adaptor.app.transfersService = services.transfersService
   adaptor.app.queueService = services.queueService

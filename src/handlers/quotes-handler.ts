@@ -3,7 +3,7 @@ import { QuotesIDPutResponse, QuotesPostRequest, ErrorInformation } from '../typ
 import { TransactionState } from '../services/transactions-service'
 import { AdaptorServices } from '../adaptor'
 
-export async function quotesRequestHandler ({ transactionsService, quotesService, MojaClient }: AdaptorServices, payload: QuotesPostRequest, headers: Request['headers']): Promise<void> {
+export async function quotesRequestHandler ({ transactionsService, quotesService, mojaClient }: AdaptorServices, payload: QuotesPostRequest, headers: Request['headers']): Promise<void> {
   try {
     const transaction = await transactionsService.get(payload.transactionId, 'transactionId')
     const quoteRequest = { transactionRequestId: transaction.transactionRequestId, ...payload }
@@ -18,13 +18,13 @@ export async function quotesRequestHandler ({ transactionsService, quotesService
       expiration: quote.expiration,
       transferAmount: quote.transferAmount
     }
-    await MojaClient.putQuotes(quote.id, quoteResponse, headers['fspiop-source'])
+    await mojaClient.putQuotes(quote.id, quoteResponse, headers['fspiop-source'])
     await transactionsService.updateState(transaction.transactionRequestId, 'transactionRequestId', TransactionState.quoteResponded)
   } catch (error) {
     const errorInformation: ErrorInformation = {
       errorCode: '2001',
       errorDescription: `${error.message}`
     }
-    MojaClient.putQuotesError(payload.quoteId, errorInformation, headers['fspiop-source'])
+    mojaClient.putQuotesError(payload.quoteId, errorInformation, headers['fspiop-source'])
   }
 }

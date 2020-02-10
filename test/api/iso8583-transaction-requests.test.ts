@@ -121,7 +121,7 @@ describe('Transaction Requests API', function () {
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
     expect(response.statusCode).toEqual(202)
-    expect(services.MojaClient.getParties).toHaveBeenCalledWith('MSISDN', iso0100[102], null)
+    expect(services.mojaClient.getParties).toHaveBeenCalledWith('MSISDN', iso0100[102], null)
   })
 
   test('check for incomplete transactions', async () => {

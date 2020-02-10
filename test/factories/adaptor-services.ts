@@ -2,7 +2,7 @@ import { Factory } from 'rosie'
 import { AdaptorServices } from '../../src/adaptor'
 
 export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorServicesFactory').attrs({
-  MojaClient: {
+  mojaClient: {
     getParties: jest.fn().mockResolvedValue(undefined),
     putParties: jest.fn(),
     putPartiesError: jest.fn(),

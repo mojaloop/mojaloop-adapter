@@ -114,7 +114,7 @@ describe('Quotes Handler', function () {
       })
 
       await quotesRequestHandler(services, quoteRequest, headers)
-      expect(services.MojaClient.putQuotes).toHaveBeenCalled()
+      expect(services.mojaClient.putQuotes).toHaveBeenCalled()
     })
 
     test('updates transaction state to quoteResponded', async () => {

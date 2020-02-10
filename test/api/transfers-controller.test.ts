@@ -106,7 +106,7 @@ describe('Transfers Controller', function () {
       expect(response.statusCode).toEqual(200)
 
       // expect putTransfers to have been called once
-      expect(services.MojaClient.putTransfers).toHaveBeenCalledWith(transfer.transferId, { fulfilment: transfer.fulfilment, transferState: 'COMMITTED', completedTimestamp: new Date(Date.now()).toISOString() }, payload.payerFsp)
+      expect(services.mojaClient.putTransfers).toHaveBeenCalledWith(transfer.transferId, { fulfilment: transfer.fulfilment, transferState: 'COMMITTED', completedTimestamp: new Date(Date.now()).toISOString() }, payload.payerFsp)
     })
 
     test('updates transactionState by transactionId', async () => {

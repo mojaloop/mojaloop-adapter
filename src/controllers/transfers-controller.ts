@@ -31,7 +31,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
       transferState: TransferState.committed,
       completedTimestamp: (new Date(Date.now())).toISOString()
     }
-    await request.server.app.MojaClient.putTransfers(transfer.transferId, transferResponse, payload.payerFsp)
+    await request.server.app.mojaClient.putTransfers(transfer.transferId, transferResponse, payload.payerFsp)
 
     await request.server.app.transactionsService.updateState(dataElement.transactionId, 'transactionId', TransactionState.fulfillmentSent)
 

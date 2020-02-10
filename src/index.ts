@@ -62,7 +62,7 @@ const AuthorizationsClient: AxiosInstance = axios.create({
   timeout: 3000
 })
 const authorizationsService = new KnexAuthorizationsService({ knex, client: AuthorizationsClient, logger })
-const MojaClient = new MojaloopRequests({
+const mojaClient = new MojaloopRequests({
   logger: console,
   dfspId: ADAPTOR_FSP_ID,
   quotesEndpoint: QUOTE_REQUESTS_URL,
@@ -81,7 +81,7 @@ const adaptorServices: AdaptorServices = {
   isoMessagesService,
   quotesService,
   authorizationsService,
-  MojaClient,
+  mojaClient,
   transfersService,
   queueService
 }
