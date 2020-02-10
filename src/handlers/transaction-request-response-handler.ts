@@ -1,21 +1,27 @@
-import { TransactionRequestsIDPutResponse } from 'types/mojaloop'
+import { TransactionRequestsIDPutResponse, ErrorInformation } from 'types/mojaloop'
 import { TransactionState } from '../services/transactions-service'
 import { AdaptorServices } from '../adaptor'
+import { Request } from 'hapi'
 
-export async function transactionRequestResponseHandler ({ transactionsService }: AdaptorServices, transactionRequestResponse: TransactionRequestsIDPutResponse, ID: string): Promise<void> {
+export async function transactionRequestResponseHandler ({ transactionsService, mojaClient }: AdaptorServices, transactionRequestResponse: TransactionRequestsIDPutResponse, headers: Request['headers'], transactionRequestId: string): Promise<void> {
   try {
 
     if (transactionRequestResponse.transactionId) {
       // TODO: refactor update functions
-      await transactionsService.updateTransactionId(ID, transactionRequestResponse.transactionId)
-      await transactionsService.updateState(ID, 'transactionRequestId', TransactionState.transactionResponded)
+      await transactionsService.updateTransactionId(transactionRequestId, transactionRequestResponse.transactionId)
+      await transactionsService.updateState(transactionRequestId, 'transactionRequestId', TransactionState.transactionResponded)
     }
 
     if (transactionRequestResponse.transactionRequestState === 'REJECTED') {
-      await transactionsService.updateState(ID, 'transactionRequestId', TransactionState.transactionCancelled)
+      await transactionsService.updateState(transactionRequestId, 'transactionRequestId', TransactionState.transactionCancelled)
     }
   } catch (error) {
-    // TODO
+    const errorInformation: ErrorInformation = {
+      errorCode: '2001',
+      errorDescription: 'Failed to update transactionId'
+    }
+
+    await mojaClient.putTransactionRequestsError(transactionRequestId, errorInformation, headers['fspiop-source'])
   }
 
 }

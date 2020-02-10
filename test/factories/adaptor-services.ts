@@ -17,7 +17,11 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
 
     postTransfers: jest.fn(),
     putTransfers: jest.fn(),
-    putTransfersError: jest.fn()
+    putTransfersError: jest.fn(),
+
+    postTransactionRequests: jest.fn(),
+    putTransactionRequests: jest.fn(),
+    putTransactionRequestsError: jest.fn()
   },
   isoMessagesService: {
     create: jest.fn(),

@@ -91,7 +91,7 @@ const QuoteRequests = new Worker('QuoteRequests', async job => {
 })
 
 const TransactionRequests = new Worker('TransactionRequests', async job => {
-  await transactionRequestResponseHandler(adaptorServices, job.data.payload, job.data.ID)
+  await transactionRequestResponseHandler(adaptorServices, job.data.payload, job.data.headers, job.data.ID)
 })
 
 const start = async (): Promise<void> => {

@@ -60,7 +60,7 @@ describe('Quotes Handler', function () {
       payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
     })
     expect(response.statusCode).toBe(202)
-    await transactionRequestResponseHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, '123')
+    await transactionRequestResponseHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, headers, '123')
   })
 
   afterEach(async () => {
