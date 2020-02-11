@@ -9,3 +9,7 @@ export type AuthorizationRequestQueueMessage = {
   transactionRequestId: string;
   headers: { [k: string]: any };
 }
+
+export type TransferResponseQueueMessage = {
+  transferId: string;
+}

@@ -41,5 +41,4 @@ export type LegacyFinancialRequest = {
 
 export type LegacyFinancialResponse = {
   lpsFinancialRequestMessageId: string;
-  transferState: string;
 }
