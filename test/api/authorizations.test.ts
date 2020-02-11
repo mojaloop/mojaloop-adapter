@@ -1,15 +1,7 @@
 import Knex from 'knex'
 import { Server } from 'hapi'
-import Axios, { AxiosInstance } from 'axios'
-import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { createApp } from '../../src/adaptor'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { TcpIsoMessagingClient } from '../../src/services/iso-messaging-client'
-import { KnexIsoMessageService } from '../../src/services/iso-message-service'
-import { QuotesPostRequestFactory, PartiesPutResponseFactory } from '../factories/mojaloop-messages'
-import { KnexQuotesService } from '../../src/services/quotes-service'
-import { quotesRequestHandler } from '../../src/handlers/quotes-handler'
-import { transactionRequestResponseHandler } from '../../src/handlers/transaction-request-response-handler'
 
 describe('Authorizations api', function () {
   let knex: Knex
