@@ -18,8 +18,8 @@ export const TransactionRequestFactory = Factory.define<TransactionRequest>('Tra
     amount: Faker.random.number().toString(),
     currency: 'USD'
   },
-  lpsId: 'postillion',
-  lpsKey: 'postillion:aef-123',
+  lpsId: 'lps1',
+  lpsKey: 'lps1-001-abc',
   payee: {
     partyIdInfo: {
       partyIdType: 'MSISDN',

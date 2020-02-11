@@ -9,9 +9,11 @@ import { KnexTransfersService } from './services/transfers-service'
 import { KnexAuthorizationsService } from './services/authorizations-service'
 import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
-import { Worker } from 'bullmq'
+import { Worker, Job } from 'bullmq'
 import { quotesRequestHandler } from './handlers/quotes-handler'
 import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
+import { partiesResponseHandler } from 'handlers/parties-response-handler'
+import { PartiesResponseQueueMessage } from 'types/queueMessages'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -83,7 +85,8 @@ const adaptorServices: AdaptorServices = {
   authorizationsService,
   mojaClient,
   transfersService,
-  queueService
+  queueService,
+  logger
 }
 
 const QuoteRequests = new Worker('QuoteRequests', async job => {
@@ -91,7 +94,11 @@ const QuoteRequests = new Worker('QuoteRequests', async job => {
 })
 
 const TransactionRequests = new Worker('TransactionRequests', async job => {
-  await transactionRequestResponseHandler(adaptorServices, job.data.payload, job.data.headers, job.data.ID)
+  await transactionRequestResponseHandler(adaptorServices, job.data.transactionRequestResponse, job.data.headers, job.data.transactionRequestId)
+})
+
+const PartiesResponseWorker = new Worker('PartiesResponse', async (job: Job<PartiesResponseQueueMessage>) => {
+  await partiesResponseHandler(adaptorServices, job.data.partiesResponse, job.data.partyIdValue)
 })
 
 const start = async (): Promise<void> => {

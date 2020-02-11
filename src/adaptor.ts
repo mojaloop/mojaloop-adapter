@@ -32,7 +32,7 @@ export type AdaptorServices = {
   quotesService: QuotesService;
   authorizationsService: AuthorizationsService;
   mojaClient: MojaloopRequests;
-  logger?: Logger;
+  logger: Logger;
   transfersService: TransfersService;
   queueService: QueueService;
 }
@@ -71,9 +71,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   adaptor.app.isoMessagingClients = new Map()
   adaptor.app.transfersService = services.transfersService
   adaptor.app.queueService = services.queueService
-  if (!services.logger) {
-    adaptor.app.logger = CentralLogger
-  }
+  adaptor.app.logger = services.logger
 
   await adaptor.register({
     plugin: require('hapi-openapi'),

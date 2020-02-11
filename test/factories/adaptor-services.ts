@@ -55,5 +55,11 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
   queueService: {
     addToQueue: jest.fn(),
     shutdown: jest.fn()
+  },
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
   }
 })
