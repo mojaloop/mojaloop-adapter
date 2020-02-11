@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import Axios, { AxiosInstance } from 'axios'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
-import { KnexTransactionsService } from '../../src/services/transactions-service'
+import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
@@ -87,7 +87,7 @@ describe('Authorization Request Handler', function () {
     await knex.destroy()
   })
 
-  test('puts ARAuthorizationRequest message on to AuthorizationResponses queue for the lps the transcation request came from', async () => {
+  test('puts LegacyAuthorizationResponse message on to AuthorizationResponses queue for the lps that the transaction request came from', async () => {
     const headers = {
       'fspiop-source': 'payerFSP',
       'fspiop-destination': 'payeeFSP'
@@ -106,6 +106,18 @@ describe('Authorization Request Handler', function () {
         currency: 'USD'
       }
     })
+  })
+
+  test('updates transaction state to be authSent', async () => {
+    const headers = {
+      'fspiop-source': 'payerFSP',
+      'fspiop-destination': 'payeeFSP'
+    }
+
+    await authorizationRequestHandler(services, '123', headers)
+
+    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
+    expect(transaction.state).toBe(TransactionState.authSent)
   })
 
   test('sends error message if it fails to process the authorization request', async () => {

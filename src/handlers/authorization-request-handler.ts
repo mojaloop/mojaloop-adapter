@@ -1,6 +1,7 @@
-import { AdaptorServices } from 'adaptor'
-import { LegacyAuthorizationResponse } from 'types/adaptor-relay-messages'
-import { ErrorInformation } from 'types/mojaloop'
+import { AdaptorServices } from '../adaptor'
+import { LegacyAuthorizationResponse } from '../types/adaptor-relay-messages'
+import { ErrorInformation } from '../types/mojaloop'
+import { TransactionState } from '../services/transactions-service'
 
 export async function authorizationRequestHandler ({ transactionsService, quotesService, queueService, logger, authorizationsService }: AdaptorServices, transactionRequestId: string, headers: { [k: string]: any }): Promise<void> {
   try {
@@ -14,8 +15,9 @@ export async function authorizationRequestHandler ({ transactionsService, quotes
     }
 
     await queueService.addToQueue(`${transaction.lpsId}AuthorizationResponses`, authorizationRequest)
+
+    await transactionsService.updateState(transactionRequestId, 'transactionRequestId', TransactionState.authSent)
   } catch (error) {
-    console.log('error', error.message)
     logger.error(`Authorization Request Handler: Failed to handle authorization request. ${error.message}`)
     const errorInformation: ErrorInformation = {
       errorCode: '2001',
