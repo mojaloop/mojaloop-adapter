@@ -1,4 +1,4 @@
-import { PartiesTypeIDPutResponse } from './mojaloop'
+import { PartiesTypeIDPutResponse, TransfersIDPutResponse, TransfersPostRequest } from './mojaloop'
 
 export type PartiesResponseQueueMessage = {
   partiesResponse: PartiesTypeIDPutResponse;
@@ -12,4 +12,11 @@ export type AuthorizationRequestQueueMessage = {
 
 export type TransferResponseQueueMessage = {
   transferId: string;
+  transferResponse: TransfersIDPutResponse;
+  headers: { [k: string]: any };
+}
+
+export type TransferRequestQueueMessage = {
+  transferRequest: TransfersPostRequest;
+  headers: { [k: string]: any };
 }
