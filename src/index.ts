@@ -13,7 +13,8 @@ import { Worker, Job } from 'bullmq'
 import { quotesRequestHandler } from './handlers/quotes-handler'
 import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
 import { partiesResponseHandler } from 'handlers/parties-response-handler'
-import { PartiesResponseQueueMessage } from 'types/queueMessages'
+import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage } from 'types/queueMessages'
+import { authorizationRequestHandler } from 'handlers/authorization-request-handler'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -99,6 +100,10 @@ const TransactionRequests = new Worker('TransactionRequests', async job => {
 
 const PartiesResponseWorker = new Worker('PartiesResponse', async (job: Job<PartiesResponseQueueMessage>) => {
   await partiesResponseHandler(adaptorServices, job.data.partiesResponse, job.data.partyIdValue)
+})
+
+const AuthorizationRequestsWorker = new Worker('AuthorizationRequests', async (job: Job<AuthorizationRequestQueueMessage>) => {
+  await authorizationRequestHandler(adaptorServices, job.data.transactionRequestId, job.data.headers)
 })
 
 const start = async (): Promise<void> => {
