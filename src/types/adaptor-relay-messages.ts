@@ -1,6 +1,6 @@
 import { Money } from './mojaloop'
 
-export type ARTransactionRequest = {
+export type LegacyAuthorizationRequest = {
   lpsId: string;
   lpsKey: string;
   lpsAuthorizationRequestMessageId: string;
@@ -22,13 +22,13 @@ export type ARTransactionRequest = {
   };
 }
 
-export type ARAuthorizationRequest = {
+export type LegacyAuthorizationResponse = {
   lpsAuthorizationRequestMessageId: string;
   transferAmount: Money;
   fees: Money;
 }
 
-export type ARAuthorizationResponse = {
+export type LegacyFinancialRequest = {
   lpsId: string;
   lpsKey: string;
   lpsFinancialRequestMessageId: string;
@@ -39,7 +39,7 @@ export type ARAuthorizationResponse = {
   responseType: 'ENTERED' | 'REJECTED';
 }
 
-export type ARTransferResponse = {
+export type LegacyFinancialResponse = {
   lpsFinancialRequestMessageId: string;
   transferState: string;
 }

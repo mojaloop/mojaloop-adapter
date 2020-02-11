@@ -1,5 +1,5 @@
 import { AdaptorServices } from 'adaptor'
-import { ARAuthorizationRequest } from 'types/adaptor-relay-messages'
+import { LegacyAuthorizationResponse } from 'types/adaptor-relay-messages'
 import { ErrorInformation } from 'types/mojaloop'
 
 export async function authorizationRequestHandler ({ transactionsService, quotesService, queueService, logger, authorizationsService }: AdaptorServices, transactionRequestId: string, headers: { [k: string]: any }): Promise<void> {
@@ -7,7 +7,7 @@ export async function authorizationRequestHandler ({ transactionsService, quotes
     const transaction = await transactionsService.get(transactionRequestId, 'transactionRequestId')
     const quote = await quotesService.get(transactionRequestId, 'transactionRequestId')
 
-    const authorizationRequest: ARAuthorizationRequest = {
+    const authorizationRequest: LegacyAuthorizationResponse = {
       lpsAuthorizationRequestMessageId: 'lpsMessageId', // TODO: refactor DB
       fees: quote.fees,
       transferAmount: quote.transferAmount
