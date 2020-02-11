@@ -12,9 +12,11 @@ import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 import { Worker, Job } from 'bullmq'
 import { quotesRequestHandler } from './handlers/quotes-handler'
 import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
-import { partiesResponseHandler } from 'handlers/parties-response-handler'
-import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage } from 'types/queueMessages'
+import { partiesResponseHandler } from './handlers/parties-response-handler'
+import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, TransferRequestQueueMessage, TransferResponseQueueMessage } from 'types/queueMessages'
 import { authorizationRequestHandler } from 'handlers/authorization-request-handler'
+import { transferRequestHandler } from 'handlers/transfer-request-handler'
+import { transferResponseHandler } from 'handlers/transfer-response-handler'
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -90,6 +92,7 @@ const adaptorServices: AdaptorServices = {
   logger
 }
 
+// TODO: Error handling if worker throws an error
 const QuoteRequests = new Worker('QuoteRequests', async job => {
   await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
 })
@@ -104,6 +107,14 @@ const PartiesResponseWorker = new Worker('PartiesResponse', async (job: Job<Part
 
 const AuthorizationRequestsWorker = new Worker('AuthorizationRequests', async (job: Job<AuthorizationRequestQueueMessage>) => {
   await authorizationRequestHandler(adaptorServices, job.data.transactionRequestId, job.data.headers)
+})
+
+const TransferRequestsWorker = new Worker('TransferRequests', async (job: Job<TransferRequestQueueMessage>) => {
+  await transferRequestHandler(adaptorServices, job.data.transferRequest, job.data.headers)
+})
+
+const TransferResponseWorker = new Worker('TransferResponses', async (job: Job<TransferResponseQueueMessage>) => {
+  await transferResponseHandler(adaptorServices, job.data.transferResponse, job.data.headers, job.data.transferId)
 })
 
 const start = async (): Promise<void> => {
