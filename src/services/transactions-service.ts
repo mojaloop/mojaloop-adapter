@@ -9,7 +9,7 @@ export enum TransactionState {
   transactionResponded = '03',
   quoteReceived = '04',
   quoteResponded = '05',
-  authRecieved = '06',
+  authReceived = '06',
   authSent = '07',
   financialRequestReceived = '08',
   financialRequestSent = '09',
