@@ -1,6 +1,5 @@
 import { Server } from 'hapi'
 import { TransactionsService } from './services/transactions-service'
-import * as Iso8583TransactionRequestController from './controllers/iso8583-transaction-requests-controller'
 import * as TransactionRequestsController from './controllers/transaction-requests-controller'
 import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
@@ -80,21 +79,6 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
       handlers: {
         health: {
           get: () => ({ status: 'ok' })
-        },
-        iso8583: {
-          transactionRequests: {
-            post: Iso8583TransactionRequestController.create
-          },
-          authorizations: {
-            '{ID}': {
-              put: AuthorizationController.update
-            }
-          },
-          transfers: {
-            '{ID}': {
-              put: () => 'dummy handler'
-            }
-          }
         },
         transactionRequests: {
           '{ID}': {

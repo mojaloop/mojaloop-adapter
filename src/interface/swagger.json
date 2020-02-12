@@ -10,51 +10,6 @@
       "https"
   ],
   "paths": {
-      "/iso8583/transactionRequests": {
-          "post": {
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "responses": {
-                  "200": {
-                      "$ref": "#/responses/Response200",
-                      "description": "Ok"
-                  },
-                  "400": {
-                      "$ref": "#/responses/ErrorResponse400",
-                      "description": "Bad Request - The application cannot process the request; for example, due to malformed syntax or the payload exceeded size restrictions.",
-                      "schema": {
-                          "$ref": "#/definitions/ErrorInformationResponse"
-                      }
-                  }
-              },
-              "summary": "/iso8583/transactionRequests",
-              "description": "The HTTP request POST /transactionRequests is used to request the creation of a transaction request from an ISO8583:0100 message.",
-              "x-examples": {
-                  "application/json": {
-                      "“errorInformation”": {
-                          "“errorCode”": "“5100”",
-                          "“errorDescription”": "“This is an error description”",
-                          "extensionList": {
-                              "extension": [
-                                  {
-                                      "“key”": "“errorDescription”",
-                                      "“value”": "“This is a more detailed error description”"
-                                  },
-                                  {
-                                      "“key”": "“errorDescription”",
-                                      "“value”": "“This is a more detailed error description”"
-                                  }
-                              ]
-                          }
-                      }
-                  }
-              }
-          }
-      },
       "/authorizations/{ID}": {
           "get": {
               "responses": {
@@ -210,7 +165,6 @@
       },
       "/parties/{Type}/{ID}": {
           "put": {
-
               "parameters": [
                   {
                       "name": "body",
@@ -739,29 +693,6 @@
               }
           ]
       },
-      "/iso8583/transfers/{ID}": {
-          "put": {
-              "responses": {
-                  "200": {
-                      "description": "Ok"
-                  },
-                  "400": {
-                      "description": "Bad Request - The application cannot process the request; for example, due to malformed syntax or the payload exceeded size restrictions."
-                  }
-              },
-              "summary": "/iso8583/transfers/<ID>",
-              "description": "The callback PUT iso8583/transfers/<ID> is used to inform the adaptor of the result of a previously-requested transfer. The <ID> in the URI should contain the ISO8583 STAN that was used in the POST /iso8583/transactionRequests."
-          },
-          "parameters": [
-              {
-                  "name": "ID",
-                  "description": "ISO8583 System Trace Number",
-                  "in": "path",
-                  "required": true,
-                  "type": "string"
-              }
-          ]
-      },
       "/health": {
           "get": {
               "produces": [
@@ -776,71 +707,6 @@
               "summary": "/health",
               "description": "The HTTP request GET /health is used to return the current status of the API."
           }
-      },
-      "/iso8583/authorizations/{ID}": {
-          "put": {
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "responses": {
-                  "200": {
-                      "$ref": "#/responses/Response200",
-                      "description": "Ok"
-                  },
-                  "400": {
-                      "description": "Bad Request - The application cannot process the request; for example, due to malformed syntax or the payload exceeded size restrictions."
-                  }
-              },
-              "summary": "/iso8583/authorizations/<ID>",
-              "description": "The callback PUT iso8583/authorizations/<ID> is used to inform the client of the result of a previously-requested authorization. The <ID> in the URI should contain the ISO8583 STAN that was used in the POST /iso8583/transactionRequests."
-          },
-          "parameters": [
-              {
-                  "name": "ID",
-                  "description": "ISO8583 System Trace Number",
-                  "in": "path",
-                  "required": true,
-                  "type": "string"
-              },
-              {
-                  "name": "fspiop-destination",
-                  "description": "The FSPIOP-Destination header field is a non-HTTP standard field used by the API for HTTP header based routing of requests and responses to the destination. The field should be set by the original sender of the request (if known), so that any entities between the client and the server do not need to parse the payload for routing purposes.",
-                  "in": "header",
-                  "required": false,
-                  "type": "string"
-              },
-              {
-                  "name": "fspiop-source",
-                  "description": "The FSPIOP-Source header field is a non-HTTP standard field used by the API for identifying the sender of the HTTP request. The field should be set by the original sender of the request. Required for routing and signature verification (see header field FSPIOP-Signature).",
-                  "in": "header",
-                  "required": true,
-                  "type": "string"
-              },
-              {
-                  "name": "date",
-                  "description": "The Date header field indicates the date when the request was sent.",
-                  "in": "header",
-                  "required": true,
-                  "type": "string"
-              },
-              {
-                  "name": "content-type",
-                  "description": "The Content-Type header indicates the specific version of the API used to send the payload body.",
-                  "in": "header",
-                  "required": true,
-                  "type": "string"
-              },
-              {
-                  "name": "id",
-                  "description": "Custom unique id.",
-                  "in": "header",
-                  "required": true,
-                  "type": "string"
-              }
-          ]
       },
       "/transfers": {
           "post": {
