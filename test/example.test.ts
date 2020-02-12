@@ -1,4 +1,5 @@
-import { generateOTP } from '../src/utils/util'
+import { Model } from 'objection'
+import { Transaction } from '../src/models'
 import Knex = require('knex')
 
 describe('Example test', function () {
@@ -13,6 +14,7 @@ describe('Example test', function () {
       },
       useNullAsDefault: true
     })
+    Model.knex(knex)
   })
 
   beforeEach(async () => {
@@ -27,10 +29,10 @@ describe('Example test', function () {
     await knex.destroy()
   })
 
-  test('can generate a random OTP', async () => {
-    const otp = generateOTP()
+  test('creating a model', async () => {
+    const transaction = await Transaction.query().insertAndFetch({ state: '01', transactionRequestId: '123', lpsId: 'lps1', lpsKey: 'lps1-001-abc', scenario: 'WITHDRAWAL', initiator: 'PAYEE', initiatorType: 'DEVICE', amount: '100', currency: 'USD', expiration: new Date(Date.now()).toUTCString() })
 
-    expect(otp).toBeDefined()
+    expect(transaction.amount).toBe('100')
   })
 
 })
