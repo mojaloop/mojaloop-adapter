@@ -1,7 +1,6 @@
 import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
 import { createApp, AdaptorServices } from './adaptor'
-import { KnexTransactionsService } from './services/transactions-service'
 import { createTcpRelay } from './tcp-relay'
 import { KnexIsoMessageService } from './services/iso-message-service'
 import { KnexQuotesService } from './services/quotes-service'
@@ -10,7 +9,7 @@ import { KnexAuthorizationsService } from './services/authorizations-service'
 import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
 import { Worker, Job } from 'bullmq'
-import { quotesRequestHandler } from './handlers/quotes-handler'
+import { quotesRequestHandler } from './handlers/quote-request-handler'
 import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
 import { partiesResponseHandler } from './handlers/parties-response-handler'
 import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, TransferRequestQueueMessage, TransferResponseQueueMessage } from 'types/queueMessages'
@@ -51,13 +50,6 @@ const logger = require('@mojaloop/central-services-logger')
 
 const queueService = new BullQueueService(['QuoteRequests', 'TransactionRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
 
-const transacationRequestClient = axios.create({
-  baseURL: TRANSACTION_REQUESTS_URL,
-  timeout: 3000
-})
-const transactionRequestService = new KnexTransactionsService({ knex, client: transacationRequestClient, logger })
-const isoMessagesService = new KnexIsoMessageService(knex)
-
 const quotesService = new KnexQuotesService({ knex, ilpSecret: ILP_SECRET, logger, expirationWindow: Number(QUOTE_EXPIRATION_WINDOW) })
 
 const transfersService = new KnexTransfersService({ knex, ilpSecret: ILP_SECRET, logger })
@@ -82,8 +74,6 @@ const mojaClient = new MojaloopRequests({
   peerEndpoint: 'string'
 })
 const adaptorServices: AdaptorServices = {
-  transactionsService: transactionRequestService,
-  isoMessagesService,
   quotesService,
   authorizationsService,
   mojaClient,

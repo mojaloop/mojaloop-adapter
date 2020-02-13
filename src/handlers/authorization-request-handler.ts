@@ -1,11 +1,11 @@
 import { AdaptorServices } from '../adaptor'
 import { LegacyAuthorizationResponse } from '../types/adaptor-relay-messages'
 import { ErrorInformation } from '../types/mojaloop'
-import { TransactionState } from '../models'
+import { TransactionState, Transaction } from '../models'
 
-export async function authorizationRequestHandler ({ transactionsService, quotesService, queueService, logger, authorizationsService }: AdaptorServices, transactionRequestId: string, headers: { [k: string]: any }): Promise<void> {
+export async function authorizationRequestHandler ({ quotesService, queueService, logger, authorizationsService }: AdaptorServices, transactionRequestId: string, headers: { [k: string]: any }): Promise<void> {
   try {
-    const transaction = await transactionsService.get(transactionRequestId, 'transactionRequestId')
+    const transaction = await Transaction.query().where({ transactionRequestId }).first().throwIfNotFound()
     const quote = await quotesService.get(transactionRequestId, 'transactionRequestId')
 
     const authorizationRequest: LegacyAuthorizationResponse = {
@@ -16,7 +16,7 @@ export async function authorizationRequestHandler ({ transactionsService, quotes
 
     await queueService.addToQueue(`${transaction.lpsId}AuthorizationResponses`, authorizationRequest)
 
-    await transactionsService.updateState(transactionRequestId, 'transactionRequestId', TransactionState.authSent)
+    await transaction.$query().update({ state: TransactionState.authSent, previousState: transaction.state })
   } catch (error) {
     logger.error(`Authorization Request Handler: Failed to handle authorization request. ${error.message}`)
     const errorInformation: ErrorInformation = {

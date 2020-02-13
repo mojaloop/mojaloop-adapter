@@ -1,11 +1,9 @@
 import { Server } from 'hapi'
-import { TransactionsService } from './services/transactions-service'
 import * as TransactionRequestsController from './controllers/transaction-requests-controller'
 import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
 import { IsoMessagingClient } from './services/iso-messaging-client'
-import { IsoMessageService } from './services/iso-message-service'
 import { QuotesService } from './services/quotes-service'
 import { AuthorizationsService } from './services/authorizations-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
@@ -26,8 +24,6 @@ export type AdaptorConfig = {
 }
 
 export type AdaptorServices = {
-  transactionsService: TransactionsService;
-  isoMessagesService: IsoMessageService;
   quotesService: QuotesService;
   authorizationsService: AuthorizationsService;
   mojaClient: MojaloopRequests;
@@ -45,8 +41,6 @@ export type Logger = {
 
 declare module 'hapi' {
   interface ApplicationState {
-    transactionsService: TransactionsService;
-    isoMessagesService: IsoMessageService;
     quotesService: QuotesService;
     authorizationsService: AuthorizationsService;
     mojaClient: MojaloopRequests;
@@ -62,8 +56,6 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   const adaptor = new Server(config)
 
   // register services
-  adaptor.app.transactionsService = services.transactionsService
-  adaptor.app.isoMessagesService = services.isoMessagesService
   adaptor.app.quotesService = services.quotesService
   adaptor.app.authorizationsService = services.authorizationsService
   adaptor.app.mojaClient = services.mojaClient

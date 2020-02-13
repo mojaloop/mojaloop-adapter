@@ -1,38 +1,38 @@
 import { AdaptorServices } from '../adaptor'
 import { TransfersPostRequest, TransfersIDPutResponse, ErrorInformation } from '../types/mojaloop'
 import { Transfer, TransferState } from '../services/transfers-service'
-import { TransactionState } from '../models'
+import { TransactionState, Transaction } from '../models'
 const IlpPacket = require('ilp-packet')
 
-export async function transferRequestHandler ({ transfersService, transactionsService, mojaClient, logger }: AdaptorServices, transferRequest: TransfersPostRequest, headers: { [k: string]: any }): Promise<void> {
+export async function transferRequestHandler ({ transfersService, mojaClient, logger }: AdaptorServices, transferRequest: TransfersPostRequest, headers: { [k: string]: any }): Promise<void> {
   try {
     const binaryPacket = Buffer.from(transferRequest.ilpPacket, 'base64')
     const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
     const dataElement = JSON.parse(Buffer.from(jsonPacket.data.data.toString(), 'base64').toString('utf8'))
-    const transaction = await transactionsService.get(dataElement.transactionId, 'transactionId')
+    const transaction = await Transaction.query().where('transactionId', dataElement.transactionId).first().throwIfNotFound()
     const transactionRequestId = transaction.transactionRequestId
 
     const transfer: Transfer = {
-      transferId: transferRequest.transferId,
+      id: transferRequest.transferId,
       quoteId: dataElement.quoteId,
       transactionRequestId: transactionRequestId,
-      fulfilment: transfersService.calculateFulfilment(transferRequest.ilpPacket),
-      transferState: TransferState.received,
+      fulfillment: transfersService.calculateFulfilment(transferRequest.ilpPacket),
+      state: TransferState.received,
       amount: transferRequest.amount
     }
 
     await transfersService.create(transfer)
 
     const transferResponse: TransfersIDPutResponse = {
-      fulfilment: transfer.fulfilment,
+      fulfilment: transfer.fulfillment,
       transferState: TransferState.committed,
       completedTimestamp: (new Date(Date.now())).toISOString()
     }
-    await mojaClient.putTransfers(transfer.transferId, transferResponse, transferRequest.payerFsp)
+    await mojaClient.putTransfers(transfer.id, transferResponse, transferRequest.payerFsp)
 
-    await transactionsService.updateState(dataElement.transactionId, 'transactionId', TransactionState.fulfillmentSent)
+    await transaction.$query().update({ previousState: transaction.state, state: TransactionState.fulfillmentSent })
 
-    transfer.transferState = TransferState.reserved
+    transfer.state = TransferState.reserved
     await transfersService.updateTransferState(transfer)
   } catch (error) {
     logger.error(`Transfer Request Handler: Failed to process transfer request ${transferRequest.transferId} from ${headers['fspiop-source']}. ${error.message}`)

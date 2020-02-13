@@ -27,17 +27,6 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     create: jest.fn(),
     get: jest.fn()
   },
-  transactionsService: {
-    create: jest.fn(),
-    get: jest.fn(),
-    getByLpsKeyAndState: jest.fn(),
-    getByPayerMsisdn: jest.fn(),
-    sendToMojaHub: jest.fn().mockResolvedValue(undefined),
-    updatePayerFspId: jest.fn(),
-    updateState: jest.fn().mockResolvedValue(undefined),
-    updateTransactionId: jest.fn(),
-    findIncompleteTransactions: jest.fn()
-  },
   quotesService: {
     create: jest.fn(),
     get: jest.fn(),

@@ -1,27 +1,59 @@
 import Knex from 'knex'
-import Axios, { AxiosInstance } from 'axios'
-import { TransactionRequestFactory } from '../factories/transaction-requests'
-import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { KnexIsoMessageService } from '../../src/services/iso-message-service'
-import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
-import { Money, TransactionRequestsIDPutResponse, AuthorizationsIDPutResponse } from '../../src/types/mojaloop'
+import { Money, AuthorizationsIDPutResponse } from '../../src/types/mojaloop'
 import { KnexQuotesService } from '../../src/services/quotes-service'
-import { quotesRequestHandler } from '../../src/handlers/quotes-handler'
-import { authorizationRequestHandler } from '../../src/handlers/authorization-request-handler'
-import { transactionRequestResponseHandler } from '../../src/handlers/transaction-request-response-handler'
 import { legacyFinancialRequestHandler } from '../../src/handlers/legacy-financial-request-handler'
 import { LegacyFinancialRequest } from '../../src/types/adaptor-relay-messages'
-import { TransactionState } from '../../src/models'
+import { TransactionState, Transaction } from '../../src/models'
+import { Model } from 'objection'
+const uuid = require('uuid/v4')
 const Logger = require('@mojaloop/central-services-logger')
+Logger.log = Logger.info
 
-describe('Legacy Authorization Respone Handler', () => {
+describe('Legacy Financial Request Handler', () => {
   let knex: Knex
-  const fakeHttpClient: AxiosInstance = Axios.create()
-  fakeHttpClient.get = jest.fn()
   const services = AdaptorServicesFactory.build()
   const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
   const logger = Logger
+  const transactionInfo = {
+    lpsId: 'lps1',
+    lpsKey: 'lps1-001-abc',
+    transactionRequestId: uuid(),
+    transactionId: uuid(),
+    initiator: 'PAYEE',
+    initiatorType: 'DEVICE',
+    scenario: 'WITHDRAWAL',
+    amount: '100',
+    currency: 'USD',
+    state: TransactionState.authSent,
+    expiration: new Date(Date.now()).toUTCString(),
+    authenticationType: 'OTP',
+    payer: {
+      type: 'payer',
+      identifierType: 'MSISDN',
+      identifierValue: '0821234567',
+      fspId: 'mojawallet'
+    },
+    payee: {
+      type: 'payee',
+      identifierType: 'DEVICE',
+      identifierValue: '1234',
+      subIdOrType: 'abcd',
+      fspId: 'adaptor'
+    },
+    quote: {
+      id: uuid(),
+      transferAmount: '107',
+      transferAmountCurrency: 'USD',
+      amount: '100',
+      amountCurrency: 'USD',
+      feeAmount: '7',
+      feeCurrency: 'USD',
+      ilpPacket: 'test-packet',
+      condition: 'test-condition',
+      expiration: new Date(Date.now() + 10000).toUTCString()
+    }
+  }
 
   beforeAll(async () => {
     knex = Knex({
@@ -32,56 +64,12 @@ describe('Legacy Authorization Respone Handler', () => {
       },
       useNullAsDefault: true
     })
-    services.transactionsService = new KnexTransactionsService({ knex, client: fakeHttpClient, logger })
-    services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
-    services.isoMessagesService = new KnexIsoMessageService(knex)
+    Model.knex(knex)
     services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger, calculateAdaptorFees })
   })
 
   beforeEach(async () => {
     await knex.migrate.latest()
-
-    const headers = {
-      'fspiop-destination': 'payeeFSP',
-      'fspiop-source': 'payerFSP'
-    }
-    const transactionRequest = TransactionRequestFactory.build({
-      lpsId: 'lps1',
-      lpsKey: 'lps1-001-abc',
-      transactionRequestId: '123',
-      amount: {
-        amount: '100',
-        currency: 'USD'
-      },
-      lpsFee: {
-        amount: '5',
-        currency: 'USD'
-      },
-      payer: {
-        partyIdType: 'MSISDN',
-        partyIdentifier: '0821234567',
-        fspId: 'payerFSP'
-      }
-    })
-    await services.transactionsService.create(transactionRequest)
-
-    const transactionRequestResponse: TransactionRequestsIDPutResponse = {
-      transactionId: '456',
-      transactionRequestState: 'RECEIVED'
-    }
-    await transactionRequestResponseHandler(services, transactionRequestResponse, { 'fspiop-source': 'payerFSP', 'fspiop-destination': 'payeeFSP' }, '123')
-
-    const quoteRequest = QuotesPostRequestFactory.build({
-      transactionRequestId: '123',
-      transactionId: '456',
-      amount: {
-        amount: '100',
-        currency: 'USD'
-      }
-    })
-    await quotesRequestHandler(services, quoteRequest, headers)
-
-    await authorizationRequestHandler(services, '123', headers)
   })
 
   afterEach(async () => {
@@ -93,6 +81,7 @@ describe('Legacy Authorization Respone Handler', () => {
   })
 
   test('sends authorization response and updates state to financialRequestSent', async () => {
+    let transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
     const legacyFinancialRequest: LegacyFinancialRequest = {
       lpsFinancialRequestMessageId: 'financialRequestId', // TODO: refactor once db and services are refactored
       lpsId: 'lps1',
@@ -107,7 +96,7 @@ describe('Legacy Authorization Respone Handler', () => {
     await legacyFinancialRequestHandler(services, legacyFinancialRequest)
 
     const headers = {
-      'fspiop-destination': 'payerFSP',
+      'fspiop-destination': 'mojawallet',
       'fspiop-source': 'adaptor',
       date: new Date().toUTCString(),
       'content-type': 'application/vnd.interoperability.authorizations+json;version=1.0'
@@ -119,8 +108,11 @@ describe('Legacy Authorization Respone Handler', () => {
       },
       responseType: 'ENTERED'
     }
-    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
-    expect(services.authorizationsService.sendAuthorizationsResponse).toHaveBeenCalledWith('123', authorizationsResponse, headers)
+    transaction = await transaction.$query()
+    expect(services.authorizationsService.sendAuthorizationsResponse).toHaveBeenCalledWith(transactionInfo.transactionRequestId, authorizationsResponse, headers)
     expect(transaction.state).toEqual(TransactionState.financialRequestSent)
+    expect(transaction.previousState).toEqual(TransactionState.authSent)
   })
+
+  test.todo('maps the legacy financial request message to the transaction')
 })

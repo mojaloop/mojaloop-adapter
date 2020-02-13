@@ -1,31 +1,93 @@
 import Knex from 'knex'
-import Axios, { AxiosInstance } from 'axios'
-import { TransactionRequestFactory } from '../factories/transaction-requests'
-import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
-import { Money, TransactionRequestsIDPutResponse, TransfersIDPutResponse } from '../../src/types/mojaloop'
+import { Money, TransfersIDPutResponse } from '../../src/types/mojaloop'
 import { KnexQuotesService } from '../../src/services/quotes-service'
-import { quotesRequestHandler } from '../../src/handlers/quotes-handler'
-import { authorizationRequestHandler } from '../../src/handlers/authorization-request-handler'
-import { transactionRequestResponseHandler } from '../../src/handlers/transaction-request-response-handler'
-import { legacyFinancialRequestHandler } from '../../src/handlers/legacy-financial-request-handler'
 import { transferRequestHandler } from '../../src/handlers/transfer-request-handler'
-import { LegacyFinancialRequest } from '../../src/types/adaptor-relay-messages'
 import { TransferState, KnexTransfersService } from '../../src/services/transfers-service'
 import { TransferPostRequestFactory } from '../factories/transfer-post-request'
-import { TransactionState } from '../../src/models'
+import { TransactionState, Transaction } from '../../src/models'
+import { Model } from 'objection'
+const uuid = require('uuid/v4')
 const Logger = require('@mojaloop/central-services-logger')
 const sdk = require('@mojaloop/sdk-standard-components')
+Logger.log = Logger.info
 
 describe('Transfer Requests Handler', () => {
   let knex: Knex
-  const fakeHttpClient: AxiosInstance = Axios.create()
-  fakeHttpClient.get = jest.fn()
   const services = AdaptorServicesFactory.build()
   const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
   const logger = Logger
-  let transferRequestIlpPacket: string
+  const ilp = new sdk.Ilp({ secret: 'test', logger })
+  const quoteRequest = QuotesPostRequestFactory.build({
+    quoteId: uuid(),
+    transactionRequestId: uuid(),
+    transactionId: uuid(),
+    amount: {
+      amount: '100',
+      currency: 'USD'
+    }
+  })
+  const quoteResponse = {
+    transferAmount: {
+      amount: '107',
+      currency: 'USD'
+    },
+    payeeFspFee: {
+      amount: '7',
+      currency: 'USD'
+    }
+  }
+  const { ilpPacket, condition } = ilp.getQuoteResponseIlp(quoteRequest, quoteResponse)
+  const transactionInfo = {
+    lpsId: 'lps1',
+    lpsKey: 'lps1-001-abc',
+    transactionRequestId: quoteRequest.transactionRequestId,
+    transactionId: quoteRequest.transactionId,
+    initiator: 'PAYEE',
+    initiatorType: 'DEVICE',
+    scenario: 'WITHDRAWAL',
+    amount: '100',
+    currency: 'USD',
+    state: TransactionState.financialRequestSent,
+    expiration: new Date(Date.now()).toUTCString(),
+    authenticationType: 'OTP',
+    payer: {
+      type: 'payer',
+      identifierType: 'MSISDN',
+      identifierValue: '0821234567',
+      fspId: 'mojawallet'
+    },
+    payee: {
+      type: 'payee',
+      identifierType: 'DEVICE',
+      identifierValue: '1234',
+      subIdOrType: 'abcd',
+      fspId: 'adaptor'
+    },
+    fees: [{
+      type: 'lps',
+      amount: '5',
+      currency: 'USD'
+    }, {
+      type: 'adaptor',
+      amount: '2',
+      currency: 'USD'
+    }],
+    quote: {
+      id: quoteRequest.quoteId,
+      transactionId: quoteRequest.transactionId,
+      transferAmount: '107',
+      transferAmountCurrency: 'USD',
+      amount: '100',
+      amountCurrency: 'USD',
+      feeAmount: '7',
+      feeCurrency: 'USD',
+      ilpPacket,
+      condition,
+      expiration: new Date(Date.now() + 10000).toUTCString()
+    }
+  }
 
   beforeAll(async () => {
     knex = Knex({
@@ -36,82 +98,13 @@ describe('Transfer Requests Handler', () => {
       },
       useNullAsDefault: true
     })
-    services.transactionsService = new KnexTransactionsService({ knex, client: fakeHttpClient, logger })
-    services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
+    Model.knex(knex)
     services.transfersService = new KnexTransfersService({ knex, ilpSecret: 'secret', logger })
     services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger, calculateAdaptorFees })
   })
 
   beforeEach(async () => {
     await knex.migrate.latest()
-
-    const headers = {
-      'fspiop-destination': 'payeeFSP',
-      'fspiop-source': 'payerFSP'
-    }
-    const transactionRequest = TransactionRequestFactory.build({
-      lpsId: 'lps1',
-      lpsKey: 'lps1-001-abc',
-      transactionRequestId: '123',
-      amount: {
-        amount: '100',
-        currency: 'USD'
-      },
-      lpsFee: {
-        amount: '5',
-        currency: 'USD'
-      },
-      payer: {
-        partyIdType: 'MSISDN',
-        partyIdentifier: '0821234567',
-        fspId: 'payerFSP'
-      }
-    })
-    await services.transactionsService.create(transactionRequest)
-
-    const transactionRequestResponse: TransactionRequestsIDPutResponse = {
-      transactionId: '456',
-      transactionRequestState: 'RECEIVED'
-    }
-    await transactionRequestResponseHandler(services, transactionRequestResponse, { 'fspiop-source': 'payerFSP', 'fspiop-destination': 'payeeFSP' }, '123')
-
-    const quoteRequest = QuotesPostRequestFactory.build({
-      quoteId: 'quote123',
-      transactionRequestId: '123',
-      transactionId: '456',
-      amount: {
-        amount: '100',
-        currency: 'USD'
-      }
-    })
-    const quoteResponse = {
-      transferAmount: {
-        amount: '107',
-        currency: 'USD'
-      },
-      payeeFspFee: {
-        amount: '7',
-        currency: 'USD'
-      }
-    }
-    const ilp = new sdk.Ilp({ secret: 'test' })
-    transferRequestIlpPacket = ilp.getQuoteResponseIlp(quoteRequest, quoteResponse).ilpPacket
-    await quotesRequestHandler(services, quoteRequest, headers)
-
-    await authorizationRequestHandler(services, '123', headers)
-
-    const legacyFinancialRequest: LegacyFinancialRequest = {
-      lpsFinancialRequestMessageId: 'financialRequestId', // TODO: refactor once db and services are refactored
-      lpsId: 'lps1',
-      lpsKey: 'lps1-001-abc',
-      authenticationInfo: {
-        authenticationType: 'OTP',
-        authenticationValue: '1515'
-      },
-      responseType: 'ENTERED'
-    }
-
-    await legacyFinancialRequestHandler(services, legacyFinancialRequest)
   })
 
   afterEach(async () => {
@@ -123,12 +116,13 @@ describe('Transfer Requests Handler', () => {
   })
 
   test('creates transfer', async () => {
+    await Transaction.query().insertGraphAndFetch(transactionInfo)
     const transferRequest = TransferPostRequestFactory.build({
       amount: {
         amount: '107',
         currency: 'USD'
       },
-      ilpPacket: transferRequestIlpPacket
+      ilpPacket
     })
     const headers = {
       'fspiop-source': 'payerFSP',
@@ -139,23 +133,24 @@ describe('Transfer Requests Handler', () => {
 
     const transfer = await services.transfersService.get(transferRequest.transferId)
     expect(transfer).toMatchObject({
-      transferId: transferRequest.transferId,
-      quoteId: 'quote123',
-      transactionRequestId: '123',
-      fulfilment: services.transfersService.calculateFulfilment(transferRequest.ilpPacket),
-      transferState: TransferState.reserved,
+      id: transferRequest.transferId,
+      quoteId: quoteRequest.quoteId,
+      transactionRequestId: quoteRequest.transactionRequestId,
+      fulfillment: services.transfersService.calculateFulfilment(transferRequest.ilpPacket),
+      state: TransferState.reserved,
       amount: transferRequest.amount
     })
   })
 
   test('sends transfer response and updates transaction state to fulfillmentSent', async () => {
+    let transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
     Date.now = jest.fn().mockReturnValue(0)
     const transferRequest = TransferPostRequestFactory.build({
       amount: {
         amount: '107',
         currency: 'USD'
       },
-      ilpPacket: transferRequestIlpPacket,
+      ilpPacket,
       payerFsp: 'payerFSP'
     })
     const headers = {
@@ -165,9 +160,9 @@ describe('Transfer Requests Handler', () => {
 
     await transferRequestHandler(services, transferRequest, headers)
 
-    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
+    transaction = await transaction.$query()
     expect(transaction.state).toBe(TransactionState.fulfillmentSent)
-
+    expect(transaction.previousState).toBe(TransactionState.financialRequestSent)
     const transferResponse: TransfersIDPutResponse = {
       fulfilment: services.transfersService.calculateFulfilment(transferRequest.ilpPacket),
       transferState: TransferState.committed,
@@ -183,7 +178,7 @@ describe('Transfer Requests Handler', () => {
         amount: '107',
         currency: 'USD'
       },
-      ilpPacket: transferRequestIlpPacket,
+      ilpPacket,
       payerFsp: 'payerFSP'
     })
     const headers = {

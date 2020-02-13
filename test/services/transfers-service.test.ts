@@ -38,16 +38,16 @@ describe('Transfers Service', function () {
   test('can create a transfer request', async () => {
     const data: Transfer = TransferFactory.build()
     const transfer = await transfersService.create(data)
-    const dbTransfer = await knex('transfers').where('transferId', data.transferId).first()
+    const dbTransfer = await knex('transfers').where('id', data.id).first()
     expect(dbTransfer).toBeDefined()
     expect(dbTransfer).toMatchObject({
       transactionRequestId: data.transactionRequestId,
       amount: data.amount.amount,
       currency: data.amount.currency,
-      transferId: data.transferId,
+      id: data.id,
       quoteId: data.quoteId,
-      fulfilment: data.fulfilment,
-      transferState: data.transferState
+      fulfillment: data.fulfillment,
+      state: data.state
     })
     expect(transfer).toMatchObject(data)
   })
@@ -56,7 +56,7 @@ describe('Transfers Service', function () {
     const data: Transfer = TransferFactory.build()
     await transfersService.create(data)
 
-    const transfer = await transfersService.get(data.transferId)
+    const transfer = await transfersService.get(data.id)
 
     expect(transfer).toMatchObject(data)
   })
@@ -64,9 +64,9 @@ describe('Transfers Service', function () {
   test('can update the transfer state', async () => {
     const data: Transfer = TransferFactory.build()
     await transfersService.create(data)
-    const transfer = await transfersService.get(data.transferId)
+    const transfer = await transfersService.get(data.id)
     expect(transfer).toMatchObject(data)
-    data.transferState = TransferState.committed
+    data.state = TransferState.committed
 
     const updatedTransfer = await transfersService.updateTransferState(data)
 

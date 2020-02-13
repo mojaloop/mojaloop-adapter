@@ -3,6 +3,7 @@ import { TransactionFee } from './transactionFee'
 import { TransactionParty } from './transactionParty'
 import { LpsMessage } from './lpsMessage'
 import { Quote } from './quote'
+import { Transfers } from './transfer'
 
 export enum TransactionState {
   transactionReceived = '01',
@@ -92,11 +93,19 @@ export class Transaction extends Model {
         }
       },
       quote: {
-        relation: Model.HasManyRelation,
+        relation: Model.HasOneRelation,
         modelClass: Quote,
         join: {
           from: 'transactions.transactionRequestId',
           to: 'quotes.transactionRequestId'
+        }
+      },
+      transfer: {
+        relation: Model.HasOneRelation,
+        modelClass: Transfers,
+        join: {
+          from: 'transactions.transactionRequestId',
+          to: 'transfers.transactionRequestId'
         }
       }
     }
@@ -108,6 +117,11 @@ export class Transaction extends Model {
         .whereNot('state', TransactionState.transactionCancelled)
         .whereNot('state', TransactionState.financialResponse)
         .where('lpsKey', lpsKey)
+    },
+    payerMsisdn (query: QueryBuilder<Transaction>, msisdn: string): void {
+      query.withGraphJoined('payer')
+        .where('payer.identifierType', 'MSISDN')
+        .where('payer.identifierValue', msisdn)
     }
   }
 }

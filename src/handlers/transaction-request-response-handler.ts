@@ -1,19 +1,18 @@
 import { TransactionRequestsIDPutResponse, ErrorInformation } from 'types/mojaloop'
-import { TransactionState } from '../models'
+import { TransactionState, Transaction } from '../models'
 import { AdaptorServices } from '../adaptor'
 import { Request } from 'hapi'
 
-export async function transactionRequestResponseHandler ({ transactionsService, mojaClient }: AdaptorServices, transactionRequestResponse: TransactionRequestsIDPutResponse, headers: Request['headers'], transactionRequestId: string): Promise<void> {
+export async function transactionRequestResponseHandler ({ mojaClient }: AdaptorServices, transactionRequestResponse: TransactionRequestsIDPutResponse, headers: Request['headers'], transactionRequestId: string): Promise<void> {
   try {
+    const transaction = await Transaction.query().where('transactionRequestId', transactionRequestId).first().throwIfNotFound()
 
     if (transactionRequestResponse.transactionId) {
-      // TODO: refactor update functions
-      await transactionsService.updateTransactionId(transactionRequestId, transactionRequestResponse.transactionId)
-      await transactionsService.updateState(transactionRequestId, 'transactionRequestId', TransactionState.transactionResponded)
+      await transaction.$query().update({ transactionId: transactionRequestResponse.transactionId, previousState: transaction.previousState, state: TransactionState.transactionResponded })
     }
 
     if (transactionRequestResponse.transactionRequestState === 'REJECTED') {
-      await transactionsService.updateState(transactionRequestId, 'transactionRequestId', TransactionState.transactionCancelled)
+      await transaction.$query().update({ previousState: transaction.previousState, state: TransactionState.transactionCancelled })
     }
   } catch (error) {
     const errorInformation: ErrorInformation = {
