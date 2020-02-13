@@ -2,24 +2,7 @@ import Knex from 'knex'
 import { Party, PartyIdInfo, Money, TransactionType, TransactionRequestsPostRequest } from '../types/mojaloop'
 import { AxiosInstance } from 'axios'
 import { Logger } from '../adaptor'
-
-export enum TransactionState {
-  transactionReceived = '01',
-  transactionSent = '02',
-  transactionResponded = '03',
-  quoteReceived = '04',
-  quoteResponded = '05',
-  authReceived = '06',
-  authSent = '07',
-  financialRequestReceived = '08',
-  financialRequestSent = '09',
-  transferReceived = '0A',
-  fulfillmentSent = '0B',
-  fulfillmentResponse = '0C',
-  financialResponse = '0D',
-  transactionDeclined = '0E',
-  transactionCancelled = '0F'
-}
+import { TransactionState } from '../models'
 
 export type DBTransactionParty = {
   fspId: string;

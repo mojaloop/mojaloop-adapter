@@ -1,7 +1,7 @@
 import { AdaptorServices } from '../adaptor'
 import { LegacyAuthorizationResponse } from '../types/adaptor-relay-messages'
 import { ErrorInformation } from '../types/mojaloop'
-import { TransactionState } from '../services/transactions-service'
+import { TransactionState } from '../models'
 
 export async function authorizationRequestHandler ({ transactionsService, quotesService, queueService, logger, authorizationsService }: AdaptorServices, transactionRequestId: string, headers: { [k: string]: any }): Promise<void> {
   try {

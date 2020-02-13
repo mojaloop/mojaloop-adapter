@@ -1,7 +1,8 @@
-import { KnexTransactionsService, TransactionRequest, TransactionState } from '../../src/services/transactions-service'
+import { KnexTransactionsService, TransactionRequest } from '../../src/services/transactions-service'
 import Axios, { AxiosInstance } from 'axios'
 import Knex from 'knex'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
+import { TransactionState } from '../../src/models'
 
 describe('Transactions Service', function () {
   let knex: Knex

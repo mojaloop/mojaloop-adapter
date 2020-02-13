@@ -4,13 +4,14 @@ import { createApp } from '../../src/adaptor'
 import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
-import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
+import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { KnexQuotesService } from '../../src/services/quotes-service'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { Money } from '../../src/types/mojaloop'
 import { quotesRequestHandler } from '../../src/handlers/quotes-handler'
 import { transactionRequestResponseHandler } from '../../src/handlers/transaction-request-response-handler'
+import { TransactionState } from '../../src/models'
 
 jest.mock('uuid/v4', () => () => '123')
 

@@ -15,6 +15,7 @@ exports.up = function (knex) {
       table.string('scenario').notNullable()
       table.string('originalTransactionId').nullable()
       table.string('refundReason').nullable()
+      table.string('authenticationType').notNullable()
       table.timestamps(true, true)
     })
 }

@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import Axios, { AxiosInstance } from 'axios'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
-import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
+import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 import { Money, TransactionRequestsIDPutResponse, TransfersIDPutResponse } from '../../src/types/mojaloop'
@@ -14,6 +14,7 @@ import { transferRequestHandler } from '../../src/handlers/transfer-request-hand
 import { LegacyFinancialRequest } from '../../src/types/adaptor-relay-messages'
 import { TransferState, KnexTransfersService } from '../../src/services/transfers-service'
 import { TransferPostRequestFactory } from '../factories/transfer-post-request'
+import { TransactionState } from '../../src/models'
 const Logger = require('@mojaloop/central-services-logger')
 const sdk = require('@mojaloop/sdk-standard-components')
 

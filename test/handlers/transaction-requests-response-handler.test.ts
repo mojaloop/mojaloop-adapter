@@ -1,10 +1,11 @@
 import Knex from 'knex'
 import Axios from 'axios'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
+import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
 import { transactionRequestResponseHandler } from '../../src/handlers/transaction-request-response-handler'
 import { ErrorInformation } from '../../src/types/mojaloop'
+import { TransactionState } from '../../src/models'
 const Logger = require('@mojaloop/central-services-logger')
 
 jest.mock('uuid/v4', () => () => '123')

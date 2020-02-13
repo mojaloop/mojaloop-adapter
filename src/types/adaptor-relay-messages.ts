@@ -15,7 +15,7 @@ export type LegacyAuthorizationRequest = {
   };
   amount: Money;
   expiration: string;
-  lpsFees?: Money;
+  lpsFee?: Money;
   transactionType: {
     scenario: 'WITHDRAWAL' | 'REFUND';
     initiatorType: 'AGENT' | 'DEVICE';

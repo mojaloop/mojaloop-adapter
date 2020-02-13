@@ -2,7 +2,7 @@ import { AdaptorServices } from '../adaptor'
 import { TransfersIDPutResponse } from '../types/mojaloop'
 import { LegacyFinancialResponse } from '../types/adaptor-relay-messages'
 import { TransferState } from '../services/transfers-service'
-import { TransactionState } from '../services/transactions-service'
+import { TransactionState } from '../models'
 
 export async function transferResponseHandler ({ queueService, transactionsService, transfersService, logger }: AdaptorServices, transferResponse: TransfersIDPutResponse, headers: { [k: string]: any }, transferId: string): Promise<void> {
   try {

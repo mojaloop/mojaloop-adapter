@@ -1,8 +1,26 @@
-import { Model, RelationMappings, Pojo } from 'objection'
+import { Model, RelationMappings, QueryBuilder } from 'objection'
 import { TransactionFee } from './transactionFee'
 import { TransactionParty } from './transactionParty'
 import { LpsMessage } from './lpsMessage'
 import { Quote } from './quote'
+
+export enum TransactionState {
+  transactionReceived = '01',
+  transactionSent = '02',
+  transactionResponded = '03',
+  quoteReceived = '04',
+  quoteResponded = '05',
+  authReceived = '06',
+  authSent = '07',
+  financialRequestReceived = '08',
+  financialRequestSent = '09',
+  transferReceived = '0A',
+  fulfillmentSent = '0B',
+  fulfillmentResponse = '0C',
+  financialResponse = '0D',
+  transactionDeclined = '0E',
+  transactionCancelled = '0F'
+}
 
 export class Transaction extends Model {
 
@@ -18,6 +36,12 @@ export class Transaction extends Model {
   expiration!: string
   state!: string
   previousState?: string
+  authenticationType!: string
+
+  fees?: TransactionFee[]
+  payer?: TransactionParty
+  payee?: TransactionParty
+  lpsMessages?: LpsMessage[]
 
   static get tableName (): string {
     return 'transactions'
@@ -38,7 +62,7 @@ export class Transaction extends Model {
         }
       },
       payer: {
-        relation: Model.HasManyRelation,
+        relation: Model.HasOneRelation,
         modelClass: TransactionParty,
         join: {
           from: 'transactions.transactionRequestId',
@@ -47,7 +71,7 @@ export class Transaction extends Model {
         filter: { 'transactionParties.type': 'payer' }
       },
       payee: {
-        relation: Model.HasManyRelation,
+        relation: Model.HasOneRelation,
         modelClass: TransactionParty,
         join: {
           from: 'transactions.transactionRequestId',
@@ -75,6 +99,15 @@ export class Transaction extends Model {
           to: 'quotes.transactionRequestId'
         }
       }
+    }
+  }
+
+  static modifiers = {
+    incomplete (query: QueryBuilder<Transaction>, lpsKey: string): void {
+      query.whereNot('state', TransactionState.transactionDeclined)
+        .whereNot('state', TransactionState.transactionCancelled)
+        .whereNot('state', TransactionState.financialResponse)
+        .where('lpsKey', lpsKey)
     }
   }
 }

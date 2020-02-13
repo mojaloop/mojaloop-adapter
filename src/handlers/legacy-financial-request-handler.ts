@@ -1,7 +1,7 @@
 import { AdaptorServices } from 'adaptor'
 import { LegacyFinancialRequest } from '../types/adaptor-relay-messages'
 import { AuthorizationsIDPutResponse } from '../types/mojaloop'
-import { TransactionState } from '../services/transactions-service'
+import { TransactionState } from '../models'
 
 export async function legacyFinancialRequestHandler ({ transactionsService, authorizationsService, logger }: AdaptorServices, financialRequest: LegacyFinancialRequest): Promise<void> {
   try {

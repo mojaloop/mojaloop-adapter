@@ -1,5 +1,5 @@
 import { TransactionRequestsIDPutResponse, ErrorInformation } from 'types/mojaloop'
-import { TransactionState } from '../services/transactions-service'
+import { TransactionState } from '../models'
 import { AdaptorServices } from '../adaptor'
 import { Request } from 'hapi'
 

@@ -1,6 +1,6 @@
 import { Request } from 'hapi'
 import { QuotesIDPutResponse, QuotesPostRequest, ErrorInformation } from '../types/mojaloop'
-import { TransactionState } from '../services/transactions-service'
+import { TransactionState } from '../models'
 import { AdaptorServices } from '../adaptor'
 
 export async function quotesRequestHandler ({ transactionsService, quotesService, mojaClient }: AdaptorServices, payload: QuotesPostRequest, headers: Request['headers']): Promise<void> {

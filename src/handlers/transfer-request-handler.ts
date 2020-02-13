@@ -1,7 +1,7 @@
 import { AdaptorServices } from '../adaptor'
 import { TransfersPostRequest, TransfersIDPutResponse, ErrorInformation } from '../types/mojaloop'
 import { Transfer, TransferState } from '../services/transfers-service'
-import { TransactionState } from '../services/transactions-service'
+import { TransactionState } from '../models'
 const IlpPacket = require('ilp-packet')
 
 export async function transferRequestHandler ({ transfersService, transactionsService, mojaClient, logger }: AdaptorServices, transferRequest: TransfersPostRequest, headers: { [k: string]: any }): Promise<void> {

@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import Axios, { AxiosInstance } from 'axios'
 import { TransactionRequestFactory } from '../factories/transaction-requests'
-import { KnexTransactionsService, TransactionState } from '../../src/services/transactions-service'
+import { KnexTransactionsService } from '../../src/services/transactions-service'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { KnexIsoMessageService } from '../../src/services/iso-message-service'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
@@ -10,6 +10,7 @@ import { KnexQuotesService } from '../../src/services/quotes-service'
 import { quotesRequestHandler } from '../../src/handlers/quotes-handler'
 import { authorizationRequestHandler } from '../../src/handlers/authorization-request-handler'
 import { transactionRequestResponseHandler } from '../../src/handlers/transaction-request-response-handler'
+import { TransactionState } from '../../src/models'
 const Logger = require('@mojaloop/central-services-logger')
 
 describe('Authorization Request Handler', function () {
