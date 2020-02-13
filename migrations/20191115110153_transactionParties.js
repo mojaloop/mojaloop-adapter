@@ -8,7 +8,7 @@ exports.up = function (knex) {
       table.string('identifierType').notNullable()
       table.string('identifierValue').notNullable()
       table.string('fspId').nullable()
-      table.string('subIdorType').nullable()
+      table.string('subIdOrType').nullable()
       table.timestamps(true, true)
     })
 }
