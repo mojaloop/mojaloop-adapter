@@ -2,7 +2,6 @@ import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
 import { createApp, AdaptorServices } from './adaptor'
 import { createTcpRelay } from './tcp-relay'
-import { KnexTransfersService } from './services/transfers-service'
 import { KnexAuthorizationsService } from './services/authorizations-service'
 import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests, Money } from '@mojaloop/sdk-standard-components'
@@ -51,8 +50,6 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 
 const queueService = new BullQueueService(['QuoteRequests', 'TransactionRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
 
-const transfersService = new KnexTransfersService({ knex, ilpSecret: ILP_SECRET, logger: Logger })
-
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
   timeout: 3000
@@ -75,7 +72,6 @@ const mojaClient = new MojaloopRequests({
 const adaptorServices: AdaptorServices = {
   authorizationsService,
   mojaClient,
-  transfersService,
   queueService,
   logger: Logger,
   calculateAdaptorFees: async (transaction: Transaction): Promise<Money> => ({ amount: '0', currency: transaction.currency }),

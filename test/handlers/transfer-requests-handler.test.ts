@@ -3,9 +3,8 @@ import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 import { TransfersIDPutResponse } from '../../src/types/mojaloop'
 import { transferRequestHandler } from '../../src/handlers/transfer-request-handler'
-import { TransferState, KnexTransfersService } from '../../src/services/transfers-service'
 import { TransferPostRequestFactory } from '../factories/transfer-post-request'
-import { TransactionState, Transaction } from '../../src/models'
+import { TransactionState, Transaction, TransferState, Transfers } from '../../src/models'
 import { Model } from 'objection'
 const uuid = require('uuid/v4')
 const Logger = require('@mojaloop/central-services-logger')
@@ -14,9 +13,9 @@ Logger.log = Logger.info
 
 describe('Transfer Requests Handler', () => {
   let knex: Knex
-  const services = AdaptorServicesFactory.build()
   const logger = Logger
   const ilp = new sdk.Ilp({ secret: 'test', logger })
+  const services = AdaptorServicesFactory.build({ ilpService: ilp })
   const quoteRequest = QuotesPostRequestFactory.build({
     quoteId: uuid(),
     transactionRequestId: uuid(),
@@ -97,7 +96,6 @@ describe('Transfer Requests Handler', () => {
       useNullAsDefault: true
     })
     Model.knex(knex)
-    services.transfersService = new KnexTransfersService({ knex, ilpSecret: 'secret', logger })
   })
 
   beforeEach(async () => {
@@ -128,14 +126,15 @@ describe('Transfer Requests Handler', () => {
 
     await transferRequestHandler(services, transferRequest, headers)
 
-    const transfer = await services.transfersService.get(transferRequest.transferId)
+    const transfer = await Transfers.query().where({ id: transferRequest.transferId }).first()
     expect(transfer).toMatchObject({
       id: transferRequest.transferId,
       quoteId: quoteRequest.quoteId,
       transactionRequestId: quoteRequest.transactionRequestId,
-      fulfillment: services.transfersService.calculateFulfilment(transferRequest.ilpPacket),
+      fulfillment: ilp.caluclateFulfil(transferRequest.ilpPacket),
       state: TransferState.reserved,
-      amount: transferRequest.amount
+      amount: transferRequest.amount.amount,
+      currency: transferRequest.amount.currency
     })
   })
 
@@ -161,7 +160,7 @@ describe('Transfer Requests Handler', () => {
     expect(transaction.state).toBe(TransactionState.fulfillmentSent)
     expect(transaction.previousState).toBe(TransactionState.financialRequestSent)
     const transferResponse: TransfersIDPutResponse = {
-      fulfilment: services.transfersService.calculateFulfilment(transferRequest.ilpPacket),
+      fulfilment: ilp.caluclateFulfil(transferRequest.ilpPacket),
       transferState: TransferState.committed,
       completedTimestamp: (new Date(Date.now())).toISOString()
     }
@@ -169,13 +168,12 @@ describe('Transfer Requests Handler', () => {
   })
 
   test('sends transfer error if fails to process transfer request', async () => {
-    services.transfersService.create = jest.fn().mockRejectedValue({ message: 'Failed to create transfer.' })
     const transferRequest = TransferPostRequestFactory.build({
       amount: {
         amount: '107',
         currency: 'USD'
       },
-      ilpPacket,
+      ilpPacket: 'not a real packet',
       payerFsp: 'payerFSP'
     })
     const headers = {

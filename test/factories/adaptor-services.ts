@@ -24,17 +24,6 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     putTransactionRequestsError: jest.fn()
   },
   calculateAdaptorFees: () => jest.fn().mockResolvedValue({ amount: '0', currency: 'USD' }),
-  quotesService: {
-    create: jest.fn(),
-    get: jest.fn(),
-    calculateAdaptorFees: jest.fn()
-  },
-  transfersService: {
-    get: jest.fn(),
-    create: jest.fn(),
-    updateTransferState: jest.fn(),
-    calculateFulfilment: jest.fn()
-  },
   authorizationsService: {
     sendAuthorizationsResponse: jest.fn().mockResolvedValue(undefined),
     sendAuthorizationsErrorResponse: jest.fn().mockResolvedValue(undefined)

@@ -1,10 +1,8 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { Money } from '../../src/types/mojaloop'
 import { transferResponseHandler } from '../../src/handlers/transfer-response-handler'
 import { LegacyFinancialResponse } from '../../src/types/adaptor-relay-messages'
-import { KnexTransfersService, TransferState } from '../../src/services/transfers-service'
-import { TransactionState, Transaction } from '../../src/models'
+import { TransactionState, Transaction, TransferState } from '../../src/models'
 import { Model } from 'objection'
 const uuid = require('uuid/v4')
 
@@ -43,7 +41,6 @@ describe('Transfer Response Handler', () => {
       useNullAsDefault: true
     })
     Model.knex(knex)
-    services.transfersService = new KnexTransfersService({ knex, ilpSecret: 'secret' })
   })
 
   beforeEach(async () => {
