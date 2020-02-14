@@ -1,8 +1,7 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
-import { Money, TransfersIDPutResponse } from '../../src/types/mojaloop'
-import { KnexQuotesService } from '../../src/services/quotes-service'
+import { TransfersIDPutResponse } from '../../src/types/mojaloop'
 import { transferRequestHandler } from '../../src/handlers/transfer-request-handler'
 import { TransferState, KnexTransfersService } from '../../src/services/transfers-service'
 import { TransferPostRequestFactory } from '../factories/transfer-post-request'
@@ -16,7 +15,6 @@ Logger.log = Logger.info
 describe('Transfer Requests Handler', () => {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
-  const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
   const logger = Logger
   const ilp = new sdk.Ilp({ secret: 'test', logger })
   const quoteRequest = QuotesPostRequestFactory.build({
@@ -100,7 +98,6 @@ describe('Transfer Requests Handler', () => {
     })
     Model.knex(knex)
     services.transfersService = new KnexTransfersService({ knex, ilpSecret: 'secret', logger })
-    services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger, calculateAdaptorFees })
   })
 
   beforeEach(async () => {

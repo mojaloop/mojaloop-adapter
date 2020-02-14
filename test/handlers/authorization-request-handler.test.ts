@@ -1,7 +1,6 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { Money } from '../../src/types/mojaloop'
-import { KnexQuotesService } from '../../src/services/quotes-service'
 import { authorizationRequestHandler } from '../../src/handlers/authorization-request-handler'
 import { TransactionState, Transaction } from '../../src/models'
 import { Model } from 'objection'
@@ -12,8 +11,6 @@ Logger.log = Logger.info
 describe('Authorization Request Handler', function () {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
-  const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
-  const logger = Logger
   const transactionInfo = {
     lpsId: 'lps1',
     lpsKey: 'lps1-001-abc',
@@ -64,7 +61,6 @@ describe('Authorization Request Handler', function () {
       useNullAsDefault: true
     })
     Model.knex(knex)
-    services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger, calculateAdaptorFees })
   })
 
   beforeEach(async () => {

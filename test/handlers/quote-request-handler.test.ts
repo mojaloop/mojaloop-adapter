@@ -1,20 +1,14 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
-import { KnexQuotesService } from '../../src/services/quotes-service'
-import { Money } from '../../src/types/mojaloop'
 import { quotesRequestHandler } from '../../src/handlers/quote-request-handler'
-import { TransactionState, Transaction } from '../../src/models'
+import { TransactionState, Transaction, Quote, TransactionFee } from '../../src/models'
 import { Model } from 'objection'
 const uuid = require('uuid/v4')
-const Logger = require('@mojaloop/central-services-logger')
-Logger.log = Logger.info
 
 describe('Quote Requests Handler', function () {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
-  const logger = Logger
-  const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
   const headers = {
     'fspiop-source': 'payer',
     'fspiop-destination': 'payee'
@@ -44,12 +38,7 @@ describe('Quote Requests Handler', function () {
       identifierValue: '1234',
       subIdOrType: 'abcd',
       fspId: 'adaptor'
-    },
-    fees: [{
-      type: 'lps',
-      amount: '1',
-      currency: 'USD'
-    }]
+    }
   }
 
   beforeAll(async () => {
@@ -61,7 +50,6 @@ describe('Quote Requests Handler', function () {
       },
       useNullAsDefault: true
     })
-    services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger, calculateAdaptorFees })
     Model.knex(knex)
   })
 
@@ -89,20 +77,81 @@ describe('Quote Requests Handler', function () {
 
     await quotesRequestHandler(services, quoteRequest, headers)
 
-    const quote = await services.quotesService.get(quoteRequest.quoteId, 'id')
+    const quote = await Quote.query().where({ id: quoteRequest.quoteId }).first().throwIfNotFound()
     expect(quote.id).toBe(quoteRequest.quoteId)
     expect(quote.transactionRequestId).toBe(transaction.transactionRequestId)
     expect(quote.transactionId).toBe(transactionInfo.transactionId)
-    expect(quote.condition).toBeDefined()
-    expect(quote.ilpPacket).toBeDefined()
-    expect(quote.amount).toMatchObject({ amount: '100', currency: 'USD' })
-    expect(quote.fees).toMatchObject({ amount: '1', currency: 'USD' })
-    expect(quote.transferAmount).toMatchObject({ amount: '103', currency: 'USD' })
+    expect(quote.amount).toBe('100')
+    expect(quote.amountCurrency).toBe('USD')
   })
 
-  test.todo('creates payerFsp and adaptor fees')
+  test('creates adaptor fee', async () => {
+    services.calculateAdaptorFees = jest.fn().mockResolvedValue({ amount: '2', currency: 'USD' })
+    const transaction = await Transaction.query().insertGraph(transactionInfo)
+    const quoteRequest = QuotesPostRequestFactory.build({
+      transactionId: transactionInfo.transactionId,
+      amount: {
+        amount: '100',
+        currency: 'USD'
+      }
+    })
 
-  test.todo('quoted fee is sum of adaptor, lps and payerFsp fees')
+    await quotesRequestHandler(services, quoteRequest, headers)
+
+    const adaptorFee = await transaction.$relatedQuery<TransactionFee>('fees').where({ type: 'adaptor' }).first()
+    expect(adaptorFee.amount).toBe('2')
+    expect(adaptorFee.currency).toBe('USD')
+  })
+
+  test('quoted fee is sum of adaptor and lps fees', async () => {
+    services.calculateAdaptorFees = jest.fn().mockResolvedValue({ amount: '2', currency: 'USD' })
+    await Transaction.query().insertGraph(
+      {
+        ...transactionInfo,
+        fees: [{
+          type: 'lps',
+          amount: '1',
+          currency: 'USD'
+        }]
+      })
+    const quoteRequest = QuotesPostRequestFactory.build({
+      transactionId: transactionInfo.transactionId,
+      amount: {
+        amount: '100',
+        currency: 'USD'
+      }
+    })
+
+    await quotesRequestHandler(services, quoteRequest, headers)
+
+    const quote = await Quote.query().where({ id: quoteRequest.quoteId }).first().throwIfNotFound()
+    expect(quote.feeAmount).toBe('3')
+    expect(quote.feeCurrency).toBe('USD')
+    expect(quote.transferAmount).toBe('103')
+    expect(quote.transferAmountCurrency).toBe('USD')
+  })
+
+  test('uses ilpService to generate condition and ilpPacket', async () => {
+    services.ilpService.getQuoteResponseIlp = jest.fn().mockResolvedValue({
+      ilpPacket: 'test ilp-packet',
+      condition: 'test condition'
+    })
+    await Transaction.query().insertGraph(transactionInfo)
+    const quoteRequest = QuotesPostRequestFactory.build({
+      transactionId: transactionInfo.transactionId,
+      amount: {
+        amount: '100',
+        currency: 'USD'
+      }
+    })
+
+    await quotesRequestHandler(services, quoteRequest, headers)
+
+    const quote = await Quote.query().where({ id: quoteRequest.quoteId }).first().throwIfNotFound()
+    expect(services.ilpService.getQuoteResponseIlp).toHaveBeenCalled()
+    expect(quote.condition).toBe('test condition')
+    expect(quote.ilpPacket).toBe('test ilp-packet')
+  })
 
   test('sends quote response', async () => {
     await Transaction.query().insertGraph(transactionInfo)

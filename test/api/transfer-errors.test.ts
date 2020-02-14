@@ -2,14 +2,11 @@ import { Server } from 'hapi'
 import Knex from 'knex'
 import { createApp } from '../../src/adaptor'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { Transfer } from '../../src/services/transfers-service'
-import { TransferFactory } from '../factories/transfer'
 
 describe('Authorization Errors Controller', function () {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
   let adaptor: Server
-  let transfer: Transfer
 
   beforeAll(async () => {
     knex = Knex({
@@ -26,7 +23,6 @@ describe('Authorization Errors Controller', function () {
 
   beforeEach(async () => {
     await knex.migrate.latest()
-    transfer = TransferFactory.build()
   })
 
   afterEach(async () => {
@@ -41,7 +37,7 @@ describe('Authorization Errors Controller', function () {
     // add to request object as payload && send to create function
     const response = await adaptor.inject({
       method: 'PUT',
-      url: `/transfers/${transfer.transferId}/error`,
+      url: '/transfers/123/error',
       payload: {
         errorInformation: {
           errorCode: 'this is an error code',

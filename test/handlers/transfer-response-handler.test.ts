@@ -1,7 +1,6 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { Money } from '../../src/types/mojaloop'
-import { KnexQuotesService } from '../../src/services/quotes-service'
 import { transferResponseHandler } from '../../src/handlers/transfer-response-handler'
 import { LegacyFinancialResponse } from '../../src/types/adaptor-relay-messages'
 import { KnexTransfersService, TransferState } from '../../src/services/transfers-service'
@@ -12,7 +11,6 @@ const uuid = require('uuid/v4')
 describe('Transfer Response Handler', () => {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
-  const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
   const transactionInfo = {
     lpsId: 'lps1',
     lpsKey: 'lps1-001-abc',
@@ -46,7 +44,6 @@ describe('Transfer Response Handler', () => {
     })
     Model.knex(knex)
     services.transfersService = new KnexTransfersService({ knex, ilpSecret: 'secret' })
-    services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', calculateAdaptorFees })
   })
 
   beforeEach(async () => {

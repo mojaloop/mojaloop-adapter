@@ -1,20 +1,15 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { Money, AuthorizationsIDPutResponse } from '../../src/types/mojaloop'
-import { KnexQuotesService } from '../../src/services/quotes-service'
+import { AuthorizationsIDPutResponse } from '../../src/types/mojaloop'
 import { legacyFinancialRequestHandler } from '../../src/handlers/legacy-financial-request-handler'
 import { LegacyFinancialRequest } from '../../src/types/adaptor-relay-messages'
 import { TransactionState, Transaction } from '../../src/models'
 import { Model } from 'objection'
 const uuid = require('uuid/v4')
-const Logger = require('@mojaloop/central-services-logger')
-Logger.log = Logger.info
 
 describe('Legacy Financial Request Handler', () => {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
-  const calculateAdaptorFees = async (amount: Money) => ({ amount: '2', currency: 'USD' })
-  const logger = Logger
   const transactionInfo = {
     lpsId: 'lps1',
     lpsKey: 'lps1-001-abc',
@@ -65,7 +60,6 @@ describe('Legacy Financial Request Handler', () => {
       useNullAsDefault: true
     })
     Model.knex(knex)
-    services.quotesService = new KnexQuotesService({ knex, ilpSecret: 'secret', logger, calculateAdaptorFees })
   })
 
   beforeEach(async () => {

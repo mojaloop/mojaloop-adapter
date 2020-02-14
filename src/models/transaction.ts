@@ -43,6 +43,7 @@ export class Transaction extends Model {
   payer?: TransactionParty
   payee?: TransactionParty
   lpsMessages?: LpsMessage[]
+  quote?: Quote
 
   static get tableName (): string {
     return 'transactions'

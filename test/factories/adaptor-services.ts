@@ -23,10 +23,7 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     putTransactionRequests: jest.fn(),
     putTransactionRequestsError: jest.fn()
   },
-  isoMessagesService: {
-    create: jest.fn(),
-    get: jest.fn()
-  },
+  calculateAdaptorFees: () => jest.fn().mockResolvedValue({ amount: '0', currency: 'USD' }),
   quotesService: {
     create: jest.fn(),
     get: jest.fn(),
@@ -51,5 +48,9 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     warn: jest.fn(),
     error: jest.fn(),
     debug: jest.fn()
+  },
+  ilpService: {
+    caluclateFulfil: jest.fn(),
+    getQuoteResponseIlp: jest.fn().mockReturnValue({ condition: 'condition', ilpPacket: 'ilpPacket' })
   }
 })

@@ -3,15 +3,24 @@ import { LegacyAuthorizationResponse } from '../types/adaptor-relay-messages'
 import { ErrorInformation } from '../types/mojaloop'
 import { TransactionState, Transaction } from '../models'
 
-export async function authorizationRequestHandler ({ quotesService, queueService, logger, authorizationsService }: AdaptorServices, transactionRequestId: string, headers: { [k: string]: any }): Promise<void> {
+export async function authorizationRequestHandler ({ queueService, logger, authorizationsService }: AdaptorServices, transactionRequestId: string, headers: { [k: string]: any }): Promise<void> {
   try {
-    const transaction = await Transaction.query().where({ transactionRequestId }).first().throwIfNotFound()
-    const quote = await quotesService.get(transactionRequestId, 'transactionRequestId')
+    const transaction = await Transaction.query().where({ transactionRequestId }).withGraphFetched('quote').first().throwIfNotFound()
+
+    if (!transaction.quote) {
+      throw new Error('Transaction does not have a quote.')
+    }
 
     const authorizationRequest: LegacyAuthorizationResponse = {
       lpsAuthorizationRequestMessageId: 'lpsMessageId', // TODO: refactor DB
-      fees: quote.fees,
-      transferAmount: quote.transferAmount
+      fees: {
+        amount: transaction.quote.feeAmount,
+        currency: transaction.quote.feeCurrency
+      },
+      transferAmount: {
+        amount: transaction.quote.transferAmount,
+        currency: transaction.quote.transferAmountCurrency
+      }
     }
 
     await queueService.addToQueue(`${transaction.lpsId}AuthorizationResponses`, authorizationRequest)

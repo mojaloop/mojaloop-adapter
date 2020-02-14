@@ -2,11 +2,10 @@ import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
 import { createApp, AdaptorServices } from './adaptor'
 import { createTcpRelay } from './tcp-relay'
-import { KnexQuotesService } from './services/quotes-service'
 import { KnexTransfersService } from './services/transfers-service'
 import { KnexAuthorizationsService } from './services/authorizations-service'
 import { BullQueueService } from './services/queue-service'
-import { MojaloopRequests } from '@mojaloop/sdk-standard-components'
+import { MojaloopRequests, Money } from '@mojaloop/sdk-standard-components'
 import { Worker, Job } from 'bullmq'
 import { quotesRequestHandler } from './handlers/quote-request-handler'
 import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
@@ -15,6 +14,10 @@ import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, Transfer
 import { authorizationRequestHandler } from 'handlers/authorization-request-handler'
 import { transferRequestHandler } from 'handlers/transfer-request-handler'
 import { transferResponseHandler } from 'handlers/transfer-response-handler'
+import { Transaction } from './models'
+const MojaloopSdk = require('@mojaloop/sdk-standard-components')
+const Logger = require('@mojaloop/central-services-logger')
+Logger.log = Logger.info
 
 const HTTP_PORT = process.env.HTTP_PORT || 3000
 const TCP_PORT = process.env.TCP_PORT || 3001
@@ -45,21 +48,18 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
   },
   useNullAsDefault: true
 })
-const logger = require('@mojaloop/central-services-logger')
 
 const queueService = new BullQueueService(['QuoteRequests', 'TransactionRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
 
-const quotesService = new KnexQuotesService({ knex, ilpSecret: ILP_SECRET, logger, expirationWindow: Number(QUOTE_EXPIRATION_WINDOW) })
-
-const transfersService = new KnexTransfersService({ knex, ilpSecret: ILP_SECRET, logger })
+const transfersService = new KnexTransfersService({ knex, ilpSecret: ILP_SECRET, logger: Logger })
 
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
   timeout: 3000
 })
-const authorizationsService = new KnexAuthorizationsService({ knex, client: AuthorizationsClient, logger })
+const authorizationsService = new KnexAuthorizationsService({ knex, client: AuthorizationsClient, logger: Logger })
 const mojaClient = new MojaloopRequests({
-  logger: console,
+  logger: Logger,
   dfspId: ADAPTOR_FSP_ID,
   quotesEndpoint: QUOTE_REQUESTS_URL,
   alsEndpoint: ACCOUNT_LOOKUP_URL,
@@ -73,12 +73,13 @@ const mojaClient = new MojaloopRequests({
   peerEndpoint: 'string'
 })
 const adaptorServices: AdaptorServices = {
-  quotesService,
   authorizationsService,
   mojaClient,
   transfersService,
   queueService,
-  logger
+  logger: Logger,
+  calculateAdaptorFees: async (transaction: Transaction): Promise<Money> => ({ amount: '0', currency: transaction.currency }),
+  ilpService: new MojaloopSdk.Ilp({ secret: ILP_SECRET, logger: Logger })
 }
 
 // TODO: Error handling if worker throws an error

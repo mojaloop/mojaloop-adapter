@@ -4,7 +4,6 @@ import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
 import { IsoMessagingClient } from './services/iso-messaging-client'
-import { QuotesService } from './services/quotes-service'
 import { AuthorizationsService } from './services/authorizations-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
 import { TransfersService } from './services/transfers-service'
@@ -15,6 +14,9 @@ import * as TransactionRequestErrorsController from './controllers/transaction-r
 import * as AuthorizationErrorsController from './controllers/authorization-errors-controller'
 import * as QuoteErrorsController from './controllers/quote-errors-controller'
 import * as TransferErrorsController from './controllers/transfer-errors-controller'
+import { Transaction } from './models'
+import { Money } from './types/mojaloop'
+import { IlpService } from './services/ilp-service'
 
 const CentralLogger = require('@mojaloop/central-services-logger')
 
@@ -24,12 +26,13 @@ export type AdaptorConfig = {
 }
 
 export type AdaptorServices = {
-  quotesService: QuotesService;
   authorizationsService: AuthorizationsService;
   mojaClient: MojaloopRequests;
   logger: Logger;
   transfersService: TransfersService;
   queueService: QueueService;
+  calculateAdaptorFees: (transaction: Transaction) => Promise<Money>;
+  ilpService: IlpService;
 }
 
 export type Logger = {
@@ -41,13 +44,14 @@ export type Logger = {
 
 declare module 'hapi' {
   interface ApplicationState {
-    quotesService: QuotesService;
     authorizationsService: AuthorizationsService;
     mojaClient: MojaloopRequests;
     logger: Logger;
     isoMessagingClients: Map<string, IsoMessagingClient>;
     transfersService: TransfersService;
     queueService: QueueService;
+    calculateAdaptorFees: (transaction: Transaction) => Promise<Money>;
+    ilpService: IlpService;
   }
 }
 
@@ -56,7 +60,6 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   const adaptor = new Server(config)
 
   // register services
-  adaptor.app.quotesService = services.quotesService
   adaptor.app.authorizationsService = services.authorizationsService
   adaptor.app.mojaClient = services.mojaClient
   adaptor.app.isoMessagingClients = new Map()
