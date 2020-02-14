@@ -1,8 +1,8 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { Money } from '../../src/types/mojaloop'
+import { ISO0100Factory } from '../factories/iso-messages'
 import { authorizationRequestHandler } from '../../src/handlers/authorization-request-handler'
-import { TransactionState, Transaction } from '../../src/models'
+import { TransactionState, Transaction, LpsMessage, LegacyMessageType } from '../../src/models'
 import { Model } from 'objection'
 const uuid = require('uuid/v4')
 const Logger = require('@mojaloop/central-services-logger')
@@ -76,7 +76,9 @@ describe('Authorization Request Handler', function () {
   })
 
   test('puts LegacyAuthorizationResponse message on to AuthorizationResponses queue for the lps that the transaction request came from', async () => {
-    await Transaction.query().insertGraph(transactionInfo)
+    const legacyAuthRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.authorizationRequest, content: ISO0100Factory.build() })
+    const transaction = await Transaction.query().insertGraph(transactionInfo)
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(legacyAuthRequest)
     const headers = {
       'fspiop-source': 'payerFSP',
       'fspiop-destination': 'payeeFSP'
@@ -85,7 +87,7 @@ describe('Authorization Request Handler', function () {
     await authorizationRequestHandler(services, transactionInfo.transactionRequestId, headers)
 
     expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1AuthorizationResponses', {
-      lpsAuthorizationRequestMessageId: 'lpsMessageId', // TODO: refactor once DB schema and services are refactored
+      lpsAuthorizationRequestMessageId: legacyAuthRequest.id,
       fees: {
         amount: '7',
         currency: 'USD'
@@ -98,7 +100,9 @@ describe('Authorization Request Handler', function () {
   })
 
   test('updates transaction state to be authSent', async () => {
-    let transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    const legacyAuthRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.authorizationRequest, content: ISO0100Factory.build() })
+    let transaction = await Transaction.query().insertGraph(transactionInfo)
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(legacyAuthRequest)
     const headers = {
       'fspiop-source': 'payerFSP',
       'fspiop-destination': 'payeeFSP'

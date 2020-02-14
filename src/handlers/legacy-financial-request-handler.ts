@@ -1,11 +1,12 @@
 import { AdaptorServices } from 'adaptor'
 import { LegacyFinancialRequest } from '../types/adaptor-relay-messages'
 import { AuthorizationsIDPutResponse } from '../types/mojaloop'
-import { TransactionState, Transaction } from '../models'
+import { TransactionState, Transaction, LpsMessage } from '../models'
 
 export async function legacyFinancialRequestHandler ({ authorizationsService, logger }: AdaptorServices, financialRequest: LegacyFinancialRequest): Promise<void> {
   try {
     const transaction = await Transaction.query().where('lpsKey', financialRequest.lpsKey).withGraphFetched('payer').where('state', TransactionState.authSent).orderBy('created_at', 'desc').first().throwIfNotFound()
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(financialRequest.lpsFinancialRequestMessageId)
 
     if (!financialRequest.authenticationInfo) {
       throw new Error('Missing authenticationInfo.')
