@@ -15,6 +15,10 @@ import { authorizationRequestHandler } from './handlers/authorization-request-ha
 import { transferRequestHandler } from './handlers/transfer-request-handler'
 import { transferResponseHandler } from './handlers/transfer-response-handler'
 import { Transaction } from './models'
+import { Model } from 'objection'
+import { LegacyAuthorizationRequest, LegacyFinancialRequest } from 'types/adaptor-relay-messages'
+import { legacyAuthorizationRequestHandler } from './handlers/legacy-authorization-handler'
+import { legacyFinancialRequestHandler } from './handlers/legacy-financial-request-handler'
 const IsoParser = require('iso_8583')
 const MojaloopSdk = require('@mojaloop/sdk-standard-components')
 const Logger = require('@mojaloop/central-services-logger')
@@ -30,7 +34,6 @@ const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-reque
 const TRANSFERS_URL = process.env.TRANSFERS_URL || 'http://transfers.local'
 const AUTHORIZATIONS_URL = process.env.AUTHORIZATIONS_URL || 'http://authorizations.local'
 const ACCOUNT_LOOKUP_URL = process.env.ACCOUNT_LOOKUP_URL || 'http://account-lookup-service.local'
-const QUOTE_EXPIRATION_WINDOW = process.env.QUOTE_EXPIRATION_WINDOW || 10000
 const ILP_SECRET = process.env.ILP_SECRET || 'secret'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
@@ -49,8 +52,9 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
   },
   useNullAsDefault: true
 })
+Model.knex(knex)
 
-const queueService = new BullQueueService(['QuoteRequests', 'TransactionRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
+const queueService = new BullQueueService(['QuoteRequests', 'TransactionRequests', 'PartiesResponse', 'AuthorizationRequests', 'TransferRequests', 'TransferResponses', 'LegacyAuthorizationRequests', 'LegacyFinancialRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
 
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
@@ -63,6 +67,7 @@ const mojaClient = new MojaloopRequests({
   quotesEndpoint: QUOTE_REQUESTS_URL,
   alsEndpoint: ACCOUNT_LOOKUP_URL,
   transfersEndpoint: TRANSFERS_URL,
+  transactionRequestsEndpoint: TRANSACTION_REQUESTS_URL,
   jwsSign: false,
   tls: { outbound: { mutualTLS: { enabled: false } } },
   wso2Auth: {
@@ -114,12 +119,19 @@ const start = async (): Promise<void> => {
   workers.set('transferResponses', new Worker('TransferResponses', async (job: Job<TransferResponseQueueMessage>) => {
     await transferResponseHandler(adaptorServices, job.data.transferResponse, job.data.headers, job.data.transferId)
   }))
+  workers.set('legacyAuthorizationRequests', new Worker('LegacyAuthorizationRequests', async (job: Job<LegacyAuthorizationRequest>) => {
+    await legacyAuthorizationRequestHandler(adaptorServices, job.data)
+  }))
+  workers.set('legacyFinancialRequests', new Worker('LegacyFinancialRequests', async (job: Job<LegacyFinancialRequest>) => {
+    await legacyFinancialRequestHandler(adaptorServices, job.data)
+  }))
 
   const adaptor = await createApp(adaptorServices, { port: HTTP_PORT })
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
 
   const tcpServer = createServer(async (socket) => {
+    Logger.info('Connection received for lps1 relay.')
     const relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps1', redisConnection: { host: REDIS_HOST, port: Number(REDIS_PORT) } })
     await relay.start()
 

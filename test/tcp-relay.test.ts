@@ -89,7 +89,7 @@ describe('TCP relay', function () {
         currency: 'USD'
       }
     }
-    expect(queueService.addToQueue).toHaveBeenCalledWith('legacyAuthorizationRequests', expectedLegacyAuthorizationRequest)
+    expect(queueService.addToQueue).toHaveBeenCalledWith('LegacyAuthorizationRequests', expectedLegacyAuthorizationRequest)
   })
 
   test('maps 0110 to a legacy authorization request and puts it on the legacyFinancialRequests queue', async () => {
@@ -109,7 +109,7 @@ describe('TCP relay', function () {
         authenticationValue: json0200[103]
       }
     }
-    expect(queueService.addToQueue).toHaveBeenCalledWith('legacyFinancialRequests', expectedLegacyFinancialRequest)
+    expect(queueService.addToQueue).toHaveBeenCalledWith('LegacyFinancialRequests', expectedLegacyFinancialRequest)
   })
 
   test('encodes legacy authorization response and sends over socket', async () => {
