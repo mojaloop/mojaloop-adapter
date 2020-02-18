@@ -1,101 +1,40 @@
-import Axios from 'axios'
+import { Server } from 'hapi'
 import { createApp } from '../../src/adaptor'
 import { PartiesPutResponseFactory } from '../factories/mojaloop-messages'
-import { Server } from 'hapi'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import Knex from 'knex'
-import { KnexTransactionsService } from '../../src/services/transactions-service'
-import { ISO0100Factory } from '../factories/iso-messages'
-
-jest.mock('uuid/v4', () => () => '123')
-const LPS_KEY = 'postillion:0100'
-const LPS_ID = 'postillion'
 
 describe('Parties API', function () {
-
-  let knex: Knex
   let adaptor: Server
   const services = AdaptorServicesFactory.build()
-  const logger = console
 
   beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    const httpClient = Axios.create()
-    services.transactionsService = new KnexTransactionsService({ knex, client: httpClient, logger })
-    services.transactionsService.sendToMojaHub = jest.fn().mockResolvedValue(undefined)
     adaptor = await createApp(services)
   })
 
-  beforeEach(async () => {
-    await knex.migrate.latest()
-    // this is the iso0100 message first being sent
-    const iso0100 = ISO0100Factory.build({
-      102: '0821234567'
-    })
+  test('returns a 202 if message is added to queue successfully', async () => {
+    const partiesResponse = PartiesPutResponseFactory.build()
+    services.queueService.addToQueue = jest.fn().mockResolvedValueOnce(undefined)
+
     const response = await adaptor.inject({
-      method: 'POST',
-      url: '/iso8583/transactionRequests',
-      payload: { lpsKey: LPS_KEY, lpsId: LPS_ID, ...iso0100 }
+      method: 'PUT',
+      url: '/parties/MSISDN/0821234567',
+      payload: partiesResponse
     })
+
     expect(response.statusCode).toBe(202)
+    expect(services.queueService.addToQueue).toHaveBeenCalledWith('PartiesResponse', { partiesResponse, partyIdValue: '0821234567' })
   })
 
-  afterEach(async () => {
-    await knex.migrate.rollback()
-  })
-
-  afterAll(async () => {
-    await knex.destroy()
-  })
-
-  test('updates the fspId of the payer in the transaction request', async () => {
-    const putPartiesResponse = PartiesPutResponseFactory.build({
-      party: {
-        partyIdInfo: {
-          partyIdType: 'MSISDN',
-          partyIdentifier: '0821234567',
-          fspId: 'mojawallet'
-        }
-      }
-    })
+  test('returns a 500 if message fails to be added to the queue', async () => {
+    const partiesResponse = PartiesPutResponseFactory.build()
+    services.queueService.addToQueue = jest.fn().mockRejectedValueOnce({ message: 'failed to add to queue' })
 
     const response = await adaptor.inject({
       method: 'PUT',
-      payload: putPartiesResponse,
-      url: `/parties/MSISDN/${putPartiesResponse.party.partyIdInfo.partyIdentifier}`
+      url: '/parties/MSISDN/0821234567',
+      payload: partiesResponse
     })
 
-    expect(response.statusCode).toBe(200)
-    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
-    expect(transaction.payer.fspId).toBe('mojawallet')
-  })
-
-  test('makes a transaction request to the Moja switch', async () => {
-    const putPartiesResponse = PartiesPutResponseFactory.build({
-      party: {
-        partyIdInfo: {
-          partyIdType: 'MSISDN',
-          partyIdentifier: '0821234567',
-          fspId: 'mojawallet'
-        }
-      }
-    })
-
-    const response = await adaptor.inject({
-      method: 'PUT',
-      payload: putPartiesResponse,
-      url: `/parties/MSISDN/${putPartiesResponse.party.partyIdInfo.partyIdentifier}`
-    })
-
-    expect(response.statusCode).toBe(200)
-    const transaction = await services.transactionsService.get('123', 'transactionRequestId')
-    expect(services.transactionsService.sendToMojaHub).toHaveBeenCalledWith(transaction)
+    expect(response.statusCode).toBe(500)
   })
 })

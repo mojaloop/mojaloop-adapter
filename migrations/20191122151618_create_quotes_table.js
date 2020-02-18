@@ -2,10 +2,11 @@ exports.up = function (knex) {
   return knex.schema
     .createTable('quotes', function (table) {
       table.string('id').primary()
-      table.string('transactionRequestId')
+      table.string('transactionRequestId', 36)
+      table.foreign('transactionRequestId').references('transactionRequestId').inTable('transactions')
       table.string('transactionId')
-      table.string('amount')
-      table.string('amountCurrency', 3)
+      table.string('amount').notNullable()
+      table.string('amountCurrency', 3).notNullable()
       table.string('feeAmount').nullable()
       table.string('feeCurrency', 3).nullable()
       table.string('commission').nullable()
@@ -13,8 +14,8 @@ exports.up = function (knex) {
       table.string('transferAmount').nullable()
       table.string('transferAmountCurrency', 3).nullable()
       table.string('expiration').nullable()
-      table.string('condition')
-      table.text('ilpPacket')
+      table.string('condition').notNullable()
+      table.text('ilpPacket').notNullable()
       table.timestamps(true, true)
     })
 }

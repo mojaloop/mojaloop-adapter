@@ -8,8 +8,8 @@ export const TransferFactory = Factory.define<Transfer>('TransferFactory').attrs
     currency: Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 3)
   }),
   transactionRequestId: () => Faker.random.uuid(),
-  fulfilment: () => Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10),
-  transferId: () => Faker.random.uuid(),
+  fulfillment: () => Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 10),
+  id: () => Faker.random.uuid(),
   quoteId: () => Faker.random.uuid(),
-  transferState: TransferState.received
+  state: TransferState.received
 })
