@@ -2,8 +2,9 @@ import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { transferResponseHandler } from '../../src/handlers/transfer-response-handler'
 import { LegacyFinancialResponse } from '../../src/types/adaptor-relay-messages'
-import { TransactionState, Transaction, TransferState } from '../../src/models'
-import { Model } from 'objection'
+import { TransactionState, Transaction, TransferState, LpsMessage, LegacyMessageType } from '../../src/models'
+import { Model, transaction } from 'objection'
+import { ISO0200Factory } from '../factories/iso-messages'
 const uuid = require('uuid/v4')
 
 describe('Transfer Response Handler', () => {
@@ -56,7 +57,9 @@ describe('Transfer Response Handler', () => {
   })
 
   test('creates legacy financial response message for a COMMITTED transfer and puts it on the correct LPS Financial Response queue', async () => {
-    await Transaction.query().insertGraphAndFetch(transactionInfo)
+    const lpsFinancialRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.financialRequest, content: ISO0200Factory.build() })
+    const transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsFinancialRequest)
     const transferResponse = {
       transferId: transactionInfo.transfer.id,
       transferState: 'COMMITTED'
@@ -69,13 +72,15 @@ describe('Transfer Response Handler', () => {
     await transferResponseHandler(services, transferResponse, headers, transferResponse.transferId)
 
     const legacyFinancialResponse: LegacyFinancialResponse = {
-      lpsFinancialRequestMessageId: 'lpsMessageId' // TODO: refactor once DB schema and services are refactored.
+      lpsFinancialRequestMessageId: lpsFinancialRequest.id
     }
     expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1FinancialResponses', legacyFinancialResponse)
   })
 
   test('update Transaction State to Financial Response', async () => {
+    const lpsFinancialRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.financialRequest, content: ISO0200Factory.build() })
     let transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsFinancialRequest)
     const transferResponse = {
       transferId: transactionInfo.transfer.id,
       transferState: 'COMMITTED'

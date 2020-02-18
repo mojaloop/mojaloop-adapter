@@ -3,8 +3,9 @@ import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { AuthorizationsIDPutResponse } from '../../src/types/mojaloop'
 import { legacyFinancialRequestHandler } from '../../src/handlers/legacy-financial-request-handler'
 import { LegacyFinancialRequest } from '../../src/types/adaptor-relay-messages'
-import { TransactionState, Transaction } from '../../src/models'
+import { TransactionState, Transaction, LpsMessage, LegacyMessageType } from '../../src/models'
 import { Model } from 'objection'
+import { ISO0200Factory } from '../factories/iso-messages'
 const uuid = require('uuid/v4')
 
 describe('Legacy Financial Request Handler', () => {
@@ -75,9 +76,10 @@ describe('Legacy Financial Request Handler', () => {
   })
 
   test('sends authorization response and updates state to financialRequestSent', async () => {
+    const lpsFinancialRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.financialRequest, content: ISO0200Factory.build() })
     let transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
     const legacyFinancialRequest: LegacyFinancialRequest = {
-      lpsFinancialRequestMessageId: 'financialRequestId', // TODO: refactor once db and services are refactored
+      lpsFinancialRequestMessageId: lpsFinancialRequest.id,
       lpsId: 'lps1',
       lpsKey: 'lps1-001-abc',
       authenticationInfo: {
@@ -108,5 +110,22 @@ describe('Legacy Financial Request Handler', () => {
     expect(transaction.previousState).toEqual(TransactionState.authSent)
   })
 
-  test.todo('maps the legacy financial request message to the transaction')
+  test('maps the legacy financial request message to the transaction', async () => {
+    const lpsFinancialRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.financialRequest, content: ISO0200Factory.build() })
+    const transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    const legacyFinancialRequest: LegacyFinancialRequest = {
+      lpsFinancialRequestMessageId: lpsFinancialRequest.id,
+      lpsId: 'lps1',
+      lpsKey: 'lps1-001-abc',
+      authenticationInfo: {
+        authenticationType: 'OTP',
+        authenticationValue: '1515'
+      },
+      responseType: 'ENTERED'
+    }
+
+    await legacyFinancialRequestHandler(services, legacyFinancialRequest)
+
+    expect((await transaction.$relatedQuery<LpsMessage>('lpsMessages').where({ type: LegacyMessageType.financialRequest }).first().throwIfNotFound()).id).toBe(lpsFinancialRequest.id)
+  })
 })

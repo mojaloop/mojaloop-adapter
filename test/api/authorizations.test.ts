@@ -1,35 +1,13 @@
-import Knex from 'knex'
 import { Server } from 'hapi'
 import { createApp } from '../../src/adaptor'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 
 describe('Authorizations api', function () {
-  let knex: Knex
   let adaptor: Server
   const services = AdaptorServicesFactory.build()
 
   beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
     adaptor = await createApp(services)
-  })
-
-  beforeEach(async () => {
-    await knex.migrate.latest()
-  })
-
-  afterEach(async () => {
-    await knex.migrate.rollback()
-  })
-
-  afterAll(async () => {
-    await knex.destroy()
   })
 
   test('returns a 200', async () => {

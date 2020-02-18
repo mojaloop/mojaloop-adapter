@@ -34,9 +34,9 @@ export class BullQueueService implements QueueService {
   }
 
   async shutdown (): Promise<void> {
-    this._queues.forEach(queues => {
-      queues.close()
-    })
+    await Promise.all(Array.from(this._queues.values()).map(queue => {
+      queue.close()
+    }))
     this._queues.clear()
   }
 

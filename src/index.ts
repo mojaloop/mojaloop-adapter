@@ -1,19 +1,21 @@
 import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
+import { Worker, Job } from 'bullmq'
+import { createServer } from 'net'
 import { createApp, AdaptorServices } from './adaptor'
-import { createTcpRelay } from './tcp-relay'
+import { DefaultIso8583TcpRelay } from './tcp-relay'
 import { KnexAuthorizationsService } from './services/authorizations-service'
 import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests, Money } from '@mojaloop/sdk-standard-components'
-import { Worker, Job } from 'bullmq'
 import { quotesRequestHandler } from './handlers/quote-request-handler'
 import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
 import { partiesResponseHandler } from './handlers/parties-response-handler'
-import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, TransferRequestQueueMessage, TransferResponseQueueMessage } from 'types/queueMessages'
-import { authorizationRequestHandler } from 'handlers/authorization-request-handler'
-import { transferRequestHandler } from 'handlers/transfer-request-handler'
-import { transferResponseHandler } from 'handlers/transfer-response-handler'
+import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, TransferRequestQueueMessage, TransferResponseQueueMessage } from './types/queueMessages'
+import { authorizationRequestHandler } from './handlers/authorization-request-handler'
+import { transferRequestHandler } from './handlers/transfer-request-handler'
+import { transferResponseHandler } from './handlers/transfer-response-handler'
 import { Transaction } from './models'
+const IsoParser = require('iso_8583')
 const MojaloopSdk = require('@mojaloop/sdk-standard-components')
 const Logger = require('@mojaloop/central-services-logger')
 Logger.log = Logger.info
@@ -78,30 +80,13 @@ const adaptorServices: AdaptorServices = {
   ilpService: new MojaloopSdk.Ilp({ secret: ILP_SECRET, logger: Logger })
 }
 
-// TODO: Error handling if worker throws an error
-const QuoteRequests = new Worker('QuoteRequests', async job => {
-  await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
-})
+const encode = (message: { [k: string]: any }): Buffer => {
+  return new IsoParser(message).getBufferMessage()
+}
 
-const TransactionRequests = new Worker('TransactionRequests', async job => {
-  await transactionRequestResponseHandler(adaptorServices, job.data.transactionRequestResponse, job.data.headers, job.data.transactionRequestId)
-})
-
-const PartiesResponseWorker = new Worker('PartiesResponse', async (job: Job<PartiesResponseQueueMessage>) => {
-  await partiesResponseHandler(adaptorServices, job.data.partiesResponse, job.data.partyIdValue)
-})
-
-const AuthorizationRequestsWorker = new Worker('AuthorizationRequests', async (job: Job<AuthorizationRequestQueueMessage>) => {
-  await authorizationRequestHandler(adaptorServices, job.data.transactionRequestId, job.data.headers)
-})
-
-const TransferRequestsWorker = new Worker('TransferRequests', async (job: Job<TransferRequestQueueMessage>) => {
-  await transferRequestHandler(adaptorServices, job.data.transferRequest, job.data.headers)
-})
-
-const TransferResponseWorker = new Worker('TransferResponses', async (job: Job<TransferResponseQueueMessage>) => {
-  await transferResponseHandler(adaptorServices, job.data.transferResponse, job.data.headers, job.data.transferId)
-})
+const decode = (data: Buffer): { [k: string]: any } => {
+  return new IsoParser().getIsoJSON(data)
+}
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
@@ -109,13 +94,39 @@ const start = async (): Promise<void> => {
 
   await knex.migrate.latest()
 
-  const adaptor = await createApp(adaptorServices, { port: HTTP_PORT })
+  const workers = new Map<string, Worker>()
+  // TODO: Error handling if worker throws an error
+  workers.set('quoteRequests', new Worker('QuoteRequests', async job => {
+    await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
+  }))
+  workers.set('transactionRequests', new Worker('TransactionRequests', async job => {
+    await transactionRequestResponseHandler(adaptorServices, job.data.transactionRequestResponse, job.data.headers, job.data.transactionRequestId)
+  }))
+  workers.set('partiesResponses', new Worker('PartiesResponse', async (job: Job<PartiesResponseQueueMessage>) => {
+    await partiesResponseHandler(adaptorServices, job.data.partiesResponse, job.data.partyIdValue)
+  }))
+  workers.set('authorizationRequests', new Worker('AuthorizationRequests', async (job: Job<AuthorizationRequestQueueMessage>) => {
+    await authorizationRequestHandler(adaptorServices, job.data.transactionRequestId, job.data.headers)
+  }))
+  workers.set('transferRequests', new Worker('TransferRequests', async (job: Job<TransferRequestQueueMessage>) => {
+    await transferRequestHandler(adaptorServices, job.data.transferRequest, job.data.headers)
+  }))
+  workers.set('transferResponses', new Worker('TransferResponses', async (job: Job<TransferResponseQueueMessage>) => {
+    await transferResponseHandler(adaptorServices, job.data.transferResponse, job.data.headers, job.data.transferId)
+  }))
 
+  const adaptor = await createApp(adaptorServices, { port: HTTP_PORT })
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
 
-  const relay = createTcpRelay('postillion', adaptor)
-  relay.listen(TCP_PORT, () => { adaptor.app.logger.info(`Postillion TCP Relay server listening on port:${TCP_PORT}`) })
+  const tcpServer = createServer(async (socket) => {
+    const relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps1', redisConnection: { host: REDIS_HOST, port: Number(REDIS_PORT) } })
+    await relay.start()
+
+    socket.on('close', async () => {
+      await relay.shutdown()
+    })
+  }).listen(TCP_PORT, () => { Logger.info('lps1 relay listening on port: ' + TCP_PORT) })
 
   process.on(
     'SIGINT',
@@ -131,8 +142,10 @@ const start = async (): Promise<void> => {
         shuttingDown = true
 
         // Graceful shutdown
+        await new Promise(resolve => { tcpServer.close(() => resolve()) })
         await adaptor.stop()
-        relay.close()
+        await Promise.all(Array.from(workers.values()).map(worker => worker.close()))
+        await queueService.shutdown()
         knex.destroy()
         console.log('completed graceful shutdown.')
       } catch (err) {

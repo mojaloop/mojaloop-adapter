@@ -1,16 +1,16 @@
 import { AdaptorServices } from '../adaptor'
 import { TransfersIDPutResponse } from '../types/mojaloop'
 import { LegacyFinancialResponse } from '../types/adaptor-relay-messages'
-import { TransactionState, Transaction, TransferState, Transfers } from '../models'
+import { TransactionState, Transaction, TransferState, Transfers, LpsMessage, LegacyMessageType } from '../models'
 
 export async function transferResponseHandler ({ queueService, logger }: AdaptorServices, transferResponse: TransfersIDPutResponse, headers: { [k: string]: any }, transferId: string): Promise<void> {
   try {
     if (transferResponse.transferState === TransferState.committed) {
       const transfer = await Transfers.query().where({ id: transferId }).first().throwIfNotFound()
-      // TODO: refactor once transfer service is deprecated
       const transaction = await Transaction.query().where({ transactionRequestId: transfer.transactionRequestId }).first().throwIfNotFound()
+      const legacyFinancialRequest = await transaction.$relatedQuery<LpsMessage>('lpsMessages').where({ type: LegacyMessageType.financialRequest }).first().throwIfNotFound()
       const legacyFinancialResponse: LegacyFinancialResponse = {
-        lpsFinancialRequestMessageId: 'lpsMessageId' // TODO: pull from transaction once DB and services are refactored.
+        lpsFinancialRequestMessageId: legacyFinancialRequest.id
       }
 
       await queueService.addToQueue(`${transaction.lpsId}FinancialResponses`, legacyFinancialResponse)
