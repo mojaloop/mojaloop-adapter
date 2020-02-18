@@ -3,7 +3,6 @@ import * as TransactionRequestsController from './controllers/transaction-reques
 import * as QuotesController from './controllers/quotes-controller'
 import * as PartiesController from './controllers/parties-controller'
 import swagger from './interface/swagger.json'
-import { IsoMessagingClient } from './services/iso-messaging-client'
 import { AuthorizationsService } from './services/authorizations-service'
 import * as AuthorizationController from './controllers/authorizations-controller'
 import * as TransfersController from './controllers/transfers-controller'
@@ -45,7 +44,6 @@ declare module 'hapi' {
     authorizationsService: AuthorizationsService;
     mojaClient: MojaloopRequests;
     logger: Logger;
-    isoMessagingClients: Map<string, IsoMessagingClient>;
     queueService: QueueService;
     calculateAdaptorFees: (transaction: Transaction) => Promise<Money>;
     ilpService: IlpService;
@@ -59,7 +57,6 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
   // register services
   adaptor.app.authorizationsService = services.authorizationsService
   adaptor.app.mojaClient = services.mojaClient
-  adaptor.app.isoMessagingClients = new Map()
   adaptor.app.queueService = services.queueService
   adaptor.app.logger = services.logger
 

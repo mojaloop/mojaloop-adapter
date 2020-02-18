@@ -48,6 +48,7 @@ declare module '@mojaloop/sdk-standard-components' {
     alsEndpoint?: string;
     quotesEndpoint?: string;
     transfersEndpoint?: string;
+    transactionRequestsEndpoint?: string;
     wso2Auth?: any;
   }
 

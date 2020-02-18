@@ -70,10 +70,10 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
         const lpsMessage = await LpsMessage.query().insertAndFetch({ lpsId: this._lpsId, lpsKey, type: messageType, content: legacyMessage })
         switch (messageType) {
           case LegacyMessageType.authorizationRequest:
-            this._queueService.addToQueue('legacyAuthorizationRequests', await this.mapFromAuthorizationRequest(lpsMessage.id, legacyMessage))
+            this._queueService.addToQueue('LegacyAuthorizationRequests', await this.mapFromAuthorizationRequest(lpsMessage.id, legacyMessage))
             break
           case LegacyMessageType.financialRequest:
-            this._queueService.addToQueue('legacyFinancialRequests', await this.mapFromFinancialRequest(lpsMessage.id, legacyMessage))
+            this._queueService.addToQueue('LegacyFinancialRequests', await this.mapFromFinancialRequest(lpsMessage.id, legacyMessage))
             break
           default:
             throw new Error(this._lpsId + 'relay: Cannot handle legacy message with mti: ' + messageType)
