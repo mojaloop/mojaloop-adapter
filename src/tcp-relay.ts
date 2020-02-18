@@ -184,6 +184,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   }
 
   async mapFromAuthorizationRequest (lpsMessageId: string, legacyMessage: LegacyMessage): Promise<LegacyAuthorizationRequest> {
+    this._logger.debug(`${this._lpsId} relay: Mapping from authorization request`)
     // assuming local time
     const expirationDate = new Date()
     expirationDate.setMonth(Number(legacyMessage[7].slice(0, 2)) - 1, Number(legacyMessage[7].slice(2, 4)))
@@ -213,6 +214,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   }
 
   async mapToAuthorizationResponse (authorizationResponse: LegacyAuthorizationResponse): Promise<LegacyMessage> {
+    this._logger.debug(`${this._lpsId} relay: Mapping to authorization response`)
     const authorizationRequest = await LpsMessage.query().where({ id: authorizationResponse.lpsAuthorizationRequestMessageId }).first().throwIfNotFound()
 
     return {
@@ -225,6 +227,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   }
 
   async mapFromFinancialRequest (lpsMessageId: string, legacyMessage: LegacyMessage): Promise<LegacyFinancialRequest> {
+    this._logger.debug(`${this._lpsId} relay: Mapping from financial request`)
     return {
       lpsId: this._lpsId,
       lpsKey: this._lpsId + '-' + legacyMessage[41] + '-' + legacyMessage[42],
@@ -238,6 +241,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   }
 
   async mapToFinancialResponse (financialResponse: LegacyFinancialResponse): Promise<LegacyMessage> {
+    this._logger.debug(`${this._lpsId} relay: Mapping to financial request`)
     const financialRequest = await LpsMessage.query().where({ id: financialResponse.lpsFinancialRequestMessageId }).first().throwIfNotFound()
 
     return {
