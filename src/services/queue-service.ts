@@ -1,25 +1,17 @@
-import { Queue } from 'bullmq'
+import { Queue, ConnectionOptions } from 'bullmq'
 
 export interface QueueService {
     addToQueue(name: string, payload: { [k: string]: any }): Promise<void>;
     shutdown (): Promise<void>;
 }
 
-export type RedisConnection = {
-  host: string;
-  port: number;
-}
-
 export class BullQueueService implements QueueService {
   private _queues: Map<string, Queue> = new Map()
 
-  constructor (queues: string[], options?: RedisConnection) {
+  constructor (queues: string[], redisConnection?: ConnectionOptions) {
     queues.forEach(name => {
       this._queues.set(name, new Queue(name, {
-        connection: {
-          host: options ? options.host : 'localhost',
-          port: options ? options.port : 6379
-        }
+        connection: redisConnection ?? { host: 'localhost', port: 6379 }
       }))
     })
   }
@@ -34,9 +26,7 @@ export class BullQueueService implements QueueService {
   }
 
   async shutdown (): Promise<void> {
-    await Promise.all(Array.from(this._queues.values()).map(queue => {
-      queue.close()
-    }))
+    await Promise.all(Array.from(this._queues.values()).map(queue => queue.close()))
     this._queues.clear()
   }
 
