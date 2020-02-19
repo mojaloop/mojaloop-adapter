@@ -42,3 +42,10 @@ export type LegacyFinancialRequest = {
 export type LegacyFinancialResponse = {
   lpsFinancialRequestMessageId: string;
 }
+
+export type LegacyReversalRequest = {
+  lpsId: string;
+  lpsKey: string;
+  lpsFinancialRequestMessageId: string;
+  lpsReversalRequestMessageId: string;
+}

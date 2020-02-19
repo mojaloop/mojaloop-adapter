@@ -4,7 +4,9 @@ export enum LegacyMessageType {
   authorizationRequest = 'authorizationRequest',
   authorizationResponse = 'authorizationRespone',
   financialRequest = 'financialRequest',
-  financialResponse = 'financialResponse'
+  financialResponse = 'financialResponse',
+  reversalRequest = 'reversalRequest',
+  reversalResponse = 'reversalResponse'
 }
 
 export class LpsMessage extends Model {
