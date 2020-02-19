@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import axios, { AxiosInstance } from 'axios'
 import { Worker, Job } from 'bullmq'
-import { createServer } from 'net'
+import { createServer, Socket } from 'net'
 import { createApp, AdaptorServices } from './adaptor'
 import { DefaultIso8583TcpRelay } from './tcp-relay'
 import { KnexAuthorizationsService } from './services/authorizations-service'
@@ -129,9 +129,10 @@ const start = async (): Promise<void> => {
   const adaptor = await createApp(adaptorServices, { port: HTTP_PORT })
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
-
+  const sockets: Socket[] = []
   const tcpServer = createServer(async (socket) => {
     Logger.info('Connection received for lps1 relay.')
+    sockets.push(socket)
     const relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps1', redisConnection: { host: REDIS_HOST, port: Number(REDIS_PORT) } })
     await relay.start()
 
@@ -154,7 +155,8 @@ const start = async (): Promise<void> => {
         shuttingDown = true
 
         // Graceful shutdown
-        await new Promise(resolve => { tcpServer.close(() => resolve()) })
+        tcpServer.close()
+        sockets.forEach(sock => { sock.destroy() })
         await adaptor.stop()
         await Promise.all(Array.from(workers.values()).map(worker => worker.close()))
         await queueService.shutdown()
