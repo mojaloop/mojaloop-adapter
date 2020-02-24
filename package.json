@@ -24,7 +24,7 @@
   "dependencies": {
     "@mojaloop/central-services-logger": "^8.6.0",
     "@mojaloop/ml-number": "^8.2.0",
-    "@mojaloop/sdk-standard-components": "^8.6.9",
+    "@mojaloop/sdk-standard-components": "^9.1.0",
     "@types/hapi": "^18.0.2",
     "@types/knex": "^0.16.1",
     "axios": "^0.19.2",

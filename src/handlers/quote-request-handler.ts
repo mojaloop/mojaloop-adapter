@@ -46,8 +46,7 @@ export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, 
     await transaction.$query().update({ state: TransactionState.quoteResponded, previousState: transaction.state })
 
   } catch (error) {
-    console.log('error', error.message)
-    logger.error(`Quote Request Handler: Failed to process quote request: ${quoteRequest.quoteId} from ${headers['fspiop-source']}`)
+    logger.error(`Quote Request Handler: Failed to process quote request: ${quoteRequest.quoteId} from ${headers['fspiop-source']}. ${error.message}`)
     const errorInformation: ErrorInformation = {
       errorCode: '2001',
       errorDescription: `${error.message}`

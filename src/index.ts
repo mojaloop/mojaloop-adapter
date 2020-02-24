@@ -10,7 +10,7 @@ import { MojaloopRequests, Money } from '@mojaloop/sdk-standard-components'
 import { quotesRequestHandler } from './handlers/quote-request-handler'
 import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
 import { partiesResponseHandler } from './handlers/parties-response-handler'
-import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, TransferRequestQueueMessage, TransferResponseQueueMessage } from './types/queueMessages'
+import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, TransferRequestQueueMessage, TransferResponseQueueMessage, TransactionRequestResponseQueueMessage } from './types/queueMessages'
 import { authorizationRequestHandler } from './handlers/authorization-request-handler'
 import { transferRequestHandler } from './handlers/transfer-request-handler'
 import { transferResponseHandler } from './handlers/transfer-response-handler'
@@ -54,8 +54,18 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 })
 Model.knex(knex)
 
-const queueService = new BullQueueService(['QuoteRequests', 'TransactionRequests', 'PartiesResponse', 'AuthorizationRequests', 'TransferRequests', 'TransferResponses', 'LegacyAuthorizationRequests', 'LegacyFinancialRequests'], { host: REDIS_HOST, port: Number(REDIS_PORT) })
-
+const redisConnection = { host: REDIS_HOST, port: Number(REDIS_PORT) }
+const queueService = new BullQueueService([
+  'QuoteRequests',
+  'TransactionRequestResponses',
+  'PartiesResponse',
+  'AuthorizationRequests',
+  'TransferRequests',
+  'TransferResponses',
+  'LegacyAuthorizationRequests',
+  'LegacyFinancialRequests',
+  'lps1AuthorizationResponses',
+  'lps1FinancialResponses'], redisConnection)
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
   timeout: 3000
@@ -95,7 +105,9 @@ const decode = (data: Buffer): { [k: string]: any } => {
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
-  console.log('LOG_LEVEL: ', process.env.LOG_LEVEL)
+  console.log('LOG_LEVEL:', process.env.LOG_LEVEL)
+  console.log('REDIS_HOST:', REDIS_HOST, 'REDIS_PORT:', REDIS_PORT)
+  console.log('TRANSACTION_REQUESTS_URL:', TRANSACTION_REQUESTS_URL)
 
   await knex.migrate.latest()
 
@@ -103,28 +115,28 @@ const start = async (): Promise<void> => {
   // TODO: Error handling if worker throws an error
   workers.set('quoteRequests', new Worker('QuoteRequests', async job => {
     await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
-  }))
-  workers.set('transactionRequests', new Worker('TransactionRequests', async job => {
+  }, { connection: redisConnection }))
+  workers.set('transactionRequests', new Worker('TransactionRequestResponses', async (job: Job<TransactionRequestResponseQueueMessage>) => {
     await transactionRequestResponseHandler(adaptorServices, job.data.transactionRequestResponse, job.data.headers, job.data.transactionRequestId)
-  }))
+  }, { connection: redisConnection }))
   workers.set('partiesResponses', new Worker('PartiesResponse', async (job: Job<PartiesResponseQueueMessage>) => {
     await partiesResponseHandler(adaptorServices, job.data.partiesResponse, job.data.partyIdValue)
-  }))
+  }, { connection: redisConnection }))
   workers.set('authorizationRequests', new Worker('AuthorizationRequests', async (job: Job<AuthorizationRequestQueueMessage>) => {
     await authorizationRequestHandler(adaptorServices, job.data.transactionRequestId, job.data.headers)
-  }))
+  }, { connection: redisConnection }))
   workers.set('transferRequests', new Worker('TransferRequests', async (job: Job<TransferRequestQueueMessage>) => {
     await transferRequestHandler(adaptorServices, job.data.transferRequest, job.data.headers)
-  }))
+  }, { connection: redisConnection }))
   workers.set('transferResponses', new Worker('TransferResponses', async (job: Job<TransferResponseQueueMessage>) => {
     await transferResponseHandler(adaptorServices, job.data.transferResponse, job.data.headers, job.data.transferId)
-  }))
+  }, { connection: redisConnection }))
   workers.set('legacyAuthorizationRequests', new Worker('LegacyAuthorizationRequests', async (job: Job<LegacyAuthorizationRequest>) => {
     await legacyAuthorizationRequestHandler(adaptorServices, job.data)
-  }))
+  }, { connection: redisConnection }))
   workers.set('legacyFinancialRequests', new Worker('LegacyFinancialRequests', async (job: Job<LegacyFinancialRequest>) => {
     await legacyFinancialRequestHandler(adaptorServices, job.data)
-  }))
+  }, { connection: redisConnection }))
 
   const adaptor = await createApp(adaptorServices, { port: HTTP_PORT })
   await adaptor.start()
@@ -133,7 +145,7 @@ const start = async (): Promise<void> => {
   const tcpServer = createServer(async (socket) => {
     Logger.info('Connection received for lps1 relay.')
     sockets.push(socket)
-    const relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps1', redisConnection: { host: REDIS_HOST, port: Number(REDIS_PORT) } })
+    const relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps1', redisConnection })
     await relay.start()
 
     socket.on('close', async () => {
