@@ -52,7 +52,7 @@ declare module '@mojaloop/sdk-standard-components' {
     wso2Auth?: any;
   }
 
-  class MojaloopRequests {
+  class MojaloopRequests { // eslint-disable-line
     constructor(config: Config)
 
     getParties(idType: string, idValue: string, idSubValue: string | null): Promise<object>

@@ -12,9 +12,13 @@ export async function legacyFinancialRequestHandler ({ authorizationsService, lo
       throw new Error('Missing authenticationInfo.')
     }
 
+    if (!transaction.payer) {
+      throw new Error('Transaction does not have payer')
+    }
+
     // TODO: add authorizations to mojaloop sdk
     const headers = {
-      'fspiop-destination': transaction.payer!.fspId!,
+      'fspiop-destination': transaction.payer.fspId,
       'fspiop-source': process.env.ADAPTOR_FSP_ID || 'adaptor',
       date: new Date().toUTCString(),
       'content-type': 'application/vnd.interoperability.authorizations+json;version=1.0'
