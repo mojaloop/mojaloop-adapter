@@ -68,6 +68,7 @@ describe('Quote Requests Handler', function () {
   test('creates quote for transaction', async () => {
     const transaction = await Transaction.query().insertGraph(transactionInfo)
     const quoteRequest = QuotesPostRequestFactory.build({
+      transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId,
       amount: {
         amount: '100',
@@ -89,6 +90,7 @@ describe('Quote Requests Handler', function () {
     services.calculateAdaptorFees = jest.fn().mockResolvedValue({ amount: '2', currency: 'USD' })
     const transaction = await Transaction.query().insertGraph(transactionInfo)
     const quoteRequest = QuotesPostRequestFactory.build({
+      transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId,
       amount: {
         amount: '100',
@@ -115,6 +117,7 @@ describe('Quote Requests Handler', function () {
         }]
       })
     const quoteRequest = QuotesPostRequestFactory.build({
+      transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId,
       amount: {
         amount: '100',
@@ -138,6 +141,7 @@ describe('Quote Requests Handler', function () {
     })
     await Transaction.query().insertGraph(transactionInfo)
     const quoteRequest = QuotesPostRequestFactory.build({
+      transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId,
       amount: {
         amount: '100',
@@ -156,6 +160,7 @@ describe('Quote Requests Handler', function () {
   test('sends quote response', async () => {
     await Transaction.query().insertGraph(transactionInfo)
     const quoteRequest = QuotesPostRequestFactory.build({
+      transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId
     })
 
@@ -166,6 +171,7 @@ describe('Quote Requests Handler', function () {
   test('updates transaction state to quoteResponded', async () => {
     let transaction = await Transaction.query().insertGraph(transactionInfo)
     const quoteRequest = QuotesPostRequestFactory.build({
+      transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId
     })
 

@@ -7,7 +7,10 @@ const QUOTE_EXPIRATION_WINDOW = process.env.QUOTE_EXPIRATION_WINDOW || 10
 
 export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, ilpService, logger }: AdaptorServices, quoteRequest: QuotesPostRequest, headers: Request['headers']): Promise<void> {
   try {
-    const transaction = await Transaction.query().where('transactionId', quoteRequest.transactionId).withGraphFetched('fees').first().throwIfNotFound()
+    if (!quoteRequest.transactionRequestId) {
+      throw new Error('No transactionRequestId given for quoteRequest.')
+    }
+    const transaction = await Transaction.query().where('transactionRequestId', quoteRequest.transactionRequestId).withGraphFetched('fees').first().throwIfNotFound()
     const adaptorFees = await calculateAdaptorFees(transaction)
     await transaction.$relatedQuery<TransactionFee>('fees').insert({ type: 'adaptor', ...adaptorFees })
 
