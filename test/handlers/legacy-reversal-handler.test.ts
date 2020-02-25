@@ -1,8 +1,5 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { AuthorizationsIDPutResponse } from '../../src/types/mojaloop'
-import { legacyFinancialRequestHandler } from '../../src/handlers/legacy-financial-request-handler'
-import { LegacyFinancialRequest } from '../../src/types/adaptor-relay-messages'
 import { TransactionState, Transaction, LpsMessage, LegacyMessageType } from '../../src/models'
 import { Model } from 'objection'
 import { ISO0100Factory } from '../factories/iso-messages'

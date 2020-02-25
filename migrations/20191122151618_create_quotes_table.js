@@ -14,8 +14,8 @@ exports.up = function (knex) {
       table.string('transferAmount').nullable()
       table.string('transferAmountCurrency', 3).nullable()
       table.string('expiration').nullable()
-      table.string('condition').notNullable()
-      table.text('ilpPacket').notNullable()
+      table.string('condition').nullable()
+      table.text('ilpPacket').nullable()
       table.timestamps(true, true)
     })
 }
