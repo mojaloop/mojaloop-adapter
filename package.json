@@ -24,11 +24,10 @@
   "dependencies": {
     "@mojaloop/central-services-logger": "^8.6.0",
     "@mojaloop/ml-number": "^8.2.0",
-    "@mojaloop/sdk-standard-components": "^8.6.9",
+    "@mojaloop/sdk-standard-components": "^9.1.0",
     "@types/hapi": "^18.0.2",
     "@types/knex": "^0.16.1",
     "axios": "^0.19.2",
-    "bcd": "^1.0.0",
     "bullmq": "^1.6.7",
     "eslint": "^6.8.0",
     "hapi": "^18.1.0",
@@ -36,8 +35,6 @@
     "iso_8583": "^2.6.5",
     "knex": "^0.19.5",
     "mysql": "^2.18.1",
-    "node-cache": "^4.2.1",
-    "node-fetch": "^2.6.0",
     "objection": "^2.1.2",
     "sqlite3": "^4.1.1"
   },

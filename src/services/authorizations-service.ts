@@ -4,7 +4,7 @@ import { AuthorizationsIDPutResponse, ErrorInformation } from '../types/mojaloop
 import { Logger } from '../adaptor'
 
 export interface AuthorizationsService {
-  sendAuthorizationsResponse (transactionRequestId: string, response: AuthorizationsIDPutResponse, headers: { [k: string]: string }): Promise<void>;
+  sendAuthorizationsResponse (transactionRequestId: string, response: AuthorizationsIDPutResponse, headers: { [k: string]: string | undefined }): Promise<void>;
   sendAuthorizationsErrorResponse (transactionRequestId: string, error: ErrorInformation, headers: { [k: string]: string }): Promise<void>;
 }
 
@@ -29,7 +29,7 @@ export class KnexAuthorizationsService implements AuthorizationsService {
     await this._client.put(`/authorizations/${transactionRequestId}`, request, { headers })
   }
 
-  async sendAuthorizationsErrorResponse (transactionRequestId: string, error: ErrorInformation, headers: { [k: string]: string }): Promise<void> {
+  async sendAuthorizationsErrorResponse (transactionRequestId: string, error: ErrorInformation, headers: { [k: string]: string | undefined }): Promise<void> {
     this._logger.debug('Authorizations Service: sending Authorizations Error Response: ' + transactionRequestId)
     await this._client.put(`/authorizations/${transactionRequestId}/error`, { errorInformation: error }, { headers })
   }
