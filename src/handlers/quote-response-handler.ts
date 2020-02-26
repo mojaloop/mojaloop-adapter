@@ -37,6 +37,6 @@ export async function quoteResponseHandler ({ mojaClient, ilpService, logger }: 
     await mojaClient.postTransfers(transfersPostRequest, headers['fspiop-source'])
 
   } catch (error) {
-    logger.error(`Parties response handler: Could not process party response. ${error.message}`)
+    logger.error(`Quote Response Handler: Could not process party response. ${error.message}`)
   }
 }

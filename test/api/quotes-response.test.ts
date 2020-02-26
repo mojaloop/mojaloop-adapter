@@ -3,7 +3,7 @@ import { createApp } from '../../src/adaptor'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesIDPutResponse } from '../../src/types/mojaloop'
 
-describe('Transaction Requests API', function () {
+describe('Quotes Response API', function () {
 
   let adaptor: Server
   const services = AdaptorServicesFactory.build()

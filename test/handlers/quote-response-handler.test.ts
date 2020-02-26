@@ -6,7 +6,7 @@ import { Quote, Transfers, TransferState } from '../../src/models'
 import { Model } from 'objection'
 const uuid = require('uuid/v4')
 
-describe('Legacy Reversal Handler', () => {
+describe('Quote Response Handler', () => {
   let knex: Knex
   const services = AdaptorServicesFactory.build()
 
