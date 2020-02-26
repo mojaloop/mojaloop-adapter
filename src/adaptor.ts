@@ -94,7 +94,7 @@ export async function createApp (services: AdaptorServices, config?: AdaptorConf
         quotes: {
           post: QuotesController.create,
           '{ID}': {
-            put: () => 'dummy handler',
+            put: QuotesController.update,
             error: {
               put: QuoteErrorsController.create
             }
