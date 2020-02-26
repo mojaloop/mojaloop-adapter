@@ -29,6 +29,7 @@ export class Transaction extends Model {
   lpsId!: string
   lpsKey!: string
   transactionId?: string
+  originalTransactionId?: string
   amount!: string
   currency!: string
   scenario!: string

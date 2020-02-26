@@ -9,8 +9,9 @@ import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests, Money } from '@mojaloop/sdk-standard-components'
 import { quotesRequestHandler } from './handlers/quote-request-handler'
 import { transactionRequestResponseHandler } from './handlers/transaction-request-response-handler'
+import { quoteResponseHandler } from './handlers/quote-response-handler'
 import { partiesResponseHandler } from './handlers/parties-response-handler'
-import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, TransferRequestQueueMessage, TransferResponseQueueMessage, TransactionRequestResponseQueueMessage } from './types/queueMessages'
+import { PartiesResponseQueueMessage, AuthorizationRequestQueueMessage, TransferRequestQueueMessage, TransferResponseQueueMessage, TransactionRequestResponseQueueMessage, QuoteResponseQueueMessage } from './types/queueMessages'
 import { authorizationRequestHandler } from './handlers/authorization-request-handler'
 import { transferRequestHandler } from './handlers/transfer-request-handler'
 import { transferResponseHandler } from './handlers/transfer-response-handler'
@@ -57,6 +58,7 @@ Model.knex(knex)
 const redisConnection = { host: REDIS_HOST, port: Number(REDIS_PORT) }
 const queueService = new BullQueueService([
   'QuoteRequests',
+  'QuoteResponses',
   'TransactionRequestResponses',
   'PartiesResponse',
   'AuthorizationRequests',
@@ -115,6 +117,9 @@ const start = async (): Promise<void> => {
   // TODO: Error handling if worker throws an error
   workers.set('quoteRequests', new Worker('QuoteRequests', async job => {
     await quotesRequestHandler(adaptorServices, job.data.payload, job.data.headers)
+  }, { connection: redisConnection }))
+  workers.set('quoteResponses', new Worker('QuoteResponses', async (job: Job<QuoteResponseQueueMessage>) => {
+    await quoteResponseHandler(adaptorServices, job.data.quoteResponse, job.data.quoteId, job.data.headers)
   }, { connection: redisConnection }))
   workers.set('transactionRequests', new Worker('TransactionRequestResponses', async (job: Job<TransactionRequestResponseQueueMessage>) => {
     await transactionRequestResponseHandler(adaptorServices, job.data.transactionRequestResponse, job.data.headers, job.data.transactionRequestId)
