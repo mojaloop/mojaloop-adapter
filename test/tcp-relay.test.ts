@@ -1,8 +1,9 @@
 import Knex from 'knex'
-import { Model } from 'objection'
+import { Model, raw } from 'objection'
 import { Socket } from 'net'
 import { DefaultIso8583TcpRelay, LegacyMessage } from '../src/tcp-relay'
-import { iso0100BinaryMessage, iso0200BinaryMessage } from './factories/iso-messages'
+import { iso0100BinaryMessage, iso0200BinaryMessage, ISO0100Factory, ISO0420Factory } from './factories/iso-messages'
+import { TransactionInfoFactory } from './factories/transaction-info'
 import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse } from '../src/types/adaptor-relay-messages'
 import { LpsMessage, LegacyMessageType } from '../src/models'
 
@@ -145,5 +146,83 @@ describe('TCP relay', function () {
     await relay.handleFinancialResponse(legacyFinancialResponse)
 
     expect(client.write).toHaveBeenCalledWith(encode({ ...json0200, 0: '0210', 39: '00' }))
+  })
+
+  test('matches a legacy reversal advice to a previous legacy request that has no acquirer id', async () => {
+    const iso0100 = ISO0100Factory.build({
+      7: '0130083636',
+      11: '000008',
+      12: '103636',
+      28: 'D00000100'
+    })
+    const iso0420 = ISO0420Factory.build({
+      28: 'C00000100',
+      90: '010000000801300836360000000000000000000000'
+    })
+
+    const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${iso0100[41]}-${iso0100[42]}`, content: iso0100 })
+    const reversalMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.reversalRequest, lpsId: 'lps1', lpsKey: `lps1-${iso0420[41]}-${iso0420[42]}`, content: iso0420 })
+
+    const legacyReversal = await relay.mapFromReversalAdvice(reversalMessage.id, iso0420)
+
+    expect(legacyReversal).toEqual({
+      lpsId: 'lps1',
+      lpsKey: `lps1-${iso0420[41]}-${iso0420[42]}`,
+      lpsFinancialRequestMessageId: lpsMessage.id,
+      lpsReversalRequestMessageId: reversalMessage.id
+    })
+  })
+
+  test('matches a legacy reversal advice to a previous legacy request that has an acquirer id', async () => {
+    const iso0100 = ISO0100Factory.build({
+      7: '0130083636',
+      11: '000008',
+      12: '103636',
+      28: 'D00000100',
+      32: '708400003'
+    })
+    const iso0420 = ISO0420Factory.build({
+      28: 'C00000100',
+      90: '010000000801300836360070840000300000000000'
+    })
+
+    const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${iso0100[41]}-${iso0100[42]}`, content: iso0100 })
+    const reversalMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.reversalRequest, lpsId: 'lps1', lpsKey: `lps1-${iso0420[41]}-${iso0420[42]}`, content: iso0420 })
+
+    const legacyReversal = await relay.mapFromReversalAdvice(reversalMessage.id, iso0420)
+
+    expect(legacyReversal).toEqual({
+      lpsId: 'lps1',
+      lpsKey: `lps1-${iso0420[41]}-${iso0420[42]}`,
+      lpsFinancialRequestMessageId: lpsMessage.id,
+      lpsReversalRequestMessageId: reversalMessage.id
+    })
+  })
+
+  test('acknowledges a 0420 message if it successfully maps it to a legacy reversal request and puts it on the LegacyReversalRequests queue', async () => {
+    client.write = jest.fn()
+    const iso0100 = ISO0100Factory.build({
+      7: '0130083636',
+      11: '000008',
+      12: '103636',
+      28: 'D00000100'
+    })
+    const iso0420 = ISO0420Factory.build({
+      28: 'C00000100',
+      90: '010000000801300836360000000000000000000000'
+    })
+    const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${iso0100[41]}-${iso0100[42]}`, content: iso0100 })
+
+    client.emit('data', encode(iso0420))
+    await new Promise(resolve => { setTimeout(() => resolve(), 100) })
+
+    const reversalMessage = await LpsMessage.query().where({ type: LegacyMessageType.reversalRequest }).first().throwIfNotFound()
+    expect(queueService.addToQueue).toHaveBeenCalledWith('LegacyReversalRequests', {
+      lpsId: 'lps1',
+      lpsKey: `lps1-${iso0420[41]}-${iso0420[42]}`,
+      lpsFinancialRequestMessageId: lpsMessage.id,
+      lpsReversalRequestMessageId: reversalMessage.id
+    })
+    expect(client.write).toHaveBeenCalledWith(encode({ ...iso0420, 0: '0430', 39: '00' }))
   })
 })

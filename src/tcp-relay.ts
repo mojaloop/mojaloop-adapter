@@ -1,8 +1,9 @@
 import { Server, Socket } from 'net'
 import { Worker, Job, ConnectionOptions } from 'bullmq'
+import { raw } from 'objection'
 import { QueueService } from './services/queue-service'
 import { Logger } from './adaptor'
-import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancialRequest, LegacyFinancialResponse } from './types/adaptor-relay-messages'
+import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancialRequest, LegacyFinancialResponse, LegacyReversalRequest } from './types/adaptor-relay-messages'
 import { LpsMessage, LegacyMessageType } from './models'
 import { Money } from '@mojaloop/sdk-standard-components'
 import { pad } from './utils/util'
@@ -20,6 +21,7 @@ export interface TcpRelay {
   mapToAuthorizationResponse: (authorizationResponse: LegacyAuthorizationResponse) => Promise<LegacyMessage>;
   mapFromFinancialRequest: (lpsMessageId: string, legacyMessage: LegacyMessage) => Promise<LegacyFinancialRequest>;
   mapToFinancialResponse: (financialResponse: LegacyFinancialResponse) => Promise<LegacyMessage>;
+  mapFromReversalAdvice: (lpsMessageId: string, legacyMessage: LegacyMessage) => Promise<LegacyReversalRequest>;
 }
 
 export type TcpRelayServices = {
@@ -74,6 +76,10 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
             break
           case LegacyMessageType.financialRequest:
             this._queueService.addToQueue('LegacyFinancialRequests', await this.mapFromFinancialRequest(lpsMessage.id, legacyMessage))
+            break
+          case LegacyMessageType.reversalRequest:
+            this._queueService.addToQueue('LegacyReversalRequests', await this.mapFromReversalAdvice(lpsMessage.id, legacyMessage))
+            socket.write(encode({ ...legacyMessage, 0: '0430', 39: '00' }))
             break
           default:
             throw new Error(this._lpsId + 'relay: Cannot handle legacy message with mti: ' + messageType)
@@ -149,6 +155,8 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
         return LegacyMessageType.authorizationRequest
       case '0200':
         return LegacyMessageType.financialRequest
+      case '0420':
+        return LegacyMessageType.reversalRequest
       default:
         throw new Error(this._lpsId + 'relay: Cannot handle legacy message with mti: ' + mti)
     }
@@ -248,6 +256,33 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
       ...financialRequest.content,
       0: '0210',
       39: '00'
+    }
+  }
+
+  async mapFromReversalAdvice (lpsMessageId: string, legacyMessage: LegacyMessage): Promise<LegacyReversalRequest> {
+    this._logger.debug(`${this._lpsId} relay: Mapping from reversal advice`)
+
+    const originalDataElements = String(legacyMessage[90])
+    const mti = originalDataElements.slice(0, 4)
+    const stan = originalDataElements.slice(4, 10)
+    const date = originalDataElements.slice(10, 20)
+    const acquiringId = originalDataElements.slice(20, 31).replace(/^0+/g, '')
+
+    this._logger.debug(JSON.stringify({ originalDataElements, stan, mti, date, acquiringId }))
+
+    const query = LpsMessage.query()
+      .where(raw(`JSON_EXTRACT(content, '$."0"') = "${mti}"`))
+      .where(raw(`JSON_EXTRACT(content, '$."7"') = "${date}"`))
+      .where(raw(`JSON_EXTRACT(content, '$."11"') = "${stan}"`))
+    if (acquiringId !== '') query.where(raw(`JSON_EXTRACT(content, '$."32"') = "${acquiringId}"`))
+
+    const prevLpsMessageId = await query.first().throwIfNotFound()
+
+    return {
+      lpsId: this._lpsId,
+      lpsKey: this._lpsId + '-' + legacyMessage[41] + '-' + legacyMessage[42],
+      lpsFinancialRequestMessageId: prevLpsMessageId.id,
+      lpsReversalRequestMessageId: lpsMessageId
     }
   }
 }
