@@ -17,9 +17,10 @@ import { transferRequestHandler } from './handlers/transfer-request-handler'
 import { transferResponseHandler } from './handlers/transfer-response-handler'
 import { Transaction } from './models'
 import { Model } from 'objection'
-import { LegacyAuthorizationRequest, LegacyFinancialRequest } from 'types/adaptor-relay-messages'
+import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyReversalRequest } from './types/adaptor-relay-messages'
 import { legacyAuthorizationRequestHandler } from './handlers/legacy-authorization-handler'
 import { legacyFinancialRequestHandler } from './handlers/legacy-financial-request-handler'
+import { legacyReversalHandler } from './handlers/legacy-reversals-handler'
 const IsoParser = require('iso_8583')
 const MojaloopSdk = require('@mojaloop/sdk-standard-components')
 const Logger = require('@mojaloop/central-services-logger')
@@ -66,6 +67,7 @@ const queueService = new BullQueueService([
   'TransferResponses',
   'LegacyAuthorizationRequests',
   'LegacyFinancialRequests',
+  'LegacyReversalRequests',
   'lps1AuthorizationResponses',
   'lps1FinancialResponses'], redisConnection)
 const AuthorizationsClient: AxiosInstance = axios.create({
@@ -141,6 +143,9 @@ const start = async (): Promise<void> => {
   }, { connection: redisConnection }))
   workers.set('legacyFinancialRequests', new Worker('LegacyFinancialRequests', async (job: Job<LegacyFinancialRequest>) => {
     await legacyFinancialRequestHandler(adaptorServices, job.data)
+  }, { connection: redisConnection }))
+  workers.set('legacyReversalRequests', new Worker('LegacyReversalRequests', async (job: Job<LegacyReversalRequest>) => {
+    await legacyReversalHandler(adaptorServices, job.data)
   }, { connection: redisConnection }))
 
   const adaptor = await createApp(adaptorServices, { port: HTTP_PORT })
