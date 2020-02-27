@@ -1,6 +1,6 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { TransactionState, Transaction, LpsMessage, LegacyMessageType } from '../../src/models'
+import { TransactionState, Transaction, LpsMessage, LegacyMessageType, Quote, Transfers, TransferState } from '../../src/models'
 import { Model } from 'objection'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { legacyReversalHandler } from '../../src/handlers/legacy-reversals-handler'
@@ -94,7 +94,7 @@ describe('Legacy Reversal Handler', () => {
     expect(transaction.lpsMessages![1]).toEqual(lpsMessage2)
   })
 
-  test('maps the lpsReversalRequestMessage to the new transaction', async () => {
+  test('sets the original transaction state to cancelled', async () => {
     const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
     const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
     const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
@@ -106,16 +106,33 @@ describe('Legacy Reversal Handler', () => {
       lpsKey: 'lps1-001-abc',
       lpsReversalRequestMessageId: '2'
     })
-    const transaction = await Transaction.query().where('originalTransactionId', transactionInfo.transactionId).withGraphFetched('lpsMessages').first()
 
-    expect(transaction.lpsMessages).toHaveLength(1)
-    expect(transaction.lpsMessages![0]).toEqual(lpsMessage2)
+    expect((await originalTransaction.$query()).state).toBe(TransactionState.transactionCancelled)
+    expect((await originalTransaction.$query()).previousState).toBe(originalTransaction.state)
   })
 
-  test('calls mojaClient.postTransactionRequests with a refund and stored successfully', async () => {
+  test('expires quote for the original transaction', async () => {
+    Date.now = jest.fn().mockReturnValue(0)
     const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
     const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
-    await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+    const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+    await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
+    const quote = await originalTransaction.$relatedQuery<Quote>('quote').insertAndFetch({ id: 'quote123', transactionId: transactionInfo.transactionId, amount: transactionInfo.amount, amountCurrency: transactionInfo.currency, transferAmount: '101', transferAmountCurrency: 'USD', ilpPacket: 'ilppacket', condition: 'condition', expiration: new Date(Date.now() + 10000).toUTCString() })
+
+    await legacyReversalHandler(services, {
+      lpsFinancialRequestMessageId: '1',
+      lpsId: 'lps1',
+      lpsKey: 'lps1-001-abc',
+      lpsReversalRequestMessageId: '2'
+    })
+
+    expect((await quote.$query()).expiration).toBe(new Date(Date.now()).toUTCString())
+  })
+
+  test('does not create a refund transaction if there is no transfer for the original transaction', async () => {
+    const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
+    const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
     await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
 
     await legacyReversalHandler(services, {
@@ -124,37 +141,97 @@ describe('Legacy Reversal Handler', () => {
       lpsKey: 'lps1-001-abc',
       lpsReversalRequestMessageId: '2'
     })
-    const transaction = await Transaction.query().where('originalTransactionId', transactionInfo.transactionId).withGraphFetched('[lpsMessages, payer, payee]').first()
 
-    expect(services.mojaClient.postTransactionRequests).toHaveBeenCalledWith({
-      transactionRequestId: transaction.transactionRequestId,
-      payee: {
-        partyIdInfo: {
-          partyIdType: transaction.payee?.identifierType,
-          partyIdentifier: transaction.payee?.identifierValue,
-          partySubIdOrType: transaction.payee?.subIdOrType,
-          fspId: transaction.payee?.fspId
-        }
-      },
-      payer: {
-        partyIdType: transaction.payer?.identifierType,
-        partyIdentifier: transaction.payer?.identifierValue,
-        partySubIdOrType: transaction.payer?.subIdOrType,
-        fspId: transaction.payer?.fspId
-      },
-      amount: {
-        currency: transaction.currency,
-        amount: transaction.amount
-      },
-      transactionType: {
-        scenario: 'REFUND',
-        initiator: 'PAYER',
-        initiatorType: transaction.initiatorType,
-        refundInfo: {
-          originalTransactionId: transaction.originalTransactionId
-        }
-      }
-    }, transaction.payee?.fspId)
+    expect(await Transaction.query().where({ scenario: 'REFUND' })).toHaveLength(0)
+    expect(services.mojaClient.postTransactionRequests).not.toHaveBeenCalled()
   })
 
+  describe('creates a refund transaction if a transfer for the original transaction has occurred', () => {
+    test('maps the lpsReversalRequestMessage to the new transaction', async () => {
+      const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+      const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
+      const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+      await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
+      const quote = await originalTransaction.$relatedQuery<Quote>('quote').insertAndFetch({ id: 'quote123', transactionId: transactionInfo.transactionId, amount: transactionInfo.amount, amountCurrency: transactionInfo.currency, transferAmount: '101', transferAmountCurrency: 'USD', ilpPacket: 'ilppacket', condition: 'condition', expiration: new Date(Date.now() + 10000).toUTCString() })
+      await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: quote.id, state: TransferState.committed, fulfillment: 'fulfillment' })
+
+      await legacyReversalHandler(services, {
+        lpsFinancialRequestMessageId: '1',
+        lpsId: 'lps1',
+        lpsKey: 'lps1-001-abc',
+        lpsReversalRequestMessageId: '2'
+      })
+      const transaction = await Transaction.query().where('originalTransactionId', transactionInfo.transactionId).withGraphFetched('lpsMessages').first()
+
+      expect(transaction.lpsMessages).toHaveLength(1)
+      expect(transaction.lpsMessages![0]).toEqual(lpsMessage2)
+    })
+
+    test('expires the quote', async () => {
+      Date.now = jest.fn().mockReturnValue(0)
+      const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+      const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
+      const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+      await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
+      const quote = await originalTransaction.$relatedQuery<Quote>('quote').insertAndFetch({ id: 'quote123', transactionId: transactionInfo.transactionId, amount: transactionInfo.amount, amountCurrency: transactionInfo.currency, transferAmount: '101', transferAmountCurrency: 'USD', ilpPacket: 'ilppacket', condition: 'condition', expiration: new Date(Date.now() + 10000).toUTCString() })
+      await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: quote.id, state: TransferState.committed, fulfillment: 'fulfillment' })
+
+      await legacyReversalHandler(services, {
+        lpsFinancialRequestMessageId: '1',
+        lpsId: 'lps1',
+        lpsKey: 'lps1-001-abc',
+        lpsReversalRequestMessageId: '2'
+      })
+      const transaction = await Transaction.query().where('originalTransactionId', transactionInfo.transactionId).withGraphFetched('lpsMessages').first()
+
+      expect((await quote.$query()).expiration).toBe(new Date(Date.now()).toUTCString())
+    })
+
+    test('calls mojaClient.postTransactionRequests with a refund and stored successfully', async () => {
+      const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+      const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
+      await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+      await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
+      const quote = await originalTransaction.$relatedQuery<Quote>('quote').insertAndFetch({ id: 'quote123', transactionId: transactionInfo.transactionId, amount: transactionInfo.amount, amountCurrency: transactionInfo.currency, transferAmount: '101', transferAmountCurrency: 'USD', ilpPacket: 'ilppacket', condition: 'condition', expiration: new Date(Date.now() + 10000).toUTCString() })
+      await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: quote.id, state: TransferState.committed, fulfillment: 'fulfillment' })
+
+      await legacyReversalHandler(services, {
+        lpsFinancialRequestMessageId: '1',
+        lpsId: 'lps1',
+        lpsKey: 'lps1-001-abc',
+        lpsReversalRequestMessageId: '2'
+      })
+      const transaction = await Transaction.query().where('originalTransactionId', transactionInfo.transactionId).withGraphFetched('[lpsMessages, payer, payee]').first()
+
+      expect(services.mojaClient.postTransactionRequests).toHaveBeenCalledWith({
+        transactionRequestId: transaction.transactionRequestId,
+        payee: {
+          partyIdInfo: {
+            partyIdType: transaction.payee?.identifierType,
+            partyIdentifier: transaction.payee?.identifierValue,
+            partySubIdOrType: transaction.payee?.subIdOrType,
+            fspId: transaction.payee?.fspId
+          }
+        },
+        payer: {
+          partyIdType: transaction.payer?.identifierType,
+          partyIdentifier: transaction.payer?.identifierValue,
+          partySubIdOrType: transaction.payer?.subIdOrType,
+          fspId: transaction.payer?.fspId
+        },
+        amount: {
+          currency: transaction.currency,
+          amount: transaction.amount
+        },
+        transactionType: {
+          scenario: 'REFUND',
+          initiator: 'PAYER',
+          initiatorType: transaction.initiatorType,
+          refundInfo: {
+            originalTransactionId: transaction.originalTransactionId
+          }
+        }
+      }, transaction.payee?.fspId)
+    })
+  })
 })
