@@ -1,9 +1,8 @@
 import Knex from 'knex'
-import { Model, raw } from 'objection'
+import { Model } from 'objection'
 import { Socket } from 'net'
 import { DefaultIso8583TcpRelay, LegacyMessage } from '../src/tcp-relay'
 import { iso0100BinaryMessage, iso0200BinaryMessage, ISO0100Factory, ISO0420Factory } from './factories/iso-messages'
-import { TransactionInfoFactory } from './factories/transaction-info'
 import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse } from '../src/types/adaptor-relay-messages'
 import { LpsMessage, LegacyMessageType } from '../src/models'
 
@@ -27,6 +26,7 @@ describe('TCP relay', function () {
     shutdown: jest.fn(),
     getQueues: jest.fn()
   }
+  const transactionExpiryWindow = 10
 
   beforeAll(async () => {
     knex = Knex({
@@ -38,7 +38,7 @@ describe('TCP relay', function () {
       useNullAsDefault: true
     })
     Model.knex(knex)
-    relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket: client }, { lpsId: 'lps1' })
+    relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket: client }, { lpsId: 'lps1', transactionExpiryWindow })
   })
 
   beforeEach(async () => {
@@ -54,10 +54,8 @@ describe('TCP relay', function () {
   })
 
   test('maps 0100 to a legacy authorization request and puts it on the legacyAuthorizationRequests queue', async () => {
+    Date.now = jest.fn().mockReturnValue(0)
     const json0100 = new IsoParser().getIsoJSON(iso0100BinaryMessage)
-    const expirationDate = new Date()
-    expirationDate.setMonth(Number(json0100[7].slice(0, 2)) - 1, Number(json0100[7].slice(2, 4)))
-    expirationDate.setHours(Number(json0100[7].slice(4, 6)) - 1, Number(json0100[7].slice(6, 8)), Number(json0100[7].slice(-2)))
 
     client.emit('data', iso0100BinaryMessage)
 
@@ -71,7 +69,7 @@ describe('TCP relay', function () {
         amount: '400',
         currency: 'USD'
       },
-      expiration: expirationDate.toUTCString(),
+      expiration: new Date(Date.now() + transactionExpiryWindow * 1000).toUTCString(),
       payee: {
         partyIdType: 'DEVICE',
         partyIdentifier: json0100[41],
@@ -224,5 +222,19 @@ describe('TCP relay', function () {
       lpsReversalRequestMessageId: reversalMessage.id
     })
     expect(client.write).toHaveBeenCalledWith(encode({ ...iso0420, 0: '0430', 39: '00' }))
+  })
+
+  test('responds to a 0420 with a 21 response code if it can\'t map it to a legacy reversal request', async () => {
+    client.write = jest.fn()
+    const iso0420 = ISO0420Factory.build({
+      28: 'C00000100',
+      90: '010000000801300836360000000000000000000000'
+    })
+
+    client.emit('data', encode(iso0420))
+    await new Promise(resolve => { setTimeout(() => resolve(), 100) })
+
+    expect(queueService.addToQueue).not.toHaveBeenCalled()
+    expect(client.write).toHaveBeenCalledWith(encode({ ...iso0420, 0: '0430', 39: '21' }))
   })
 })

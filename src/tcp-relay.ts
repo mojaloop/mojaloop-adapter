@@ -34,6 +34,7 @@ export type TcpRelayServices = {
 
 export type TcpRelayConfig = {
   lpsId: string;
+  transactionExpiryWindow?: number;
   redisConnection?: ConnectionOptions;
 }
 
@@ -42,6 +43,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   private _logger: Logger
   private _queueService: QueueService
   private _lpsId: string
+  private _transactionExpiryWindow: number
   private _redisConnection: ConnectionOptions
   private _server?: Server
   private _socket?: Socket
@@ -52,12 +54,13 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   private _authorizationResponseWorker?: Worker
   private _financialResponseWorker?: Worker
 
-  constructor ({ logger, queueService, encode, decode, socket }: TcpRelayServices, { lpsId, redisConnection }: TcpRelayConfig) {
+  constructor ({ logger, queueService, encode, decode, socket }: TcpRelayServices, { lpsId, transactionExpiryWindow,redisConnection }: TcpRelayConfig) {
     this._logger = logger
     this._queueService = queueService
     this._encode = encode
     this._decode = decode
     this._lpsId = lpsId
+    this._transactionExpiryWindow = transactionExpiryWindow || 30
     this._redisConnection = redisConnection ?? { host: 'localhost', port: 6379 }
 
     socket.on('data', async (data) => {
@@ -78,8 +81,14 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
             this._queueService.addToQueue('LegacyFinancialRequests', await this.mapFromFinancialRequest(lpsMessage.id, legacyMessage))
             break
           case LegacyMessageType.reversalRequest:
-            this._queueService.addToQueue('LegacyReversalRequests', await this.mapFromReversalAdvice(lpsMessage.id, legacyMessage))
-            socket.write(encode({ ...legacyMessage, 0: '0430', 39: '00' }))
+            try {
+              const reversalRequest = await this.mapFromReversalAdvice(lpsMessage.id, legacyMessage)
+              this._queueService.addToQueue('LegacyReversalRequests', reversalRequest)
+              socket.write(encode({ ...legacyMessage, 0: '0430', 39: '00' }))
+            } catch (error) {
+              this._logger.error(this._lpsId + ' relay: Could not process the reversal request from: ' + this._lpsId + ' lpsKey: ' + lpsKey)
+              socket.write(encode({ ...legacyMessage, 0: '0430', 39: '21' }))
+            }
             break
           default:
             throw new Error(this._lpsId + 'relay: Cannot handle legacy message with mti: ' + messageType)
@@ -193,10 +202,6 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
 
   async mapFromAuthorizationRequest (lpsMessageId: string, legacyMessage: LegacyMessage): Promise<LegacyAuthorizationRequest> {
     this._logger.debug(`${this._lpsId} relay: Mapping from authorization request`)
-    // assuming local time
-    const expirationDate = new Date()
-    expirationDate.setMonth(Number(legacyMessage[7].slice(0, 2)) - 1, Number(legacyMessage[7].slice(2, 4)))
-    expirationDate.setHours(Number(legacyMessage[7].slice(4, 6)) - 1, Number(legacyMessage[7].slice(6, 8)), Number(legacyMessage[7].slice(-2)))
 
     return {
       lpsId: this._lpsId,
@@ -216,7 +221,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
         partyIdentifier: legacyMessage[102]
       },
       transactionType: this.getTransactionType(legacyMessage),
-      expiration: expirationDate.toUTCString(),
+      expiration: new Date(Date.now() + this._transactionExpiryWindow * 1000).toUTCString(),
       lpsFee: this.calculateFee(legacyMessage)
     }
   }
