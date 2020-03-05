@@ -20,10 +20,12 @@ export async function legacyReversalHandler ({ mojaClient, logger }: AdaptorServ
     await transaction.$query().update({ state: TransactionState.transactionCancelled, previousState: transaction.state })
 
     if (transaction.quote && (new Date(transaction.quote.expiration) > new Date(Date.now()))) {
+      logger.debug(`Legacy Reversal Handler: Expiring quote for transaction request id: ${transaction.transactionRequestId}`)
       await transaction.quote.$query().update({ expiration: new Date(Date.now()).toUTCString() })
     }
 
     if (transaction.transfer) {
+      logger.debug(`Legacy Reversal Handler: Creating refund transaction: ${transaction.transactionRequestId}`)
       const transactionRequest: TransactionRequestsPostRequest = {
         transactionRequestId: uuid(),
         payee: {
@@ -46,7 +48,7 @@ export async function legacyReversalHandler ({ mojaClient, logger }: AdaptorServ
         },
         transactionType: refund
       }
-
+      logger.debug(`Legacy Reversal Handler: Creating refund transaction: ${transactionRequest}`)
       await mojaClient.postTransactionRequests(transactionRequest, transaction.payer!.fspId!)
 
       const reversalTransaction = await Transaction.query().insertGraphAndFetch({

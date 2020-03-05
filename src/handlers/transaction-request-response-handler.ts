@@ -11,14 +11,16 @@ export async function transactionRequestResponseHandler ({ mojaClient, logger }:
 
     if (transactionRequestResponse.transactionId) {
       logger.debug('Transaction Request Response Handler: Updating transaction id.')
-      await transaction.$query().update({ transactionId: transactionRequestResponse.transactionId, previousState: transaction.previousState, state: TransactionState.transactionResponded })
+      const state = transaction.state === TransactionState.transactionCancelled ? transaction.state : TransactionState.transactionResponded
+      const previousState = transaction.state === TransactionState.transactionCancelled ? transaction.previousState : transaction.state
+      await transaction.$query().update({ transactionId: transactionRequestResponse.transactionId, previousState, state })
     }
 
     if (transactionRequestResponse.transactionRequestState === 'REJECTED') {
-      await transaction.$query().update({ previousState: transaction.previousState, state: TransactionState.transactionCancelled })
+      await transaction.$query().modify('updateState', TransactionState.transactionCancelled)
     }
 
-    if (transaction.scenario === 'REFUND') {
+    if (transaction.scenario === 'REFUND' && transaction.isValid()) {
       logger.debug('Transaction Request Response Handler: Initiating quote request for refund.')
       const quote = await Quote.query().insertGraphAndFetch({
         id: uuid(),

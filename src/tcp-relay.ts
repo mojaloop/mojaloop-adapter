@@ -3,7 +3,7 @@ import { Worker, Job, ConnectionOptions } from 'bullmq'
 import { raw } from 'objection'
 import { QueueService } from './services/queue-service'
 import { Logger } from './adaptor'
-import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancialRequest, LegacyFinancialResponse, LegacyReversalRequest } from './types/adaptor-relay-messages'
+import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancialRequest, LegacyFinancialResponse, LegacyReversalRequest, ResponseType } from './types/adaptor-relay-messages'
 import { LpsMessage, LegacyMessageType } from './models'
 import { Money } from '@mojaloop/sdk-standard-components'
 import { pad } from './utils/util'
@@ -36,6 +36,13 @@ export type TcpRelayConfig = {
   lpsId: string;
   transactionExpiryWindow?: number;
   redisConnection?: ConnectionOptions;
+  responseCodes?: ResponseCodes;
+}
+
+export type ResponseCodes = {
+  approved: string;
+  invalidTransaction: string;
+  noAction: string;
 }
 
 export class DefaultIso8583TcpRelay implements TcpRelay {
@@ -53,8 +60,9 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
 
   private _authorizationResponseWorker?: Worker
   private _financialResponseWorker?: Worker
+  private _responseCodes: ResponseCodes
 
-  constructor ({ logger, queueService, encode, decode, socket }: TcpRelayServices, { lpsId, transactionExpiryWindow,redisConnection }: TcpRelayConfig) {
+  constructor ({ logger, queueService, encode, decode, socket }: TcpRelayServices, { lpsId, transactionExpiryWindow, redisConnection, responseCodes }: TcpRelayConfig) {
     this._logger = logger
     this._queueService = queueService
     this._encode = encode
@@ -62,6 +70,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
     this._lpsId = lpsId
     this._transactionExpiryWindow = transactionExpiryWindow || 30
     this._redisConnection = redisConnection ?? { host: 'localhost', port: 6379 }
+    this._responseCodes = responseCodes ?? { approved: '00', invalidTransaction: '12', noAction: '21' }
 
     socket.on('data', async (data) => {
       try {
@@ -230,12 +239,18 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
     this._logger.debug(`${this._lpsId} relay: Mapping to authorization response`)
     const authorizationRequest = await LpsMessage.query().where({ id: authorizationResponse.lpsAuthorizationRequestMessageId }).first().throwIfNotFound()
 
-    return {
-      ...authorizationRequest.content,
-      0: '0110',
-      30: 'D' + pad(new MlNumber(authorizationResponse.fees.amount).multiply(100).toString(), 8, '0'),
-      39: '00',
-      48: authorizationResponse.transferAmount.amount
+    if (authorizationResponse.response === ResponseType.approved) {
+      const approvalMessage: LegacyMessage = { ...authorizationRequest.content, 0: '0110', 39: this._responseCodes.approved }
+      if (authorizationResponse.fees) approvalMessage[30] = 'D' + pad(new MlNumber(authorizationResponse.fees.amount).multiply(100).toString(), 8, '0')
+      if (authorizationResponse.transferAmount) approvalMessage[48] = authorizationResponse.transferAmount.amount
+
+      return approvalMessage
+    } else {
+      return {
+        ...authorizationRequest.content,
+        0: '0110',
+        39: this._responseCodes.invalidTransaction
+      }
     }
   }
 
@@ -281,7 +296,9 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
       .where(raw(`JSON_EXTRACT(content, '$."11"') = "${stan}"`))
     if (acquiringId !== '') query.where(raw(`JSON_EXTRACT(content, '$."32"') = "${acquiringId}"`))
 
-    const prevLpsMessageId = await query.first().throwIfNotFound()
+    const prevLpsMessageId = await query.orderBy('created_at', 'desc').first().throwIfNotFound()
+
+    this._logger.debug(`${this._lpsId} relay: Found previous lps message: id: ${prevLpsMessageId.id} content: ${JSON.stringify(prevLpsMessageId.content)}`)
 
     return {
       lpsId: this._lpsId,

@@ -1,4 +1,4 @@
-import { Model, RelationMappings, QueryBuilder } from 'objection'
+import { Model, RelationMappings, QueryBuilder, ref } from 'objection'
 import { TransactionFee } from './transactionFee'
 import { TransactionParty } from './transactionParty'
 import { LpsMessage } from './lpsMessage'
@@ -125,6 +125,20 @@ export class Transaction extends Model {
       query.withGraphJoined('payer')
         .where('payer.identifierType', 'MSISDN')
         .where('payer.identifierValue', msisdn)
+    },
+    updateState (query: QueryBuilder<Transaction>, newState: string): void {
+      query.update({
+        state: newState,
+        previousState: ref('state')
+      })
     }
+  }
+
+  static createNotFoundError (): Error {
+    return new Error('Transaction not found')
+  }
+
+  isValid (): boolean {
+    return this.state !== TransactionState.transactionDeclined && this.state !== TransactionState.transactionCancelled && new Date(Date.now()) < new Date(this.expiration)
   }
 }

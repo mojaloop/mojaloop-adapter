@@ -35,4 +35,12 @@ export class Quote extends Model {
     }
   }
 
+  static createNotFoundError (): Error {
+    return new Error('Quote not found')
+  }
+
+  isExpired (): boolean {
+    return new Date(this.expiration) <= new Date(Date.now())
+  }
+
 }

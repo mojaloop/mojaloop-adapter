@@ -1,12 +1,12 @@
 import { AdaptorServices } from '../adaptor'
-import { LegacyAuthorizationRequest } from '../types/adaptor-relay-messages'
+import { LegacyAuthorizationRequest, ResponseType } from '../types/adaptor-relay-messages'
 import { Transaction, TransactionState, LpsMessage } from '../models'
 const uuid = require('uuid/v4')
 
-export async function legacyAuthorizationRequestHandler ({ logger, mojaClient }: AdaptorServices, legacyAuthorizationRequest: LegacyAuthorizationRequest): Promise<void> {
+export async function legacyAuthorizationRequestHandler ({ logger, mojaClient, queueService }: AdaptorServices, legacyAuthorizationRequest: LegacyAuthorizationRequest): Promise<void> {
   try {
 
-    await Transaction.query().modify('incomplete', legacyAuthorizationRequest.lpsKey).update({ state: TransactionState.transactionCancelled })
+    await Transaction.query().modify('incomplete', legacyAuthorizationRequest.lpsKey).modify('updateState', TransactionState.transactionCancelled)
 
     const fees = legacyAuthorizationRequest.lpsFee ? [{ type: 'lps', amount: legacyAuthorizationRequest.lpsFee.amount, currency: legacyAuthorizationRequest.lpsFee.currency }] : []
     const transaction = await Transaction.query().insertGraph({
@@ -41,6 +41,6 @@ export async function legacyAuthorizationRequestHandler ({ logger, mojaClient }:
 
   } catch (error) {
     logger.error(`Legacy Authorization Request Handler: Failed to process authorization request. ${error.message}`)
-    // TODO: send error message to LPS
+    await queueService.addToQueue(`${legacyAuthorizationRequest.lpsId}AuthorizationResponses`, { lpsAuthorizationRequestMessageId: legacyAuthorizationRequest.lpsAuthorizationRequestMessageId, response: ResponseType.invalid })
   }
 }

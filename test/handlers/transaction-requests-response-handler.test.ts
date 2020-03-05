@@ -66,7 +66,7 @@ describe('Transaction Requests Response Handler', function () {
   })
 
   test('updates transactionId if it is present in payload', async () => {
-    const transaction = await Transaction.query().insertAndFetch(transactionInfo)
+    const transaction = await Transaction.query().insertAndFetch({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
 
     await transactionRequestResponseHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, headers, transactionInfo.transactionRequestId)
 
@@ -74,7 +74,7 @@ describe('Transaction Requests Response Handler', function () {
   })
 
   test('updates transaction state to transactionResponded', async () => {
-    const transaction = await Transaction.query().insertAndFetch(transactionInfo)
+    const transaction = await Transaction.query().insertAndFetch({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
 
     await transactionRequestResponseHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, headers, transactionInfo.transactionRequestId)
 
@@ -89,8 +89,8 @@ describe('Transaction Requests Response Handler', function () {
     expect((await transaction.$query()).state).toBe(TransactionState.transactionCancelled)
   })
 
-  test('initiates quote request if transaction scenario is \'REFUND\'', async () => {
-    const transaction = await Transaction.query().insertAndFetch(transactionRefundInfo)
+  test('initiates quote request if transaction scenario is \'REFUND\' and it is valid', async () => {
+    const transaction = await Transaction.query().insertAndFetch({ ...transactionRefundInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
 
     await transactionRequestResponseHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, headers, transactionRefundInfo.transactionRequestId)
     const quote = await Quote.query().where('transactionId', '456').first().throwIfNotFound()
@@ -120,8 +120,17 @@ describe('Transaction Requests Response Handler', function () {
     expect(services.mojaClient.postQuotes).toBeCalledWith(expected, headers['fspiop-source'])
   })
 
+  test('doesn\'t initiate quote request for a \'REFUND\' transaction if it is invalid', async () => {
+    const transaction = await Transaction.query().insertAndFetch({ ...transactionRefundInfo, state: TransactionState.transactionCancelled })
+
+    await transactionRequestResponseHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, headers, transactionRefundInfo.transactionRequestId)
+
+    expect((await transaction.$relatedQuery<Quote>('quote').first())).toBeUndefined()
+    expect(services.mojaClient.postQuotes).toBeCalledTimes(0)
+  })
+
   test('doesn\'t initiates quote request if transaction scenario is not \'REFUND\'', async () => {
-    await Transaction.query().insertAndFetch(transactionInfo)
+    await Transaction.query().insertAndFetch({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
     await transactionRequestResponseHandler(services, { transactionId: '456', transactionRequestState: 'RECEIVED' }, headers, transactionInfo.transactionRequestId)
     const quote = await Quote.query().where('transactionId', '456').first()
     expect(quote).toBeUndefined()

@@ -4,8 +4,10 @@ import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 import { TransfersIDPutResponse } from '../../src/types/mojaloop'
 import { transferRequestHandler } from '../../src/handlers/transfer-request-handler'
 import { TransferPostRequestFactory } from '../factories/transfer-post-request'
-import { TransactionState, Transaction, TransferState, Transfers } from '../../src/models'
+import { TransactionState, Transaction, TransferState, Transfers, LpsMessage, LegacyMessageType } from '../../src/models'
 import { Model } from 'objection'
+import { ResponseType } from '../../src/types/adaptor-relay-messages'
+import { ISO0200Factory } from '../factories/iso-messages'
 const uuid = require('uuid/v4')
 const Logger = require('@mojaloop/central-services-logger')
 const sdk = require('@mojaloop/sdk-standard-components')
@@ -111,7 +113,7 @@ describe('Transfer Requests Handler', () => {
   })
 
   test('creates transfer', async () => {
-    await Transaction.query().insertGraphAndFetch(transactionInfo)
+    await Transaction.query().insertGraphAndFetch({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
     const transferRequest = TransferPostRequestFactory.build({
       amount: {
         amount: '107',
@@ -139,7 +141,7 @@ describe('Transfer Requests Handler', () => {
   })
 
   test('sends transfer response and updates transaction state to fulfillmentSent', async () => {
-    let transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    let transaction = await Transaction.query().insertGraphAndFetch({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
     Date.now = jest.fn().mockReturnValue(0)
     const transferRequest = TransferPostRequestFactory.build({
       amount: {
@@ -174,7 +176,8 @@ describe('Transfer Requests Handler', () => {
         currency: 'USD'
       },
       ilpPacket: 'not a real packet',
-      payerFsp: 'payerFSP'
+      payerFsp: 'payerFSP',
+      expiration: new Date(Date.now() + 10000).toUTCString()
     })
     const headers = {
       'fspiop-source': 'payerFSP',
@@ -185,4 +188,52 @@ describe('Transfer Requests Handler', () => {
 
     expect(services.mojaClient.putTransfersError).toHaveBeenCalledWith(transferRequest.transferId, { errorCode: '2001', errorDescription: 'Failed to process transfer request.' }, 'payerFSP')
   })
+
+  test('sends a 5105 transfer error response and queues an invalid transaction message to the LPS if the transaction is not valid', async () => {
+    const legacyFinancialRequest = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.financialRequest, lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, content: ISO0200Factory.build() })
+    const transaction = await Transaction.query().insertGraphAndFetch({ ...transactionInfo, state: TransactionState.transactionCancelled })
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(legacyFinancialRequest)
+    const transferRequest = TransferPostRequestFactory.build({
+      amount: {
+        amount: '107',
+        currency: 'USD'
+      },
+      ilpPacket
+    })
+    const headers = {
+      'fspiop-source': 'payerFSP',
+      'fspiop-destination': 'payeeFSP'
+    }
+
+    await transferRequestHandler(services, transferRequest, headers)
+
+    expect(await transaction.$relatedQuery('transfer')).toBeUndefined()
+    expect(services.mojaClient.putTransfers).not.toHaveBeenCalled()
+    expect(services.mojaClient.putTransfersError).toHaveBeenCalledWith(transferRequest.transferId, { errorInformation: { errorCode: '5105', errorDescription: 'Transaction is no longer valid.' } }, headers['fspiop-source'])
+    expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1FinancialResponses', { lpsFinancialRequestMessageId: legacyFinancialRequest.id, response: ResponseType.invalid })
+  })
+
+  test('sends a 3302 if the quote has expired', async () => {
+    const { quote, ...transactionWithoutQuote } = transactionInfo
+    quote.expiration = new Date(Date.now() - 1000).toUTCString()
+    await Transaction.query().insertGraph({ ...transactionWithoutQuote, expiration: new Date(Date.now() + 10000).toUTCString(), quote })
+    const transferRequest = TransferPostRequestFactory.build({
+      amount: {
+        amount: '107',
+        currency: 'USD'
+      },
+      ilpPacket
+    })
+    const headers = {
+      'fspiop-source': 'payerFSP',
+      'fspiop-destination': 'payeeFSP'
+    }
+
+    await transferRequestHandler(services, transferRequest, headers)
+
+    expect(services.mojaClient.putTransfers).not.toHaveBeenCalled()
+    expect(services.mojaClient.putTransfersError).toHaveBeenCalledWith(transferRequest.transferId, { errorInformation: { errorCode: '3302', errorDescription: 'Quote has expired.' } }, headers['fspiop-source'])
+  })
+
+  test.todo('queues a declined message to the LPS if the transfer request fails')
 })

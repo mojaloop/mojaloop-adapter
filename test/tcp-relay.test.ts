@@ -3,7 +3,7 @@ import { Model } from 'objection'
 import { Socket } from 'net'
 import { DefaultIso8583TcpRelay, LegacyMessage } from '../src/tcp-relay'
 import { iso0100BinaryMessage, iso0200BinaryMessage, ISO0100Factory, ISO0420Factory } from './factories/iso-messages'
-import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse } from '../src/types/adaptor-relay-messages'
+import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse, ResponseType } from '../src/types/adaptor-relay-messages'
 import { LpsMessage, LegacyMessageType } from '../src/models'
 
 const IsoParser = require('iso_8583')
@@ -111,12 +111,13 @@ describe('TCP relay', function () {
     expect(queueService.addToQueue).toHaveBeenCalledWith('LegacyFinancialRequests', expectedLegacyFinancialRequest)
   })
 
-  test('encodes legacy authorization response and sends over socket', async () => {
+  test('encodes approved legacy authorization response and sends over socket', async () => {
     client.write = jest.fn()
     const json0100 = new IsoParser().getIsoJSON(iso0100BinaryMessage)
     json0100[127.2] = '100222'
     const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${json0100[41]}-${json0100[42]}`, content: json0100 })
     const legacyAuthorizationResponse: LegacyAuthorizationResponse = {
+      response: ResponseType.approved,
       fees: {
         amount: '4',
         currency: 'USD'
@@ -133,12 +134,28 @@ describe('TCP relay', function () {
     expect(client.write).toHaveBeenCalledWith(encode({ ...json0100, 0: '0110', 30: 'D00000400', 39: '00', 48: '104' }))
   })
 
+  test('encodes declined legacy authorization response and sends over socket', async () => {
+    client.write = jest.fn()
+    const json0100 = new IsoParser().getIsoJSON(iso0100BinaryMessage)
+    json0100[127.2] = '100222'
+    const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${json0100[41]}-${json0100[42]}`, content: json0100 })
+    const legacyAuthorizationResponse: LegacyAuthorizationResponse = {
+      response: ResponseType.invalid,
+      lpsAuthorizationRequestMessageId: lpsMessage.id
+    }
+
+    await relay.handleAuthorizationResponse(legacyAuthorizationResponse)
+
+    expect(client.write).toHaveBeenCalledWith(encode({ ...json0100, 0: '0110', 39: '12' }))
+  })
+
   test('encodes legacy financial response and sends over socket', async () => {
     client.write = jest.fn().mockReturnValue(undefined)
     const json0200 = new IsoParser().getIsoJSON(iso0200BinaryMessage)
     const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${json0200[41]}-${json0200[42]}`, content: json0200 })
     const legacyFinancialResponse: LegacyFinancialResponse = {
-      lpsFinancialRequestMessageId: lpsMessage.id
+      lpsFinancialRequestMessageId: lpsMessage.id,
+      response: ResponseType.approved
     }
 
     await relay.handleFinancialResponse(legacyFinancialResponse)

@@ -6,6 +6,7 @@ import { legacyAuthorizationRequestHandler } from '../../src/handlers/legacy-aut
 import { Transaction, TransactionState } from '../../src/models/transaction'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { LpsMessage, LegacyMessageType } from '../../src/models/lpsMessage'
+import { ResponseType } from '../../src/types/adaptor-relay-messages'
 
 jest.mock('uuid/v4', () => () => '123')
 
@@ -218,5 +219,21 @@ describe('Legacy Authorization Request Handler', () => {
     await legacyAuthorizationRequestHandler(services, legacyAuthorizationRequest2)
 
     expect((await completeTransaction.$query()).state).toBe(TransactionState.transactionReceived)
+  })
+
+  test('queues an invalid transaction message to send to the LPS if it fails to process the message', async () => {
+    services.mojaClient.getParties = jest.fn().mockRejectedValue({ message: 'failed to get party' })
+    const lpsMessage = await LpsMessage.query().insertAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.authorizationRequest, content: iso0100 })
+    const legacyAuthorizationRequest = LegacyAuthorizationRequestFactory.build({
+      lpsAuthorizationRequestMessageId: lpsMessage.id,
+      lpsFee: {
+        amount: '1',
+        currency: 'USD'
+      }
+    })
+
+    await legacyAuthorizationRequestHandler(services, legacyAuthorizationRequest)
+
+    expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1AuthorizationResponses', { lpsAuthorizationRequestMessageId: lpsMessage.id, response: ResponseType.invalid })
   })
 })

@@ -35,4 +35,8 @@ export class Transfers extends Model {
     }
   }
 
+  static createNotFoundError (): Error {
+    return new Error('Transfer not found')
+  }
+
 }

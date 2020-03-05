@@ -1,20 +1,48 @@
 import { AdaptorServices } from '../adaptor'
-import { TransfersPostRequest, TransfersIDPutResponse, ErrorInformation } from '../types/mojaloop'
-import { TransactionState, Transaction, Transfers, TransferState } from '../models'
+import { TransfersPostRequest, TransfersIDPutResponse, ErrorInformation, ErrorInformationResponse } from '../types/mojaloop'
+import { TransactionState, Transaction, Transfers, TransferState, Quote, LegacyMessageType, LpsMessage } from '../models'
+import { buildMojaloopErrorResponse } from '../utils/util'
+import { ResponseType } from '../types/adaptor-relay-messages'
 const IlpPacket = require('ilp-packet')
 
-export async function transferRequestHandler ({ ilpService, mojaClient, logger }: AdaptorServices, transferRequest: TransfersPostRequest, headers: { [k: string]: any }): Promise<void> {
+const validate = async (transaction: Transaction): Promise<ErrorInformationResponse | undefined> => {
+  if (!transaction.isValid()) {
+    return buildMojaloopErrorResponse('5105', 'Transaction is no longer valid.')
+  }
+
+  const quote = transaction.quote || await transaction.$relatedQuery<Quote>('quote').first()
+
+  if (!quote) {
+    return buildMojaloopErrorResponse('3205', 'Quote not found.')
+  }
+
+  if (quote.isExpired()) {
+    return buildMojaloopErrorResponse('3302', 'Quote has expired.')
+  }
+
+  return undefined
+}
+
+export async function transferRequestHandler ({ ilpService, mojaClient, logger, queueService }: AdaptorServices, transferRequest: TransfersPostRequest, headers: { [k: string]: any }): Promise<void> {
   try {
     const binaryPacket = Buffer.from(transferRequest.ilpPacket, 'base64')
     const jsonPacket = IlpPacket.deserializeIlpPacket(binaryPacket)
     const dataElement = JSON.parse(Buffer.from(jsonPacket.data.data.toString(), 'base64').toString('utf8'))
-    const transaction = await Transaction.query().where('transactionId', dataElement.transactionId).first().throwIfNotFound()
-    const transactionRequestId = transaction.transactionRequestId
+    const transaction = await Transaction.query().where('transactionId', dataElement.transactionId).withGraphFetched('quote').first().throwIfNotFound()
+
+    const error = await validate(transaction)
+
+    if (error) {
+      await mojaClient.putTransfersError(transferRequest.transferId, error, headers['fspiop-source'])
+      const financialRequest = await transaction.$relatedQuery<LpsMessage>('lpsMessages').where({ type: LegacyMessageType.financialRequest }).first().throwIfNotFound()
+      await queueService.addToQueue(`${transaction.lpsId}FinancialResponses`, { lpsFinancialRequestMessageId: financialRequest.id, response: ResponseType.invalid })
+      return
+    }
 
     const transfer = await transaction.$relatedQuery<Transfers>('transfer').insert({
       id: transferRequest.transferId,
       quoteId: dataElement.quoteId,
-      transactionRequestId: transactionRequestId,
+      transactionRequestId: transaction.transactionRequestId,
       fulfillment: ilpService.caluclateFulfil(transferRequest.ilpPacket),
       state: TransferState.received,
       amount: transferRequest.amount.amount,

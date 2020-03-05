@@ -1,3 +1,5 @@
+import { ErrorInformationResponse } from 'types/mojaloop'
+
 /*****
  License
  --------------
@@ -33,4 +35,13 @@ export function pad (value: string, length: number, char: string): string {
   }
 
   return padding + value
+}
+
+export function buildMojaloopErrorResponse (errorCode: string, errorDescription: string): ErrorInformationResponse {
+  return {
+    errorInformation: {
+      errorCode,
+      errorDescription
+    }
+  }
 }

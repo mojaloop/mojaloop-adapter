@@ -24,4 +24,8 @@ export class LpsMessage extends Model {
     return ['content']
   }
 
+  static createNotFoundError (): Error {
+    return new Error('LPS Message not found')
+  }
+
 }

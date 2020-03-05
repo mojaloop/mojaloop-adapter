@@ -2,8 +2,10 @@ import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 import { quotesRequestHandler } from '../../src/handlers/quote-request-handler'
-import { TransactionState, Transaction, Quote, TransactionFee } from '../../src/models'
+import { TransactionState, Transaction, Quote, TransactionFee, LpsMessage, LegacyMessageType } from '../../src/models'
 import { Model } from 'objection'
+import { ISO0100Factory } from '../factories/iso-messages'
+import { ResponseType } from '../../src/types/adaptor-relay-messages'
 const uuid = require('uuid/v4')
 
 describe('Quote Requests Handler', function () {
@@ -66,7 +68,7 @@ describe('Quote Requests Handler', function () {
   })
 
   test('creates quote for transaction', async () => {
-    const transaction = await Transaction.query().insertGraph(transactionInfo)
+    const transaction = await Transaction.query().insertGraph({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
     const quoteRequest = QuotesPostRequestFactory.build({
       transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId,
@@ -88,7 +90,7 @@ describe('Quote Requests Handler', function () {
 
   test('creates adaptor fee', async () => {
     services.calculateAdaptorFees = jest.fn().mockResolvedValue({ amount: '2', currency: 'USD' })
-    const transaction = await Transaction.query().insertGraph(transactionInfo)
+    const transaction = await Transaction.query().insertGraph({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
     const quoteRequest = QuotesPostRequestFactory.build({
       transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId,
@@ -110,6 +112,7 @@ describe('Quote Requests Handler', function () {
     await Transaction.query().insertGraph(
       {
         ...transactionInfo,
+        expiration: new Date(Date.now() + 10000).toUTCString(),
         fees: [{
           type: 'lps',
           amount: '1',
@@ -139,7 +142,7 @@ describe('Quote Requests Handler', function () {
       ilpPacket: 'test ilp-packet',
       condition: 'test condition'
     })
-    await Transaction.query().insertGraph(transactionInfo)
+    await Transaction.query().insertGraph({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
     const quoteRequest = QuotesPostRequestFactory.build({
       transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId,
@@ -158,7 +161,7 @@ describe('Quote Requests Handler', function () {
   })
 
   test('sends quote response', async () => {
-    await Transaction.query().insertGraph(transactionInfo)
+    await Transaction.query().insertGraph({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
     const quoteRequest = QuotesPostRequestFactory.build({
       transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId
@@ -169,7 +172,7 @@ describe('Quote Requests Handler', function () {
   })
 
   test('updates transaction state to quoteResponded', async () => {
-    let transaction = await Transaction.query().insertGraph(transactionInfo)
+    let transaction = await Transaction.query().insertGraph({ ...transactionInfo, expiration: new Date(Date.now() + 10000).toUTCString() })
     const quoteRequest = QuotesPostRequestFactory.build({
       transactionRequestId: transactionInfo.transactionRequestId,
       transactionId: transactionInfo.transactionId
@@ -182,4 +185,20 @@ describe('Quote Requests Handler', function () {
     expect(transaction.previousState).toEqual(TransactionState.transactionResponded)
   })
 
+  test('sends a 3301 quote error response if transaction is not valid and queues an invalid transaction message to the LPS', async () => {
+    const transaction = await Transaction.query().insertGraph(transactionInfo)
+    const legacyAuthRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.authorizationRequest, content: ISO0100Factory.build() })
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(legacyAuthRequest)
+    const quoteRequest = QuotesPostRequestFactory.build({
+      transactionRequestId: transactionInfo.transactionRequestId,
+      transactionId: transactionInfo.transactionId
+    })
+
+    await quotesRequestHandler(services, quoteRequest, headers)
+
+    expect(await transaction.$relatedQuery<Quote>('quote')).toBeUndefined()
+    expect(services.mojaClient.putQuotes).not.toHaveBeenCalled()
+    expect(services.mojaClient.putQuotesError).toHaveBeenCalledWith(quoteRequest.quoteId, { errorInformation: { errorCode: '3301', errorDescription: 'Transaction is no longer valid.' } }, headers['fspiop-source'])
+    expect(services.queueService.addToQueue).toHaveBeenCalledWith(transactionInfo.lpsId + 'AuthorizationResponses', { lpsAuthorizationRequestMessageId: legacyAuthRequest.id, response: ResponseType.invalid })
+  })
 })

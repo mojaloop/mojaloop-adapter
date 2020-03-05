@@ -1,7 +1,7 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { transferResponseHandler } from '../../src/handlers/transfer-response-handler'
-import { LegacyFinancialResponse } from '../../src/types/adaptor-relay-messages'
+import { LegacyFinancialResponse, ResponseType } from '../../src/types/adaptor-relay-messages'
 import { TransactionState, Transaction, TransferState, LpsMessage, LegacyMessageType } from '../../src/models'
 import { Model, transaction } from 'objection'
 import { ISO0200Factory } from '../factories/iso-messages'
@@ -72,7 +72,8 @@ describe('Transfer Response Handler', () => {
     await transferResponseHandler(services, transferResponse, headers, transferResponse.transferId)
 
     const legacyFinancialResponse: LegacyFinancialResponse = {
-      lpsFinancialRequestMessageId: lpsFinancialRequest.id
+      lpsFinancialRequestMessageId: lpsFinancialRequest.id,
+      response: ResponseType.approved
     }
     expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1FinancialResponses', legacyFinancialResponse)
   })

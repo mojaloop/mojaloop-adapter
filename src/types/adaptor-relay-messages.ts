@@ -1,5 +1,12 @@
 import { Money } from './mojaloop'
 
+export enum ResponseType {
+  approved,
+  invalid,
+  noPayerFound,
+  payerFSPRejected
+}
+
 export type LegacyAuthorizationRequest = {
   lpsId: string;
   lpsKey: string;
@@ -24,8 +31,9 @@ export type LegacyAuthorizationRequest = {
 
 export type LegacyAuthorizationResponse = {
   lpsAuthorizationRequestMessageId: string;
-  transferAmount: Money;
-  fees: Money;
+  response: ResponseType;
+  transferAmount?: Money;
+  fees?: Money;
 }
 
 export type LegacyFinancialRequest = {
@@ -41,6 +49,7 @@ export type LegacyFinancialRequest = {
 
 export type LegacyFinancialResponse = {
   lpsFinancialRequestMessageId: string;
+  response: ResponseType;
 }
 
 export type LegacyReversalRequest = {

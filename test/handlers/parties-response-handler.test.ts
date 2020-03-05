@@ -60,7 +60,7 @@ describe('Parties Response Handler', () => {
   })
 
   test('updates the fspId of the payer', async () => {
-    const transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    const transaction = await Transaction.query().insertGraphAndFetch({ ...transactionInfo, expiration: new Date(Date.now() + 1000).toUTCString() })
     const putPartiesResponse = PartiesPutResponseFactory.build({
       party: {
         partyIdInfo: {
@@ -77,7 +77,7 @@ describe('Parties Response Handler', () => {
   })
 
   test('makes a transaction request to the Moja switch', async () => {
-    const transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    const transaction = await Transaction.query().insertGraphAndFetch({ ...transactionInfo, expiration: new Date(Date.now() + 1000).toUTCString() })
     const putPartiesResponse = PartiesPutResponseFactory.build({
       party: {
         partyIdInfo: {
@@ -146,6 +146,6 @@ describe('Parties Response Handler', () => {
 
     await partiesResponseHandler(services, putPartiesResponse, '0821234567')
 
-    expect(services.logger.error).toHaveBeenCalledWith('Parties response handler: Could not process party response. NotFoundError')
+    expect(services.logger.error).toHaveBeenCalledWith('Parties response handler: Could not process party response. Transaction not found')
   })
 })
