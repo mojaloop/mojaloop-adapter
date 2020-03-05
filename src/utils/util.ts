@@ -45,3 +45,12 @@ export function buildMojaloopErrorResponse (errorCode: string, errorDescription:
     }
   }
 }
+
+// based on https://github.com/Microsoft/TypeScript/issues/8655#issuecomment-373864014
+export function assertExists<T> (value: T | null | undefined, message: string): T {
+  if (value === null || value === undefined) {
+    throw new Error(message)
+  }
+
+  return value
+}

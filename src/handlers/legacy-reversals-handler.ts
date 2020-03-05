@@ -1,7 +1,8 @@
 import { AdaptorServices } from 'adaptor'
 import { LegacyReversalRequest } from '../types/adaptor-relay-messages'
 import { TransactionType } from '../types/mojaloop'
-import { Transaction, LpsMessage, TransactionState } from '../models'
+import { Transaction, LpsMessage, TransactionState, TransactionParty } from '../models'
+import { assertExists } from '../utils/util'
 const uuid = require('uuid/v4')
 
 export async function legacyReversalHandler ({ logger }: AdaptorServices, financialRequest: LegacyReversalRequest): Promise<void> {
@@ -13,7 +14,7 @@ export async function legacyReversalHandler ({ logger }: AdaptorServices, financ
       initiator: 'PAYER',
       initiatorType: transaction.initiatorType,
       refundInfo: {
-        originalTransactionId: transaction.transactionId!
+        originalTransactionId: assertExists<string>(transaction.transactionId, 'Transaction does not have transactionId')
       }
     }
     await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(financialRequest.lpsReversalRequestMessageId)
@@ -26,6 +27,8 @@ export async function legacyReversalHandler ({ logger }: AdaptorServices, financ
 
     if (transaction.transfer) {
       logger.debug(`Legacy Reversal Handler: Creating refund transaction: ${transaction.transactionRequestId}`)
+      const originalPayee = assertExists<TransactionParty>(transaction.payee, 'Transaction does not have a payee')
+      const originalPayer = assertExists<TransactionParty>(transaction.payer, 'Transaction does not have a payer')
       const reversalTransaction = await Transaction.query().insertGraphAndFetch({
         transactionRequestId: uuid(),
         transactionId: uuid(),
@@ -43,17 +46,17 @@ export async function legacyReversalHandler ({ logger }: AdaptorServices, financ
         fees: [],
         payer: {
           type: 'payer',
-          identifierType: transaction.payee!.identifierType,
-          identifierValue: transaction.payee!.identifierValue,
-          subIdOrType: transaction.payee!.subIdOrType,
-          fspId: transaction.payee!.fspId!
+          identifierType: originalPayee.identifierType,
+          identifierValue: originalPayee.identifierValue,
+          subIdOrType: originalPayee.subIdOrType,
+          fspId: originalPayee.fspId
         },
         payee: {
           type: 'payee',
-          identifierType: transaction.payer!.identifierType,
-          identifierValue: transaction.payer!.identifierValue,
-          subIdOrType: transaction.payer!.subIdOrType,
-          fspId: transaction.payer?.fspId
+          identifierType: originalPayer.identifierType,
+          identifierValue: originalPayer.identifierValue,
+          subIdOrType: originalPayer.subIdOrType,
+          fspId: originalPayer.fspId
         }
       })
       await reversalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(financialRequest.lpsReversalRequestMessageId)

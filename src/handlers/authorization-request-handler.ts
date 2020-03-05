@@ -1,7 +1,8 @@
 import { AdaptorServices } from '../adaptor'
 import { LegacyAuthorizationResponse, ResponseType } from '../types/adaptor-relay-messages'
 import { ErrorInformation } from '../types/mojaloop'
-import { TransactionState, Transaction, LpsMessage, LegacyMessageType } from '../models'
+import { TransactionState, Transaction, LpsMessage, LegacyMessageType, Quote } from '../models'
+import { assertExists } from '../utils/util'
 
 const validate = async (transaction: Transaction): Promise<ErrorInformation | undefined> => {
   if (!transaction.isValid()) {
@@ -44,16 +45,17 @@ export async function authorizationRequestHandler ({ queueService, logger, autho
       return
     }
 
+    const quote = assertExists<Quote>(transaction.quote, 'Transaction does not have a quote')
     const authorizationRequest: LegacyAuthorizationResponse = {
       lpsAuthorizationRequestMessageId: legacyAuthorizationRequest.id,
       response: ResponseType.approved,
       fees: {
-        amount: transaction.quote!.feeAmount, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-        currency: transaction.quote!.feeCurrency // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        amount: quote.feeAmount,
+        currency: quote.feeCurrency
       },
       transferAmount: {
-        amount: transaction.quote!.transferAmount, // eslint-disable-line @typescript-eslint/no-non-null-assertion
-        currency: transaction.quote!.transferAmountCurrency // eslint-disable-line @typescript-eslint/no-non-null-assertion
+        amount: quote.transferAmount,
+        currency: quote.transferAmountCurrency
       }
     }
 
