@@ -1,12 +1,17 @@
 import { AdaptorServices } from 'adaptor'
 import { LegacyReversalRequest } from '../types/adaptor-relay-messages'
 import { TransactionType, QuotesPostRequest } from '../types/mojaloop'
-import { Transaction, LpsMessage, TransactionState, TransactionParty, Quote } from '../models'
+import { Transaction, LpsMessage, TransactionState, TransactionParty } from '../models'
 import { assertExists } from '../utils/util'
 const uuid = require('uuid/v4')
 
 export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServices, financialRequest: LegacyReversalRequest): Promise<void> {
   try {
+    if ((await LpsMessage.query().where('lpsMessages.id', financialRequest.lpsReversalRequestMessageId).withGraphJoined('transactions').where('transactions.scenario', 'REFUND').count()).length !== 0) {
+      logger.debug(`Legacy Reversal Handler: Refund transaction already associated with legacy reversal message id: ${financialRequest.lpsReversalRequestMessageId} from lpsKey: ${financialRequest.lpsKey}`)
+      return
+    }
+
     const transaction = await Transaction.query().where('transactions.lpsKey', financialRequest.lpsKey).withGraphJoined('[lpsMessages, payer, payee, quote, transfer]').where('lpsMessages.id', financialRequest.lpsFinancialRequestMessageId).first().throwIfNotFound()
 
     const refund: TransactionType = {
@@ -18,7 +23,7 @@ export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServ
       }
     }
     await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(financialRequest.lpsReversalRequestMessageId)
-    await transaction.$query().update({ state: TransactionState.transactionCancelled, previousState: transaction.state })
+    await transaction.$query().modify('updateState', TransactionState.transactionCancelled)
 
     if (transaction.quote && (new Date(transaction.quote.expiration) > new Date(Date.now()))) {
       logger.debug(`Legacy Reversal Handler: Expiring quote for transaction request id: ${transaction.transactionRequestId}`)
@@ -84,7 +89,6 @@ export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServ
       await mojaClient.postQuotes(quoteRequest, assertExists<string>(originalPayer.fspId, 'Original payer does not have an fspId'))
     }
   } catch (error) {
-    console.log('error', error)
     logger.error(`Legacy Reversal Handler: Failed to process legacy reversal request. ${error.message}`)
   }
 }

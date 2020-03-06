@@ -225,5 +225,31 @@ describe('Legacy Reversal Handler', () => {
       }
       expect(services.mojaClient.postQuotes).toHaveBeenCalledWith(quoteRequest, assertExists<TransactionParty>(originalTransaction.payer, 'Transaction does not have payer').fspId)
     })
+
+    test('prevents replay of reversal advice message', async () => {
+      const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+      const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
+      const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+      await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
+      await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: transactionInfo.quote.id, state: TransferState.committed, fulfillment: 'fulfillment' })
+      await legacyReversalHandler(services, {
+        lpsFinancialRequestMessageId: lpsMessage.id,
+        lpsId: 'lps1',
+        lpsKey: 'lps1-001-abc',
+        lpsReversalRequestMessageId: lpsMessage2.id
+      })
+      expect(await Transaction.query().resultSize()).toBe(2)
+      expect(services.mojaClient.postQuotes).toHaveBeenCalledTimes(1)
+
+      await legacyReversalHandler(services, {
+        lpsFinancialRequestMessageId: lpsMessage.id,
+        lpsId: 'lps1',
+        lpsKey: 'lps1-001-abc',
+        lpsReversalRequestMessageId: lpsMessage2.id
+      })
+
+      expect(await Transaction.query().resultSize()).toBe(2)
+      expect(services.mojaClient.postQuotes).toHaveBeenCalledTimes(1)
+    })
   })
 })

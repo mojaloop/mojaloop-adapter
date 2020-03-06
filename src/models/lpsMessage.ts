@@ -1,4 +1,5 @@
-import { Model } from 'objection'
+import { Model, RelationMappings } from 'objection'
+import { Transaction } from './transaction'
 
 export enum LegacyMessageType {
   authorizationRequest = 'authorizationRequest',
@@ -28,4 +29,20 @@ export class LpsMessage extends Model {
     return new Error('LPS Message not found')
   }
 
+  static get relationMappings (): RelationMappings {
+    return {
+      transactions: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Transaction,
+        join: {
+          from: 'lpsMessages.id',
+          through: {
+            from: 'transactionsLpsMessages.lpsMessageId',
+            to: 'transactionsLpsMessages.transactionRequestId'
+          },
+          to: 'transactions.transactionRequestId'
+        }
+      }
+    }
+  }
 }
