@@ -1,9 +1,11 @@
 import Knex from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
-import { TransactionState, Transaction, LpsMessage, LegacyMessageType, Quote, Transfers, TransferState } from '../../src/models'
+import { TransactionState, Transaction, LpsMessage, LegacyMessageType, Quote, Transfers, TransferState, TransactionParty } from '../../src/models'
 import { Model } from 'objection'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { legacyReversalHandler } from '../../src/handlers/legacy-reversals-handler'
+import { assertExists } from '../../src/utils/util'
+import { QuotesPostRequest } from '../../src/types/mojaloop'
 const uuid = require('uuid/v4')
 
 describe('Legacy Reversal Handler', () => {
@@ -182,9 +184,46 @@ describe('Legacy Reversal Handler', () => {
         lpsKey: 'lps1-001-abc',
         lpsReversalRequestMessageId: '2'
       })
-      const transaction = await Transaction.query().where('originalTransactionId', transactionInfo.transactionId).withGraphFetched('lpsMessages').first()
 
       expect((await quote.$query()).expiration).toBe(new Date(Date.now()).toUTCString())
+    })
+
+    test('requests quote for refund', async () => {
+      const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+      const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
+      const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+      await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
+      const quote = await originalTransaction.$relatedQuery<Quote>('quote').insertAndFetch({ id: 'quote123', transactionId: transactionInfo.transactionId, amount: transactionInfo.amount, amountCurrency: transactionInfo.currency, transferAmount: '101', transferAmountCurrency: 'USD', ilpPacket: 'ilppacket', condition: 'condition', expiration: new Date(Date.now() + 10000).toUTCString() })
+      await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: quote.id, state: TransferState.committed, fulfillment: 'fulfillment' })
+
+      await legacyReversalHandler(services, {
+        lpsFinancialRequestMessageId: lpsMessage.id,
+        lpsId: 'lps1',
+        lpsKey: 'lps1-001-abc',
+        lpsReversalRequestMessageId: lpsMessage2.id
+      })
+
+      const transaction = await Transaction.query().where('originalTransactionId', transactionInfo.transactionId).withGraphFetched('[lpsMessages, quote]').first()
+      const quoteRequest: QuotesPostRequest = {
+        quoteId: assertExists<Quote>(transaction.quote, 'Transaction does not have a quote').id,
+        amount: {
+          amount: originalTransaction.amount,
+          currency: originalTransaction.currency
+        },
+        amountType: 'RECEIVE',
+        payee: assertExists<TransactionParty>(originalTransaction.payer, 'Transaction does not have payer').toMojaloopParty(),
+        payer: assertExists<TransactionParty>(originalTransaction.payee, 'Transaction does not have payee').toMojaloopParty(),
+        transactionId: assertExists<string>(transaction.transactionId, 'Transaction does not have transactionId'),
+        transactionType: {
+          initiator: 'PAYER',
+          initiatorType: originalTransaction.initiatorType,
+          scenario: 'REFUND',
+          refundInfo: {
+            originalTransactionId: assertExists<string>(originalTransaction.transactionId, 'Transaction does not have transactionId')
+          }
+        }
+      }
+      expect(services.mojaClient.postQuotes).toHaveBeenCalledWith(quoteRequest, assertExists<TransactionParty>(originalTransaction.payer, 'Transaction does not have payer').fspId)
     })
   })
 })
