@@ -213,10 +213,12 @@ describe('Transfer Requests Handler', () => {
     expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1FinancialResponses', { lpsFinancialRequestMessageId: legacyFinancialRequest.id, response: ResponseType.invalid })
   })
 
-  test('sends a 3302 if the quote has expired', async () => {
+  test('sends a 3302 and queues an invalid transaction message if the quote has expired', async () => {
+    const legacyFinancialRequest = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.financialRequest, lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, content: ISO0200Factory.build() })
     const { quote, ...transactionWithoutQuote } = transactionInfo
     quote.expiration = new Date(Date.now() - 1000).toUTCString()
-    await Transaction.query().insertGraph({ ...transactionWithoutQuote, expiration: new Date(Date.now() + 10000).toUTCString(), quote })
+    const transaction = await Transaction.query().insertGraphAndFetch({ ...transactionWithoutQuote, expiration: new Date(Date.now() + 10000).toUTCString(), quote })
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(legacyFinancialRequest)
     const transferRequest = TransferPostRequestFactory.build({
       amount: {
         amount: '107',
@@ -233,7 +235,7 @@ describe('Transfer Requests Handler', () => {
 
     expect(services.mojaClient.putTransfers).not.toHaveBeenCalled()
     expect(services.mojaClient.putTransfersError).toHaveBeenCalledWith(transferRequest.transferId, { errorInformation: { errorCode: '3302', errorDescription: 'Quote has expired.' } }, headers['fspiop-source'])
+    expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1FinancialResponses', { lpsFinancialRequestMessageId: legacyFinancialRequest.id, response: ResponseType.invalid })
   })
 
-  test.todo('queues a declined message to the LPS if the transfer request fails')
 })
