@@ -287,14 +287,16 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
     const stan = originalDataElements.slice(4, 10)
     const date = originalDataElements.slice(10, 20)
     const acquiringId = originalDataElements.slice(20, 31).replace(/^0+/g, '')
+    const forwardingId = originalDataElements.slice(31, 42).replace(/^0+/g, '')
 
-    this._logger.debug(JSON.stringify({ originalDataElements, stan, mti, date, acquiringId }))
+    this._logger.debug(JSON.stringify({ originalDataElements, stan, mti, date, acquiringId, forwardingId }))
 
     const query = LpsMessage.query()
       .where(raw(`JSON_EXTRACT(content, '$."0"') = "${mti}"`))
       .where(raw(`JSON_EXTRACT(content, '$."7"') = "${date}"`))
       .where(raw(`JSON_EXTRACT(content, '$."11"') = "${stan}"`))
     if (acquiringId !== '') query.where(raw(`JSON_EXTRACT(content, '$."32"') = "${acquiringId}"`))
+    if (forwardingId !== '') query.where(raw(`JSON_EXTRACT(content, '$."33"') = "${forwardingId}"`))
 
     const prevLpsMessageId = await query.orderBy('created_at', 'desc').first().throwIfNotFound()
 

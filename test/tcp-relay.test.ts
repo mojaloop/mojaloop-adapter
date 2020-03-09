@@ -163,7 +163,7 @@ describe('TCP relay', function () {
     expect(client.write).toHaveBeenCalledWith(encode({ ...json0200, 0: '0210', 39: '00' }))
   })
 
-  test('matches a legacy reversal advice to a previous legacy request that has no acquirer id', async () => {
+  test('matches a legacy reversal advice to a previous legacy request that has no acquirer or forwarding institution id', async () => {
     const iso0100 = ISO0100Factory.build({
       7: '0130083636',
       11: '000008',
@@ -199,6 +199,32 @@ describe('TCP relay', function () {
     const iso0420 = ISO0420Factory.build({
       28: 'C00000100',
       90: '010000000801300836360070840000300000000000'
+    })
+
+    const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${iso0100[41]}-${iso0100[42]}`, content: iso0100 })
+    const reversalMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.reversalRequest, lpsId: 'lps1', lpsKey: `lps1-${iso0420[41]}-${iso0420[42]}`, content: iso0420 })
+
+    const legacyReversal = await relay.mapFromReversalAdvice(reversalMessage.id, iso0420)
+
+    expect(legacyReversal).toEqual({
+      lpsId: 'lps1',
+      lpsKey: `lps1-${iso0420[41]}-${iso0420[42]}`,
+      lpsFinancialRequestMessageId: lpsMessage.id,
+      lpsReversalRequestMessageId: reversalMessage.id
+    })
+  })
+
+  test('matches a legacy reversal advice to a previous legacy request that has a forwarding institution id', async () => {
+    const iso0100 = ISO0100Factory.build({
+      7: '0130083636',
+      11: '000008',
+      12: '103636',
+      28: 'D00000100',
+      33: '708400003'
+    })
+    const iso0420 = ISO0420Factory.build({
+      28: 'C00000100',
+      90: '010000000801300836360000000000000708400003'
     })
 
     const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${iso0100[41]}-${iso0100[42]}`, content: iso0100 })
