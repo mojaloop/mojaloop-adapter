@@ -1,7 +1,7 @@
 import { AdaptorServices } from 'adaptor'
 import { LegacyReversalRequest } from '../types/adaptor-relay-messages'
 import { TransactionType, QuotesPostRequest } from '../types/mojaloop'
-import { Transaction, LpsMessage, TransactionState, TransactionParty } from '../models'
+import { Transaction, LpsMessage, TransactionState, TransactionParty, TransferState } from '../models'
 import { assertExists } from '../utils/util'
 const uuid = require('uuid/v4')
 
@@ -30,7 +30,7 @@ export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServ
       await transaction.quote.$query().update({ expiration: new Date(Date.now()).toUTCString() })
     }
 
-    if (transaction.transfer) {
+    if (transaction.transfer && transaction.transfer.state === TransferState.committed) {
       logger.debug(`Legacy Reversal Handler: Creating refund transaction: ${transaction.transactionRequestId}`)
       const originalPayee = assertExists<TransactionParty>(transaction.payee, 'Transaction does not have a payee')
       const originalPayer = assertExists<TransactionParty>(transaction.payer, 'Transaction does not have a payer')

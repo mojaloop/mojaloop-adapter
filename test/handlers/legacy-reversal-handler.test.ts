@@ -148,6 +148,24 @@ describe('Legacy Reversal Handler', () => {
     expect(services.mojaClient.postTransactionRequests).not.toHaveBeenCalled()
   })
 
+  test('does not create a refund transaction if the transfer was not committed', async () => {
+    const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
+    const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+    await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
+    await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: transactionInfo.quote.id, state: TransferState.aborted, fulfillment: 'fulfillment' })
+
+    await legacyReversalHandler(services, {
+      lpsFinancialRequestMessageId: '1',
+      lpsId: 'lps1',
+      lpsKey: 'lps1-001-abc',
+      lpsReversalRequestMessageId: '2'
+    })
+
+    expect(await Transaction.query().where({ scenario: 'REFUND' })).toHaveLength(0)
+    expect(services.mojaClient.postTransactionRequests).not.toHaveBeenCalled()
+  })
+
   describe('creates a refund transaction if a transfer for the original transaction has occurred', () => {
     test('maps the lpsReversalRequestMessage to the new transaction', async () => {
       const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
