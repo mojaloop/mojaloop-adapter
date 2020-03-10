@@ -1,16 +1,17 @@
 import { AdaptorServices } from 'adaptor'
-import { LegacyReversalRequest } from '../types/adaptor-relay-messages'
+import { LegacyReversalRequest, ResponseType } from '../types/adaptor-relay-messages'
 import { TransactionType, QuotesPostRequest } from '../types/mojaloop'
 import { Transaction, LpsMessage, TransactionState, TransactionParty, TransferState } from '../models'
 import { assertExists } from '../utils/util'
 const uuid = require('uuid/v4')
 
-export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServices, reversalRequest: LegacyReversalRequest): Promise<void> {
+export async function legacyReversalHandler ({ logger, mojaClient, queueService }: AdaptorServices, reversalRequest: LegacyReversalRequest): Promise<void> {
   try {
     const lpsMessage = await LpsMessage.query().where('lpsMessages.id', reversalRequest.lpsReversalRequestMessageId).withGraphJoined('transactions').first().throwIfNotFound()
 
     if (assertExists<Transaction[]>(lpsMessage.transactions, 'No transactions found for legacy message.').filter(trx => trx.scenario === 'REFUND').length !== 0) {
       logger.debug(`Legacy Reversal Handler: Refund transaction already associated with legacy reversal message id: ${reversalRequest.lpsReversalRequestMessageId} from lpsKey: ${reversalRequest.lpsKey}`)
+      await queueService.addToQueue(`${reversalRequest.lpsId}ReversalResponses`, { lpsReversalRequestMessageId: reversalRequest.lpsReversalRequestMessageId, response: ResponseType.approved })
       return
     }
 
@@ -90,7 +91,10 @@ export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServ
       })
       await mojaClient.postQuotes(quoteRequest, assertExists<string>(originalPayer.fspId, 'Original payer does not have an fspId'))
     }
+
+    await queueService.addToQueue(`${reversalRequest.lpsId}ReversalResponses`, { lpsReversalRequestMessageId: reversalRequest.lpsReversalRequestMessageId, response: ResponseType.approved })
   } catch (error) {
     logger.error(`Legacy Reversal Handler: Failed to process legacy reversal request. ${error.message}`)
+    await queueService.addToQueue(`${reversalRequest.lpsId}ReversalResponses`, { lpsReversalRequestMessageId: reversalRequest.lpsReversalRequestMessageId, response: ResponseType.invalid })
   }
 }

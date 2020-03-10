@@ -3,7 +3,7 @@ import { Worker, Job, ConnectionOptions } from 'bullmq'
 import { raw } from 'objection'
 import { QueueService } from './services/queue-service'
 import { Logger } from './adaptor'
-import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancialRequest, LegacyFinancialResponse, LegacyReversalRequest, ResponseType } from './types/adaptor-relay-messages'
+import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancialRequest, LegacyFinancialResponse, LegacyReversalRequest, ResponseType, LegacyReversalResponse } from './types/adaptor-relay-messages'
 import { LpsMessage, LegacyMessageType } from './models'
 import { Money } from '@mojaloop/sdk-standard-components'
 import { pad } from './utils/util'
@@ -22,6 +22,7 @@ export interface TcpRelay {
   mapFromFinancialRequest: (lpsMessageId: string, legacyMessage: LegacyMessage) => Promise<LegacyFinancialRequest>;
   mapToFinancialResponse: (financialResponse: LegacyFinancialResponse) => Promise<LegacyMessage>;
   mapFromReversalAdvice: (lpsMessageId: string, legacyMessage: LegacyMessage) => Promise<LegacyReversalRequest>;
+  mapToReversalAdviceResponse: (reversalResponse: LegacyReversalResponse) => Promise<LegacyMessage>;
 }
 
 export type TcpRelayServices = {
@@ -43,6 +44,8 @@ export type ResponseCodes = {
   approved: string;
   invalidTransaction: string;
   noAction: string;
+  noIssuer: string;
+  doNotHonour: string;
 }
 
 export class DefaultIso8583TcpRelay implements TcpRelay {
@@ -60,6 +63,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
 
   private _authorizationResponseWorker?: Worker
   private _financialResponseWorker?: Worker
+  private _reversalResponseWorker?: Worker
   private _responseCodes: ResponseCodes
 
   constructor ({ logger, queueService, encode, decode, socket }: TcpRelayServices, { lpsId, transactionExpiryWindow, redisConnection, responseCodes }: TcpRelayConfig) {
@@ -70,7 +74,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
     this._lpsId = lpsId
     this._transactionExpiryWindow = transactionExpiryWindow || 30
     this._redisConnection = redisConnection ?? { host: 'localhost', port: 6379 }
-    this._responseCodes = responseCodes ?? { approved: '00', invalidTransaction: '12', noAction: '21' }
+    this._responseCodes = responseCodes ?? { approved: '00', invalidTransaction: 'N0', noAction: '21', doNotHonour: '05', noIssuer: '15' }
 
     socket.on('data', async (data) => {
       try {
@@ -91,9 +95,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
             break
           case LegacyMessageType.reversalRequest:
             try {
-              const reversalRequest = await this.mapFromReversalAdvice(lpsMessage.id, legacyMessage)
-              this._queueService.addToQueue('LegacyReversalRequests', reversalRequest)
-              socket.write(encode({ ...legacyMessage, 0: '0430', 39: '00' }))
+              this._queueService.addToQueue('LegacyReversalRequests', await this.mapFromReversalAdvice(lpsMessage.id, legacyMessage))
             } catch (error) {
               this._logger.error(this._lpsId + ' relay: Could not process the reversal request from: ' + this._lpsId + ' lpsKey: ' + lpsKey)
               socket.write(encode({ ...legacyMessage, 0: '0430', 39: '21' }))
@@ -130,6 +132,14 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
         this._logger.error(`${this._lpsId} FinancialResponse worker: Failed to handle message. ${error.message}`)
       }
     }, { connection: this._redisConnection })
+
+    this._reversalResponseWorker = new Worker(`${this._lpsId}ReversalResponses`, async (job: Job<LegacyReversalResponse>) => {
+      try {
+        await this.handleReversalResponse(job.data)
+      } catch (error) {
+        this._logger.error(`${this._lpsId} ReversalResponse worker: Failed to handle message. ${error.message}`)
+      }
+    }, { connection: this._redisConnection })
   }
 
   async shutdown (): Promise<void> {
@@ -163,6 +173,16 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
     }
 
     const message = await this.mapToFinancialResponse(financialResponse)
+
+    this._socket.write(this._encode(message))
+  }
+
+  async handleReversalResponse (reversalResponse: LegacyReversalResponse): Promise<void> {
+    if (!this._socket) {
+      throw new Error(`${this._lpsId} relay: Cannot handleFinancialResponse as there is no socket registered.`)
+    }
+
+    const message = await this.mapToReversalAdviceResponse(reversalResponse)
 
     this._socket.write(this._encode(message))
   }
@@ -206,6 +226,21 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
       default: {
         throw new Error('Legacy authorization request processing code not valid')
       }
+    }
+  }
+
+  getResponseCode (response: ResponseType): string {
+    switch (response) {
+      case ResponseType.approved:
+        return this._responseCodes.approved
+      case ResponseType.invalid:
+        return this._responseCodes.invalidTransaction
+      case ResponseType.noPayerFound:
+        return this._responseCodes.noIssuer
+      case ResponseType.payerFSPRejected:
+        return this._responseCodes.doNotHonour
+      default:
+        throw new Error(`${this._lpsId} relay: Cannot map to a response code.`)
     }
   }
 
@@ -275,7 +310,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
     return {
       ...financialRequest.content,
       0: '0210',
-      39: '00'
+      39: this.getResponseCode(financialResponse.response)
     }
   }
 
@@ -307,6 +342,17 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
       lpsKey: this._lpsId + '-' + legacyMessage[41] + '-' + legacyMessage[42],
       lpsFinancialRequestMessageId: prevLpsMessageId.id,
       lpsReversalRequestMessageId: lpsMessageId
+    }
+  }
+
+  async mapToReversalAdviceResponse (reversalResponse: LegacyReversalResponse): Promise<LegacyMessage> {
+    this._logger.debug(`${this._lpsId} relay: Mapping to reversal response`)
+    const reversalRequest = await LpsMessage.query().where({ id: reversalResponse.lpsReversalRequestMessageId }).first().throwIfNotFound()
+
+    return {
+      ...reversalRequest.content,
+      0: '0430',
+      39: this.getResponseCode(reversalResponse.response)
     }
   }
 }

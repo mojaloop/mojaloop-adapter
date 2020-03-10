@@ -3,7 +3,7 @@ import { Model } from 'objection'
 import { Socket } from 'net'
 import { DefaultIso8583TcpRelay, LegacyMessage } from '../src/tcp-relay'
 import { iso0100BinaryMessage, iso0200BinaryMessage, ISO0100Factory, ISO0420Factory } from './factories/iso-messages'
-import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse, ResponseType } from '../src/types/adaptor-relay-messages'
+import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse, ResponseType, LegacyReversalResponse } from '../src/types/adaptor-relay-messages'
 import { LpsMessage, LegacyMessageType } from '../src/models'
 const knexConfig = require('../knexfile')
 const IsoParser = require('iso_8583')
@@ -140,7 +140,7 @@ describe('TCP relay', function () {
 
     await relay.handleAuthorizationResponse(legacyAuthorizationResponse)
 
-    expect(client.write).toHaveBeenCalledWith(encode({ ...json0100, 0: '0110', 39: '12' }))
+    expect(client.write).toHaveBeenCalledWith(encode({ ...json0100, 0: '0110', 39: 'N0' }))
   })
 
   test('encodes legacy financial response and sends over socket', async () => {
@@ -155,6 +155,20 @@ describe('TCP relay', function () {
     await relay.handleFinancialResponse(legacyFinancialResponse)
 
     expect(client.write).toHaveBeenCalledWith(encode({ ...json0200, 0: '0210', 39: '00' }))
+  })
+
+  test('encodes reversal response and sends over socket', async () => {
+    client.write = jest.fn().mockReturnValue(undefined)
+    const json0420 = ISO0420Factory.build()
+    const lpsMessage = await LpsMessage.query().insertAndFetch({ type: LegacyMessageType.authorizationRequest, lpsId: 'lps1', lpsKey: `lps1-${json0420[41]}-${json0420[42]}`, content: json0420 })
+    const legacyReversalResponse: LegacyReversalResponse = {
+      lpsReversalRequestMessageId: lpsMessage.id,
+      response: ResponseType.approved
+    }
+
+    await relay.handleReversalResponse(legacyReversalResponse)
+
+    expect(client.write).toHaveBeenCalledWith(encode({ ...json0420, 0: '0430', 39: '00' }))
   })
 
   test('matches a legacy reversal advice to a previous legacy request that has no acquirer or forwarding institution id', async () => {
