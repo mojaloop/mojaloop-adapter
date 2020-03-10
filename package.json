@@ -19,7 +19,7 @@
     "format": "prettier-eslint --write \"./src/**/*.ts\"",
     "migrate:make": "knex migrate:make",
     "start": "node dist/index.js",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "@mojaloop/central-services-logger": "^8.6.0",
