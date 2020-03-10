@@ -1,4 +1,4 @@
-import { Model, RelationMappings, QueryBuilder, ref, raw } from 'objection'
+import { Model, RelationMappings, QueryBuilder } from 'objection'
 import { TransactionFee } from './transactionFee'
 import { TransactionParty } from './transactionParty'
 import { LpsMessage } from './lpsMessage'
@@ -127,7 +127,7 @@ export class Transaction extends Model {
         .where('payer.identifierValue', msisdn)
     },
     updateState (query: QueryBuilder<Transaction>, newState: string): void {
-      query.onBuildKnex((knexBuilder, objectionBuilder) => {
+      query.onBuildKnex((knexBuilder) => {
         knexBuilder.update({
           previousState: Transaction.knex().ref('state'), // NB!: for MySQL order of update matters. make sure to update previousState first
           state: newState
