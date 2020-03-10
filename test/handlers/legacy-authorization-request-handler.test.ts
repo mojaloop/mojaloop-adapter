@@ -1,4 +1,4 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { Model } from 'objection'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { LegacyAuthorizationRequestFactory } from '../factories/adaptor-legacy-messages'
@@ -7,33 +7,24 @@ import { Transaction, TransactionState } from '../../src/models/transaction'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { LpsMessage, LegacyMessageType } from '../../src/models/lpsMessage'
 import { ResponseType } from '../../src/types/adaptor-relay-messages'
-
+const knexConfig = require('../../knexfile')
 jest.mock('uuid/v4', () => () => '123')
 
 describe('Legacy Authorization Request Handler', () => {
 
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const iso0100 = ISO0100Factory.build()
 
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

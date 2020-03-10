@@ -1,14 +1,16 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { partiesResponseHandler } from '../../src/handlers/parties-response-handler'
 import { PartiesPutResponseFactory } from '../factories/mojaloop-messages'
 import { TransactionState, Transaction } from '../../src/models'
 import { Model } from 'objection'
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Parties Response Handler', () => {
   const services = AdaptorServicesFactory.build()
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const transactionInfo = {
     lpsId: 'lps1',
     lpsKey: 'lps1-001-abc',
@@ -35,24 +37,14 @@ describe('Parties Response Handler', () => {
     }
   }
 
-  beforeAll(() => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

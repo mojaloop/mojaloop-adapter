@@ -5,14 +5,16 @@ import { Transaction, LpsMessage, TransactionState, TransactionParty, TransferSt
 import { assertExists } from '../utils/util'
 const uuid = require('uuid/v4')
 
-export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServices, financialRequest: LegacyReversalRequest): Promise<void> {
+export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServices, reversalRequest: LegacyReversalRequest): Promise<void> {
   try {
-    if ((await LpsMessage.query().where('lpsMessages.id', financialRequest.lpsReversalRequestMessageId).withGraphJoined('transactions').where('transactions.scenario', 'REFUND').count()).length !== 0) {
-      logger.debug(`Legacy Reversal Handler: Refund transaction already associated with legacy reversal message id: ${financialRequest.lpsReversalRequestMessageId} from lpsKey: ${financialRequest.lpsKey}`)
+    const lpsMessage = await LpsMessage.query().where('lpsMessages.id', reversalRequest.lpsReversalRequestMessageId).withGraphJoined('transactions').first().throwIfNotFound()
+
+    if (assertExists<Transaction[]>(lpsMessage.transactions, 'No transactions found for legacy message.').filter(trx => trx.scenario === 'REFUND').length !== 0) {
+      logger.debug(`Legacy Reversal Handler: Refund transaction already associated with legacy reversal message id: ${reversalRequest.lpsReversalRequestMessageId} from lpsKey: ${reversalRequest.lpsKey}`)
       return
     }
 
-    const transaction = await Transaction.query().where('transactions.lpsKey', financialRequest.lpsKey).withGraphJoined('[lpsMessages, payer, payee, quote, transfer]').where('lpsMessages.id', financialRequest.lpsFinancialRequestMessageId).first().throwIfNotFound()
+    const transaction = await Transaction.query().where('transactions.lpsKey', reversalRequest.lpsKey).withGraphJoined('[lpsMessages, payer, payee, quote, transfer]').where('lpsMessages.id', reversalRequest.lpsFinancialRequestMessageId).first().throwIfNotFound()
 
     const refund: TransactionType = {
       scenario: 'REFUND',
@@ -22,7 +24,7 @@ export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServ
         originalTransactionId: assertExists<string>(transaction.transactionId, 'Transaction does not have transactionId')
       }
     }
-    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(financialRequest.lpsReversalRequestMessageId)
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(reversalRequest.lpsReversalRequestMessageId)
     await transaction.$query().modify('updateState', TransactionState.transactionCancelled)
 
     if (transaction.quote && (new Date(transaction.quote.expiration) > new Date(Date.now()))) {
@@ -65,7 +67,7 @@ export async function legacyReversalHandler ({ logger, mojaClient }: AdaptorServ
           fspId: originalPayer.fspId
         }
       })
-      await reversalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(financialRequest.lpsReversalRequestMessageId)
+      await reversalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(reversalRequest.lpsReversalRequestMessageId)
 
       const quoteId = uuid()
       const quoteRequest: QuotesPostRequest = {

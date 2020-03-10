@@ -1,4 +1,4 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 import { TransfersIDPutResponse } from '../../src/types/mojaloop'
@@ -8,13 +8,15 @@ import { TransactionState, Transaction, TransferState, Transfers, LpsMessage, Le
 import { Model } from 'objection'
 import { ResponseType } from '../../src/types/adaptor-relay-messages'
 import { ISO0200Factory } from '../factories/iso-messages'
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 const Logger = require('@mojaloop/central-services-logger')
 const sdk = require('@mojaloop/sdk-standard-components')
 Logger.log = Logger.info
 
 describe('Transfer Requests Handler', () => {
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const logger = Logger
   const ilp = new sdk.Ilp({ secret: 'test', logger })
   const services = AdaptorServicesFactory.build({ ilpService: ilp })
@@ -88,24 +90,14 @@ describe('Transfer Requests Handler', () => {
     }
   }
 
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

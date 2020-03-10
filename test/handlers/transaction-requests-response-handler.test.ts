@@ -1,14 +1,16 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { transactionRequestResponseHandler } from '../../src/handlers/transaction-request-response-handler'
 import { ErrorInformation } from '../../src/types/mojaloop'
 import { TransactionState, Transaction, Quote } from '../../src/models'
 import { Model } from 'objection'
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Transaction Requests Response Handler', function () {
 
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const headers = {
     'fspiop-source': 'payer',
@@ -41,24 +43,14 @@ describe('Transaction Requests Response Handler', function () {
     authenticationType: 'OTP'
   }
 
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

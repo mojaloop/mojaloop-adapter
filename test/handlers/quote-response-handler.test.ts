@@ -1,18 +1,48 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesIDPutResponse, TransfersPostRequest } from '../../src/types/mojaloop'
 import { quoteResponseHandler } from '../../src/handlers/quote-response-handler'
-import { Quote, Transfers, TransferState } from '../../src/models'
+import { Quote, Transfers, TransferState, TransactionState, Transaction } from '../../src/models'
 import { Model } from 'objection'
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Quote Response Handler', () => {
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
+
+  const transactionInfo = {
+    lpsId: 'lps1',
+    lpsKey: 'lps1-001-abc',
+    transactionRequestId: uuid(),
+    transactionId: uuid(),
+    initiator: 'PAYEE',
+    initiatorType: 'DEVICE',
+    scenario: 'WITHDRAWAL',
+    amount: '100',
+    currency: 'USD',
+    state: TransactionState.transactionResponded,
+    expiration: new Date(Date.now()).toUTCString(),
+    authenticationType: 'OTP',
+    payer: {
+      type: 'payer',
+      identifierType: 'MSISDN',
+      identifierValue: '0821234567',
+      fspId: 'mojawallet'
+    },
+    payee: {
+      type: 'payee',
+      identifierType: 'DEVICE',
+      identifierValue: '1234',
+      subIdOrType: 'abcd',
+      fspId: 'adaptor'
+    }
+  }
 
   const quote = {
     id: uuid(),
-    transactionRequestId: uuid(),
+    transactionRequestId: transactionInfo.transactionRequestId,
     transferAmount: '107',
     transferAmountCurrency: 'USD',
     amount: '100',
@@ -39,24 +69,15 @@ describe('Quote Response Handler', () => {
     'fspiop-destination': 'payer'
   }
 
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
+    await Transaction.query().insertGraph(transactionInfo)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

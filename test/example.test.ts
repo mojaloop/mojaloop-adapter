@@ -1,28 +1,20 @@
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { Model } from 'objection'
 import { Transaction } from '../src/models'
-import Knex = require('knex')
+const knexConfig = require('../knexfile')
 
 describe('Example test', function () {
-  let knex: Knex
-
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
 
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

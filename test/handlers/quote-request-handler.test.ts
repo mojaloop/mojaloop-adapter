@@ -1,4 +1,4 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { QuotesPostRequestFactory } from '../factories/mojaloop-messages'
 import { quotesRequestHandler } from '../../src/handlers/quote-request-handler'
@@ -6,10 +6,12 @@ import { TransactionState, Transaction, Quote, TransactionFee, LpsMessage, Legac
 import { Model } from 'objection'
 import { ISO0100Factory } from '../factories/iso-messages'
 import { ResponseType } from '../../src/types/adaptor-relay-messages'
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Quote Requests Handler', function () {
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const headers = {
     'fspiop-source': 'payer',
@@ -43,24 +45,14 @@ describe('Quote Requests Handler', function () {
     }
   }
 
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

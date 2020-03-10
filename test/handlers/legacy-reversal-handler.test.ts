@@ -1,4 +1,4 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { TransactionState, Transaction, LpsMessage, LegacyMessageType, Quote, Transfers, TransferState, TransactionParty } from '../../src/models'
 import { Model } from 'objection'
@@ -6,10 +6,12 @@ import { ISO0100Factory } from '../factories/iso-messages'
 import { legacyReversalHandler } from '../../src/handlers/legacy-reversals-handler'
 import { assertExists } from '../../src/utils/util'
 import { QuotesPostRequest } from '../../src/types/mojaloop'
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Legacy Reversal Handler', () => {
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const iso0100 = ISO0100Factory.build()
 
@@ -53,24 +55,14 @@ describe('Legacy Reversal Handler', () => {
     }
   }
 
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {
@@ -84,10 +76,10 @@ describe('Legacy Reversal Handler', () => {
     await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
 
     await legacyReversalHandler(services, {
-      lpsFinancialRequestMessageId: '1',
+      lpsFinancialRequestMessageId: lpsMessage.id,
       lpsId: 'lps1',
       lpsKey: 'lps1-001-abc',
-      lpsReversalRequestMessageId: '2'
+      lpsReversalRequestMessageId: lpsMessage2.id
     })
 
     const transaction = await Transaction.query().where('transactionRequestId', transactionInfo.transactionRequestId).withGraphFetched('lpsMessages').first()
@@ -103,10 +95,10 @@ describe('Legacy Reversal Handler', () => {
     await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
 
     await legacyReversalHandler(services, {
-      lpsFinancialRequestMessageId: '1',
+      lpsFinancialRequestMessageId: lpsMessage.id,
       lpsId: 'lps1',
       lpsKey: 'lps1-001-abc',
-      lpsReversalRequestMessageId: '2'
+      lpsReversalRequestMessageId: lpsMessage2.id
     })
 
     expect((await originalTransaction.$query()).state).toBe(TransactionState.transactionCancelled)
@@ -122,10 +114,10 @@ describe('Legacy Reversal Handler', () => {
     const quote = await originalTransaction.$relatedQuery<Quote>('quote').insertAndFetch({ id: 'quote123', transactionId: transactionInfo.transactionId, amount: transactionInfo.amount, amountCurrency: transactionInfo.currency, transferAmount: '101', transferAmountCurrency: 'USD', ilpPacket: 'ilppacket', condition: 'condition', expiration: new Date(Date.now() + 10000).toUTCString() })
 
     await legacyReversalHandler(services, {
-      lpsFinancialRequestMessageId: '1',
+      lpsFinancialRequestMessageId: lpsMessage.id,
       lpsId: 'lps1',
       lpsKey: 'lps1-001-abc',
-      lpsReversalRequestMessageId: '2'
+      lpsReversalRequestMessageId: lpsMessage2.id
     })
 
     expect((await quote.$query()).expiration).toBe(new Date(Date.now()).toUTCString())
@@ -138,10 +130,10 @@ describe('Legacy Reversal Handler', () => {
     await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
 
     await legacyReversalHandler(services, {
-      lpsFinancialRequestMessageId: '1',
+      lpsFinancialRequestMessageId: lpsMessage.id,
       lpsId: 'lps1',
       lpsKey: 'lps1-001-abc',
-      lpsReversalRequestMessageId: '2'
+      lpsReversalRequestMessageId: lpsMessage2.id
     })
 
     expect(await Transaction.query().where({ scenario: 'REFUND' })).toHaveLength(0)
@@ -156,10 +148,10 @@ describe('Legacy Reversal Handler', () => {
     await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: transactionInfo.quote.id, state: TransferState.aborted, fulfillment: 'fulfillment' })
 
     await legacyReversalHandler(services, {
-      lpsFinancialRequestMessageId: '1',
+      lpsFinancialRequestMessageId: lpsMessage.id,
       lpsId: 'lps1',
       lpsKey: 'lps1-001-abc',
-      lpsReversalRequestMessageId: '2'
+      lpsReversalRequestMessageId: lpsMessage2.id
     })
 
     expect(await Transaction.query().where({ scenario: 'REFUND' })).toHaveLength(0)
@@ -176,10 +168,10 @@ describe('Legacy Reversal Handler', () => {
       await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: quote.id, state: TransferState.committed, fulfillment: 'fulfillment' })
 
       await legacyReversalHandler(services, {
-        lpsFinancialRequestMessageId: '1',
+        lpsFinancialRequestMessageId: lpsMessage.id,
         lpsId: 'lps1',
         lpsKey: 'lps1-001-abc',
-        lpsReversalRequestMessageId: '2'
+        lpsReversalRequestMessageId: lpsMessage2.id
       })
       const transaction = await Transaction.query().where('originalTransactionId', transactionInfo.transactionId).withGraphFetched('lpsMessages').first()
 
@@ -197,10 +189,10 @@ describe('Legacy Reversal Handler', () => {
       await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: quote.id, state: TransferState.committed, fulfillment: 'fulfillment' })
 
       await legacyReversalHandler(services, {
-        lpsFinancialRequestMessageId: '1',
+        lpsFinancialRequestMessageId: lpsMessage.id,
         lpsId: 'lps1',
         lpsKey: 'lps1-001-abc',
-        lpsReversalRequestMessageId: '2'
+        lpsReversalRequestMessageId: lpsMessage2.id
       })
 
       expect((await quote.$query()).expiration).toBe(new Date(Date.now()).toUTCString())

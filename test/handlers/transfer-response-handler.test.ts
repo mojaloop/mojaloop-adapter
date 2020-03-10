@@ -1,15 +1,18 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { transferResponseHandler } from '../../src/handlers/transfer-response-handler'
 import { LegacyFinancialResponse, ResponseType } from '../../src/types/adaptor-relay-messages'
 import { TransactionState, Transaction, TransferState, LpsMessage, LegacyMessageType } from '../../src/models'
-import { Model, transaction } from 'objection'
+import { Model } from 'objection'
 import { ISO0200Factory } from '../factories/iso-messages'
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Transfer Response Handler', () => {
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
+  const quoteId = uuid()
   const transactionInfo = {
     lpsId: 'lps1',
     lpsKey: 'lps1-001-abc',
@@ -22,9 +25,21 @@ describe('Transfer Response Handler', () => {
     state: TransactionState.fulfillmentSent,
     expiration: new Date(Date.now()).toUTCString(),
     authenticationType: 'OTP',
+    quote: {
+      id: quoteId,
+      transferAmount: '107',
+      transferAmountCurrency: 'USD',
+      amount: '100',
+      amountCurrency: 'USD',
+      feeAmount: '7',
+      feeCurrency: 'USD',
+      ilpPacket: 'test-packet',
+      condition: 'test-condition',
+      expiration: new Date(Date.now() + 10000).toUTCString()
+    },
     transfer: {
       id: uuid(),
-      quoteId: uuid(),
+      quoteId: quoteId,
       state: TransferState.reserved,
       amount: '107',
       currency: 'USD',
@@ -32,24 +47,14 @@ describe('Transfer Response Handler', () => {
     }
   }
 
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

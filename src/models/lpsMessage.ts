@@ -17,6 +17,7 @@ export class LpsMessage extends Model {
   lpsKey!: string
   type!: string
   content!: { [k: string]: any }
+  transactions?: Transaction[]
   static get tableName (): string {
     return 'lpsMessages'
   }

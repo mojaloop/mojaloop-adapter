@@ -1,11 +1,13 @@
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { Model } from 'objection'
 import { Transaction, TransactionState } from '../../src/models'
-import Knex = require('knex')
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Transactions', () => {
 
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
 
   const transactionInfo = {
     lpsId: 'lps1',
@@ -36,24 +38,14 @@ describe('Transactions', () => {
     }
   }
 
-  beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {
@@ -61,8 +53,7 @@ describe('Transactions', () => {
   })
 
   test('updateState sets the previousState to state and then state to the specified state', async () => {
-    const transaction = await Transaction.query().insertGraph(transactionInfo)
-
+    const transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
     await transaction.$query().modify('updateState', TransactionState.fulfillmentSent)
 
     const freshTransaction = await transaction.$query()

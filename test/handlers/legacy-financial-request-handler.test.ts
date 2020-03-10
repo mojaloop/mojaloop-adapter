@@ -1,4 +1,4 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { AuthorizationsIDPutResponse } from '../../src/types/mojaloop'
 import { legacyFinancialRequestHandler } from '../../src/handlers/legacy-financial-request-handler'
@@ -6,10 +6,12 @@ import { LegacyFinancialRequest } from '../../src/types/adaptor-relay-messages'
 import { TransactionState, Transaction, LpsMessage, LegacyMessageType } from '../../src/models'
 import { Model } from 'objection'
 import { ISO0200Factory } from '../factories/iso-messages'
+const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Legacy Financial Request Handler', () => {
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const transactionInfo = {
     lpsId: 'lps1',
@@ -52,23 +54,17 @@ describe('Legacy Financial Request Handler', () => {
   }
 
   beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
-  })
-
-  beforeEach(async () => {
     await knex.migrate.latest()
   })
 
+  beforeEach(async () => {
+    trx = await knex.transaction()
+    Model.knex(trx)
+  })
+
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {

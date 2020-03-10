@@ -6,5 +6,7 @@ module.exports = {
   collectCoverage: false,
   collectCoverageFrom: ['./src/**/*.ts'],
   coverageReporters: ['json', 'lcov'],
-  clearMocks: true
+  clearMocks: true,
+  globalSetup: './test/setup.js',
+  globalTeardown: './test/teardown.js'
 }
