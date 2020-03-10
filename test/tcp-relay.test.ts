@@ -1,18 +1,19 @@
-import Knex from 'knex'
+import Knex, { Transaction as KnexTransaction } from 'knex'
 import { Model } from 'objection'
 import { Socket } from 'net'
 import { DefaultIso8583TcpRelay, LegacyMessage } from '../src/tcp-relay'
 import { iso0100BinaryMessage, iso0200BinaryMessage, ISO0100Factory, ISO0420Factory } from './factories/iso-messages'
 import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse, ResponseType } from '../src/types/adaptor-relay-messages'
 import { LpsMessage, LegacyMessageType } from '../src/models'
-
+const knexConfig = require('../knexfile')
 const IsoParser = require('iso_8583')
 const Logger = require('@mojaloop/central-services-logger')
 Logger.log = Logger.info
 
 describe('TCP relay', function () {
 
-  let knex: Knex
+  const knex = Knex(knexConfig.testing)
+  let trx: KnexTransaction
   let relay: DefaultIso8583TcpRelay
   const client = new Socket()
   const encode = (message: LegacyMessage): Buffer => {
@@ -29,24 +30,17 @@ describe('TCP relay', function () {
   const transactionExpiryWindow = 10
 
   beforeAll(async () => {
-    knex = Knex({
-      client: 'sqlite3',
-      connection: {
-        filename: ':memory:',
-        supportBigNumbers: true
-      },
-      useNullAsDefault: true
-    })
-    Model.knex(knex)
     relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket: client }, { lpsId: 'lps1', transactionExpiryWindow })
   })
 
   beforeEach(async () => {
-    await knex.migrate.latest()
+    trx = await knex.transaction()
+    Model.knex(trx)
   })
 
   afterEach(async () => {
-    await knex.migrate.rollback()
+    await trx.rollback()
+    await trx.destroy()
   })
 
   afterAll(async () => {
@@ -240,7 +234,7 @@ describe('TCP relay', function () {
     })
   })
 
-  test('acknowledges a 0420 message if it successfully maps it to a legacy reversal request and puts it on the LegacyReversalRequests queue', async () => {
+  test('maps it to a legacy reversal request and puts it on the LegacyReversalRequests queue', async () => {
     client.write = jest.fn()
     const iso0100 = ISO0100Factory.build({
       7: '0130083636',
@@ -264,7 +258,6 @@ describe('TCP relay', function () {
       lpsFinancialRequestMessageId: lpsMessage.id,
       lpsReversalRequestMessageId: reversalMessage.id
     })
-    expect(client.write).toHaveBeenCalledWith(encode({ ...iso0420, 0: '0430', 39: '00' }))
   })
 
   test('responds to a 0420 with a 21 response code if it can\'t map it to a legacy reversal request', async () => {

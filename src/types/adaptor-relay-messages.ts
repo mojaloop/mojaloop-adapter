@@ -58,3 +58,8 @@ export type LegacyReversalRequest = {
   lpsFinancialRequestMessageId: string;
   lpsReversalRequestMessageId: string;
 }
+
+export type LegacyReversalResponse = {
+  lpsReversalRequestMessageId: string;
+  response: ResponseType;
+}
