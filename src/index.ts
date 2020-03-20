@@ -69,7 +69,8 @@ const queueService = new BullQueueService([
   'LegacyFinancialRequests',
   'LegacyReversalRequests',
   'lps1AuthorizationResponses',
-  'lps1FinancialResponses'], redisConnection)
+  'lps1FinancialResponses',
+  'lps1ReversalResponses'], redisConnection)
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
   timeout: 3000
