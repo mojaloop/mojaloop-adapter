@@ -2,7 +2,7 @@ import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { transferResponseHandler } from '../../src/handlers/transfer-response-handler'
 import { LegacyFinancialResponse, ResponseType } from '../../src/types/adaptor-relay-messages'
-import { TransactionState, Transaction, TransferState, LpsMessage, LegacyMessageType } from '../../src/models'
+import { TransactionState, Transaction, TransferState, LpsMessage, LegacyMessageType, Transfers } from '../../src/models'
 import { Model } from 'objection'
 import { ISO0200Factory } from '../factories/iso-messages'
 const knexConfig = require('../../knexfile')
@@ -101,6 +101,24 @@ describe('Transfer Response Handler', () => {
     transaction = await transaction.$query()
     expect(transaction.state).toBe(TransactionState.financialResponse)
     expect(transaction.previousState).toBe(TransactionState.fulfillmentSent)
+  })
+
+  test('updates the transfer state', async () => {
+    const lpsFinancialRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.financialRequest, content: ISO0200Factory.build() })
+    const transaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsFinancialRequest)
+    const transferResponse = {
+      transferId: transactionInfo.transfer.id,
+      transferState: 'COMMITTED'
+    }
+    const headers = {
+      'fspiop-source': 'payerFSP',
+      'fspiop-destination': 'payeeFSP'
+    }
+
+    await transferResponseHandler(services, transferResponse, headers, transferResponse.transferId)
+
+    expect((await Transfers.query().where('id', transactionInfo.transfer.id).first().throwIfNotFound()).state).toBe(TransferState.committed)
   })
 
 })

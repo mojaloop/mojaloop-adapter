@@ -17,6 +17,7 @@ export async function transferResponseHandler ({ queueService, logger }: Adaptor
       await queueService.addToQueue(`${transaction.lpsId}FinancialResponses`, legacyFinancialResponse)
 
       await transaction.$query().update({ state: TransactionState.financialResponse, previousState: transaction.state })
+      await transfer.$query().update({ state: TransferState.committed })
     }
   } catch (error) {
     logger.error(`Transfer Response Handler: Could not process transfer response for transferId=${transferId} from ${headers['fspiop-source']}. ${error.message}`)
