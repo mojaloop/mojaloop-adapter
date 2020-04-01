@@ -2,7 +2,7 @@ sequenceDiagram
     participant Payer FSP
     participant Moja Switch
     participant ALS
-    participant Adapter
+    participant Orchestrator
     participant Redis
     participant TCP Relay
     participant Legacy Switch
@@ -15,17 +15,17 @@ Legacy Switch ->> TCP Relay: Legacy Authorization Request
 Note over TCP Relay: Convert to JSON <br> Field mapping
 
 TCP Relay ->> Redis: Queue to be processed
-Redis ->> Adapter: Pick up message
-Note over Adapter, Redis: Duplicate checks <br> Create transaction and legacy fees <br> Map transaction to legacy key
+Redis ->> Orchestrator: Pick up message
+Note over Orchestrator, Redis: Duplicate checks <br> Create transaction and legacy fees <br> Map transaction to legacy key
 
-Adapter ->> ALS: GET parties/MSISDN/<msisdn>
-ALS -->> Adapter: 202 Accepted
-ALS ->> Adapter: PUT parties/MSISDN/<msisdn> 
-Adapter -->> ALS: 200 Ok
-Note over Adapter: Update payer info
+Orchestrator ->> ALS: GET parties/MSISDN/<msisdn>
+ALS -->> Orchestrator: 202 Accepted
+ALS ->> Orchestrator: PUT parties/MSISDN/<msisdn> 
+Orchestrator -->> ALS: 200 Ok
+Note over Orchestrator: Update payer info
  
-Adapter ->> Moja Switch: POST /transactionRequests
-Moja Switch -->> Adapter: 202 Accepted
+Orchestrator ->> Moja Switch: POST /transactionRequests
+Moja Switch -->> Orchestrator: 202 Accepted
 Moja Switch ->> Payer FSP : POST /transactionRequests
 Payer FSP -->> Moja Switch: 202 Accepted
 
@@ -33,31 +33,31 @@ Note left of Payer FSP: Create transaction <br> Generate quote ID
 
 Payer FSP ->> Moja Switch: PUT /transactionRequests/<ID> <br> transactionId = <tx ID>
 Moja Switch -->> Payer FSP: 200 Ok
-Moja Switch ->> Adapter: PUT /transactionRequests/<txReqId> <br> transactionId = <tx ID>
-Adapter -->> Moja Switch: 200 Ok
+Moja Switch ->> Orchestrator: PUT /transactionRequests/<txReqId> <br> transactionId = <tx ID>
+Orchestrator -->> Moja Switch: 200 Ok
 
-Note over Adapter: Store transactionId
+Note over Orchestrator: Store transactionId
 
 Payer FSP ->> Moja Switch: POST /quotes
 Moja Switch -->> Payer FSP: 202 Accepted
-Moja Switch ->> Adapter: POST /qoutes
-Adapter -->> Moja Switch: 202 Accepted
+Moja Switch ->> Orchestrator: POST /qoutes
+Orchestrator -->> Moja Switch: 202 Accepted
 
-Note over Adapter: Create quote <br> Generate condition <br> Calculate fees
+Note over Orchestrator: Create quote <br> Generate condition <br> Calculate fees
 
-Adapter ->> Moja Switch: PUT /qoutes
-Moja Switch -->> Adapter: 200 Ok
+Orchestrator ->> Moja Switch: PUT /qoutes
+Moja Switch -->> Orchestrator: 200 Ok
 Moja Switch ->> Payer FSP: PUT /quotes
 Payer FSP -->> Moja Switch: 200 Ok
 
 Payer FSP ->> Moja Switch: GET /authorizations/<transactionRequestId>
 Moja Switch -->> Payer FSP: 202 Accepted
-Moja Switch ->> Adapter: Get /authorizations/<transactionRequestId>
+Moja Switch ->> Orchestrator: Get /authorizations/<transactionRequestId>
 
-Adapter ->> Moja Switch: 202 Accepted
+Orchestrator ->> Moja Switch: 202 Accepted
 
-Note over Adapter: Find correct relay
-Adapter ->> Redis: Queue to be processed
+Note over Orchestrator: Find correct relay
+Orchestrator ->> Redis: Queue to be processed
 Redis ->> TCP Relay: Pick up message
 Note over TCP Relay, Legacy Switch: Convert to <br> Legacy Authorization Response
 TCP Relay ->> Legacy Switch: Legacy Authorization Response
