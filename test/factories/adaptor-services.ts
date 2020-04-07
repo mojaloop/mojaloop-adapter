@@ -39,7 +39,7 @@ export const AdaptorServicesFactory = Factory.define<AdaptorServices>('AdaptorSe
     debug: jest.fn()
   },
   ilpService: {
-    caluclateFulfil: jest.fn(),
+    calculateFulfil: jest.fn(),
     getQuoteResponseIlp: jest.fn().mockReturnValue({ condition: 'condition', ilpPacket: 'ilpPacket' })
   }
 })

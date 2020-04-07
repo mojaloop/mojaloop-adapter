@@ -125,7 +125,7 @@ describe('Transfer Requests Handler', () => {
       id: transferRequest.transferId,
       quoteId: quoteRequest.quoteId,
       transactionRequestId: quoteRequest.transactionRequestId,
-      fulfillment: ilp.caluclateFulfil(transferRequest.ilpPacket),
+      fulfillment: ilp.calculateFulfil(transferRequest.ilpPacket),
       state: TransferState.reserved,
       amount: transferRequest.amount.amount,
       currency: transferRequest.amount.currency
@@ -154,7 +154,7 @@ describe('Transfer Requests Handler', () => {
     expect(transaction.state).toBe(TransactionState.fulfillmentSent)
     expect(transaction.previousState).toBe(TransactionState.financialRequestSent)
     const transferResponse: TransfersIDPutResponse = {
-      fulfilment: ilp.caluclateFulfil(transferRequest.ilpPacket),
+      fulfilment: ilp.calculateFulfil(transferRequest.ilpPacket),
       transferState: TransferState.committed,
       completedTimestamp: (new Date(Date.now())).toISOString()
     }
