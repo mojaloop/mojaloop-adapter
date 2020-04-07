@@ -224,3 +224,6 @@ We can access the Docker image of the Redis server from here - [https://hub.dock
 **Troubleshooting**
 
 For removing the created Helm release we can use the below command
+       sudo microk8s.helm del --purge release name
+
+
