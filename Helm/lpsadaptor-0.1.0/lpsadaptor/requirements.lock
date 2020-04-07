@@ -1,0 +1,9 @@
+dependencies:
+- name: percona
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 1.2.1
+- name: redis
+  repository: https://kubernetes-charts.storage.googleapis.com
+  version: 10.5.7
+digest: sha256:4389ab35ff02fa262c55ae30b621fbd17e0f61f14c8e4fa6bb6e906e474b5fff
+generated: "2020-03-23T16:58:39.421321464+05:30"
