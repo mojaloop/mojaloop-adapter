@@ -15,7 +15,8 @@ const sdk = require('@mojaloop/sdk-standard-components')
 Logger.log = Logger.info
 
 describe('Transfer Requests Handler', () => {
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const logger = Logger
   const ilp = new sdk.Ilp({ secret: 'test', logger })
@@ -89,6 +90,12 @@ describe('Transfer Requests Handler', () => {
       expiration: new Date(Date.now() + 10000).toUTCString()
     }
   }
+
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
 
   beforeEach(async () => {
     trx = await knex.transaction()

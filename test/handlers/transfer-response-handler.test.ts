@@ -9,7 +9,8 @@ const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Transfer Response Handler', () => {
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const quoteId = uuid()
@@ -46,6 +47,12 @@ describe('Transfer Response Handler', () => {
       fulfillment: 'test-fulfillment'
     }
   }
+
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
 
   beforeEach(async () => {
     trx = await knex.transaction()

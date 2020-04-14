@@ -1,8 +1,8 @@
 module.exports = {
-  testing: {
+  integration: {
     client: 'mysql',
     connection: {
-      host: 'localhost',
+      host: 'mysql',
       user: 'root',
       password: 'root',
       database: 'testing'
@@ -12,8 +12,8 @@ module.exports = {
     client: 'sqlite3',
     connection: {
       filename: ':memory:',
-      supportBigNumbers: true
-    },
-    useNullAsDefault: true
+      supportBigNumbers: true,
+      useNullAsDefault: true
+    }
   }
 }

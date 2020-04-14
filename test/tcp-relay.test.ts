@@ -12,7 +12,8 @@ Logger.log = Logger.info
 
 describe('TCP relay', function () {
 
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   let relay: DefaultIso8583TcpRelay
   const client = new Socket()
@@ -30,6 +31,9 @@ describe('TCP relay', function () {
   const transactionExpiryWindow = 10
 
   beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
     relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket: client }, { lpsId: 'lps1', transactionExpiryWindow })
   })
 

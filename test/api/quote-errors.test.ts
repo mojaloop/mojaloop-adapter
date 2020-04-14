@@ -2,7 +2,7 @@ import { Server } from 'hapi'
 import { createApp } from '../../src/adaptor'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 
-describe('Authorization Errors Controller', function () {
+describe('Quotes Errors Controller', function () {
   const services = AdaptorServicesFactory.build()
   let adaptor: Server
 
@@ -13,7 +13,7 @@ describe('Authorization Errors Controller', function () {
   test('returns response code 200', async () => {
     const response = await adaptor.inject({
       method: 'PUT',
-      url: '/authorizations/123/error',
+      url: '/quotes/123/error',
       payload: {
         errorInformation: {
           errorCode: 'this is an error code',

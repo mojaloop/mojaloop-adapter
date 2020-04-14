@@ -9,7 +9,8 @@ const uuid = require('uuid/v4')
 
 describe('Parties Response Handler', () => {
   const services = AdaptorServicesFactory.build()
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const transactionInfo = {
     lpsId: 'lps1',
@@ -36,6 +37,12 @@ describe('Parties Response Handler', () => {
       fspId: 'adaptor'
     }
   }
+
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
 
   beforeEach(async () => {
     trx = await knex.transaction()
