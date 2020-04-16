@@ -78,11 +78,11 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
 
     socket.on('data', async (data) => {
       try {
-        this._logger.debug(`${this._lpsId} relay: Received buffer message`)
+        // this._logger.debug(`${this._lpsId} relay: Received buffer message`)
         const legacyMessage = this._decode(data)
         const lpsKey = this._lpsId + '-' + legacyMessage[41] + '-' + legacyMessage[42]
-        this._logger.debug(this._lpsId + ' relay: Received message from: ' + this._lpsId + ' lpsKey: ' + lpsKey)
-        this._logger.debug(this._lpsId + ' relay: Message converted to JSON: ' + JSON.stringify(legacyMessage))
+        // this._logger.debug(this._lpsId + ' relay: Received message from: ' + this._lpsId + ' lpsKey: ' + lpsKey)
+        // this._logger.debug(this._lpsId + ' relay: Message converted to JSON: ' + JSON.stringify(legacyMessage))
 
         const messageType = this.getMessageType(legacyMessage[0])
         const lpsMessage = await LpsMessage.query().insertAndFetch({ lpsId: this._lpsId, lpsKey, type: messageType, content: legacyMessage })

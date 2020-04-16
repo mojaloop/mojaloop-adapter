@@ -21,6 +21,9 @@ import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyReversalReque
 import { legacyAuthorizationRequestHandler } from './handlers/legacy-authorization-handler'
 import { legacyFinancialRequestHandler } from './handlers/legacy-financial-request-handler'
 import { legacyReversalHandler } from './handlers/legacy-reversals-handler'
+import { MockMojaClient } from './services/mock-moja-client'
+import { Server } from 'net'
+import { pad } from './utils/util'
 const IsoParser = require('iso_8583')
 const MojaloopSdk = require('@mojaloop/sdk-standard-components')
 const Logger = require('@mojaloop/central-services-logger')
@@ -57,7 +60,7 @@ const knex = KNEX_CLIENT === 'mysql' ? Knex({
 Model.knex(knex)
 
 const redisConnection = { host: REDIS_HOST, port: Number(REDIS_PORT) }
-const queueService = new BullQueueService([
+const queues = [
   'QuoteRequests',
   'QuoteResponses',
   'TransactionRequestResponses',
@@ -68,29 +71,21 @@ const queueService = new BullQueueService([
   'LegacyAuthorizationRequests',
   'LegacyFinancialRequests',
   'LegacyReversalRequests',
-  'lps1AuthorizationResponses',
-  'lps1FinancialResponses',
-  'lps1ReversalResponses'], redisConnection)
+]
+
+for(let i = 1; i < 21; i++) {
+  queues.push('lps' + pad(i.toString(), 2, '0') + 'AuthorizationResponses')
+  queues.push('lps' + pad(i.toString(), 2, '0') + 'FinancialResponses')
+  queues.push('lps' + pad(i.toString(), 2, '0') + 'ReversalResponses')
+}
+
+const queueService = new BullQueueService(queues, redisConnection)
 const AuthorizationsClient: AxiosInstance = axios.create({
   baseURL: AUTHORIZATIONS_URL,
   timeout: 3000
 })
 const authorizationsService = new KnexAuthorizationsService({ knex, client: AuthorizationsClient, logger: Logger })
-const mojaClient = new MojaloopRequests({
-  logger: Logger,
-  dfspId: ADAPTOR_FSP_ID,
-  quotesEndpoint: QUOTE_REQUESTS_URL,
-  alsEndpoint: ACCOUNT_LOOKUP_URL,
-  transfersEndpoint: TRANSFERS_URL,
-  transactionRequestsEndpoint: TRANSACTION_REQUESTS_URL,
-  jwsSign: false,
-  tls: { outbound: { mutualTLS: { enabled: false } } },
-  wso2Auth: {
-    getToken: () => null
-  },
-  jwsSigningKey: 'string',
-  peerEndpoint: 'string'
-})
+const mojaClient = new MockMojaClient(queueService)
 const adaptorServices: AdaptorServices = {
   authorizationsService,
   mojaClient,
@@ -153,16 +148,20 @@ const start = async (): Promise<void> => {
   await adaptor.start()
   adaptor.app.logger.info(`Adaptor HTTP server listening on port:${HTTP_PORT}`)
   const sockets: Socket[] = []
-  const tcpServer = createServer(async (socket) => {
-    Logger.info('Connection received for lps1 relay.')
-    sockets.push(socket)
-    const relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps1', redisConnection })
-    await relay.start()
-
-    socket.on('close', async () => {
-      await relay.shutdown()
-    })
-  }).listen(TCP_PORT, () => { Logger.info('lps1 relay listening on port: ' + TCP_PORT) })
+  const servers: Server[] = []
+  for(let i = 1; i < 21; i++) {
+    const tcpServer = createServer(async (socket) => {
+      Logger.info('Connection received for ' + 'lps' + pad(i.toString(), 2, '0') + ' relay.')
+      sockets.push(socket)
+      const relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps' + pad(i.toString(), 2, '0'), redisConnection })
+      await relay.start()
+  
+      socket.on('close', async () => {
+        await relay.shutdown()
+      })
+    }).listen(3000 + i, () => { Logger.info('lps' + pad(i.toString(), 2, '0') + ' relay listening on port: ' + (3000 + i)) })
+    servers.push(tcpServer)
+  }
 
   process.on(
     'SIGINT',
@@ -178,7 +177,7 @@ const start = async (): Promise<void> => {
         shuttingDown = true
 
         // Graceful shutdown
-        tcpServer.close()
+        servers.forEach(server => { server.close() })
         sockets.forEach(sock => { sock.destroy() })
         await adaptor.stop()
         await Promise.all(Array.from(workers.values()).map(worker => worker.close()))

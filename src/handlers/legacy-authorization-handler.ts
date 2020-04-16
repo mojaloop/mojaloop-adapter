@@ -37,7 +37,7 @@ export async function legacyAuthorizationRequestHandler ({ logger, mojaClient, q
     })
     await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(legacyAuthorizationRequest.lpsAuthorizationRequestMessageId)
 
-    await mojaClient.getParties(legacyAuthorizationRequest.payer.partyIdType, legacyAuthorizationRequest.payer.partyIdentifier, null)
+    await mojaClient.getParties(legacyAuthorizationRequest.payer.partyIdType, legacyAuthorizationRequest.payer.partyIdentifier, legacyAuthorizationRequest.lpsId)
 
   } catch (error) {
     logger.error(`Legacy Authorization Request Handler: Failed to process authorization request. ${error.message}`)

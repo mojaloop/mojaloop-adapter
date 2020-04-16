@@ -56,14 +56,15 @@ export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, 
       ilpPacket
     })
 
-    const quoteResponse: QuotesIDPutResponse = {
+    const quoteResponse = {
       condition,
       ilpPacket,
       expiration: expiration,
       transferAmount: {
         amount: transferAmount,
         currency: transaction.currency
-      }
+      },
+      transactionRequestId: quoteRequest.transactionRequestId
     }
     await mojaClient.putQuotes(quoteRequest.quoteId, quoteResponse, headers['fspiop-source'])
 
