@@ -25,6 +25,16 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.AppVersion | replace "+" "_" }}
     spec:
+      {{- if .Values.init.enabled }}
+      initContainers:
+        - name: {{ .Values.init.redis.name }}
+          image: {{ .Values.init.redis.repository }}:{{ .Values.init.redis.tag }}
+          imagePullPolicy: {{ .Values.init.redis.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.redis.command | replace "$host" ($redisHost) | replace "$port" (print .Values.config.redis_port) )| quote }}
+      {{- end }}
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

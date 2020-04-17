@@ -38,6 +38,15 @@ containers:
       initialDelaySeconds: 60
       periodSeconds: 15
 
+init:
+  enabled: true
+  redis:
+    name: wait-for-redis
+    repository: redis
+    tag: latest
+    pullPolicy: Always
+    command: "until result=$(redis-cli -h $host -p $port ping | grep PONG) && if [ -z $result ]; then false; fi; do echo waiting for Redis; sleep 2; done;"
+
 service:
   type: ClusterIP
 
