@@ -27,17 +27,17 @@ RESULTS_DIR="${RESULTS_DIR:-"/tmp"}"
 
 function startDocker() {
   docker-compose \
-    -f ${DIR}/../docker-compose.integration.yml \
+    -f ${DIR}/../docker-compose.yml \
     up -d
 }
 
 function waitForDocker() {
   echo 'Waiting for docker services to be healthy'
   HEALTHY_COUNT=$(docker ps | grep "healthy" | wc -l)
-  EXPECTED_HEALTHY_COUNT=2
-  EXPECTED_SERVICE_COUNT=2
+  EXPECTED_HEALTHY_COUNT=3
+  EXPECTED_SERVICE_COUNT=3
   while [ $(docker ps | grep "healthy" | wc -l) -lt $EXPECTED_HEALTHY_COUNT ]; do
-    TOTAL_SERVICES=$(docker ps | grep "als_*" | wc -l)
+    TOTAL_SERVICES=$(docker ps | wc -l)
     # exit early if we don't have the required services
     if [ ${TOTAL_SERVICES} -lt ${EXPECTED_SERVICE_COUNT} ]; then
       echo 'Not all docker-compose services are running. Check the logs and try again.'
@@ -55,10 +55,10 @@ function runTests() {
 
 function tearDown() {
   docker-compose \
-    -f ${DIR}/../docker-compose.integration.yml \
+    -f ${DIR}/../docker-compose.yml \
     stop
   docker-compose \
-    -f ${DIR}/../docker-compose.integration.yml \
+    -f ${DIR}/../docker-compose.yml \
     rm -f
 }
 
