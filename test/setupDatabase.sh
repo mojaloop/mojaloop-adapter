@@ -8,5 +8,5 @@ docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 percona/perc
 
 sh docker/wait-for/wait-for-mysql.sh
 
-docker exec -it ps mysql -u root -proot -e "ALTER USER 'root' IDENTIFIED WITH mysql_native_password BY 'root'"
-docker exec -it ps mysql -u root -proot -e "CREATE DATABASE testing;"
+docker exec -it mysql mysql -u root -proot -e "ALTER USER 'root' IDENTIFIED WITH mysql_native_password BY 'root'"
+docker exec -it mysql mysql -u root -proot -e "CREATE DATABASE testing;"
