@@ -8,7 +8,8 @@ const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Quote Response Handler', () => {
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
 
@@ -69,6 +70,12 @@ describe('Quote Response Handler', () => {
     'fspiop-destination': 'payer'
   }
 
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
+
   beforeEach(async () => {
     trx = await knex.transaction()
     Model.knex(trx)
@@ -94,14 +101,14 @@ describe('Quote Response Handler', () => {
     expect(updatedQuote.expiration === originalQuote.expiration).toBeFalsy()
   })
 
-  test('Calls services.ilpService.caluclateFulfil to calculate the fulfilment from ilp-packet', async () => {
+  test('Calls services.ilpService.calculateFulfil to calculate the fulfilment from ilp-packet', async () => {
     await Quote.query().insertGraphAndFetch(quote)
     await quoteResponseHandler(services, quoteResponse, quote.id, headers)
-    expect(services.ilpService.caluclateFulfil).toBeCalledWith(quoteResponse.ilpPacket)
+    expect(services.ilpService.calculateFulfil).toBeCalledWith(quoteResponse.ilpPacket)
   })
 
   test('Create and store a transfer', async () => {
-    services.ilpService.caluclateFulfil = jest.fn().mockResolvedValueOnce('test-fulfillment')
+    services.ilpService.calculateFulfil = jest.fn().mockResolvedValueOnce('test-fulfillment')
     await Quote.query().insertGraphAndFetch(quote)
     await quoteResponseHandler(services, quoteResponse, quote.id, headers)
     const transfer = await Transfers.query().where('quoteId', quote.id).first()
@@ -110,7 +117,7 @@ describe('Quote Response Handler', () => {
   })
 
   test('Calls services.mojaClient.postTransfers to send the transferRequest', async () => {
-    services.ilpService.caluclateFulfil = jest.fn().mockResolvedValueOnce('test-fulfillment')
+    services.ilpService.calculateFulfil = jest.fn().mockResolvedValueOnce('test-fulfillment')
     await Quote.query().insertGraphAndFetch(quote)
     await quoteResponseHandler(services, quoteResponse, quote.id, headers)
     const transfer = await Transfers.query().where('quoteId', quote.id).first()

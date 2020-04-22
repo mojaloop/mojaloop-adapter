@@ -43,7 +43,7 @@ export async function transferRequestHandler ({ ilpService, mojaClient, logger, 
       id: transferRequest.transferId,
       quoteId: dataElement.quoteId,
       transactionRequestId: transaction.transactionRequestId,
-      fulfillment: ilpService.caluclateFulfil(transferRequest.ilpPacket),
+      fulfillment: ilpService.calculateFulfil(transferRequest.ilpPacket),
       state: TransferState.received,
       amount: transferRequest.amount.amount,
       currency: transferRequest.amount.currency

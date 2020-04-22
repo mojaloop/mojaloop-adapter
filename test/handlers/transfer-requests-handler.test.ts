@@ -15,7 +15,8 @@ const sdk = require('@mojaloop/sdk-standard-components')
 Logger.log = Logger.info
 
 describe('Transfer Requests Handler', () => {
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const logger = Logger
   const ilp = new sdk.Ilp({ secret: 'test', logger })
@@ -90,6 +91,12 @@ describe('Transfer Requests Handler', () => {
     }
   }
 
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
+
   beforeEach(async () => {
     trx = await knex.transaction()
     Model.knex(trx)
@@ -125,7 +132,7 @@ describe('Transfer Requests Handler', () => {
       id: transferRequest.transferId,
       quoteId: quoteRequest.quoteId,
       transactionRequestId: quoteRequest.transactionRequestId,
-      fulfillment: ilp.caluclateFulfil(transferRequest.ilpPacket),
+      fulfillment: ilp.calculateFulfil(transferRequest.ilpPacket),
       state: TransferState.reserved,
       amount: transferRequest.amount.amount,
       currency: transferRequest.amount.currency
@@ -154,7 +161,7 @@ describe('Transfer Requests Handler', () => {
     expect(transaction.state).toBe(TransactionState.fulfillmentSent)
     expect(transaction.previousState).toBe(TransactionState.financialRequestSent)
     const transferResponse: TransfersIDPutResponse = {
-      fulfilment: ilp.caluclateFulfil(transferRequest.ilpPacket),
+      fulfilment: ilp.calculateFulfil(transferRequest.ilpPacket),
       transferState: TransferState.committed,
       completedTimestamp: (new Date(Date.now())).toISOString()
     }

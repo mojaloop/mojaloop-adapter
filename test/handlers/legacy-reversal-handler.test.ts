@@ -11,7 +11,8 @@ const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Legacy Reversal Handler', () => {
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const iso0100 = ISO0100Factory.build()
@@ -55,6 +56,12 @@ describe('Legacy Reversal Handler', () => {
       expiration: new Date(Date.now() + 10000).toUTCString()
     }
   }
+
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
 
   beforeEach(async () => {
     trx = await knex.transaction()

@@ -1,0 +1,31 @@
+{
+  "decisions": {
+    "1168|hapi>subtext": {
+      "decision": "ignore",
+      "madeAt": 1586862601477,
+      "expiresAt": 1589454586947
+    },
+    "1478|hapi>subtext": {
+      "decision": "ignore",
+      "madeAt": 1586862601478,
+      "expiresAt": 1589454586947
+    },
+    "1479|hapi>subtext": {
+      "decision": "ignore",
+      "madeAt": 1586862601478,
+      "expiresAt": 1589454586947
+    },
+    "1472|hapi>ammo": {
+      "decision": "ignore",
+      "madeAt": 1586862605407,
+      "expiresAt": 1589454586947
+    },
+    "1481|hapi": {
+      "decision": "ignore",
+      "madeAt": 1586862609584,
+      "expiresAt": 1589454586947
+    }
+  },
+  "rules": {},
+  "version": 1
+}

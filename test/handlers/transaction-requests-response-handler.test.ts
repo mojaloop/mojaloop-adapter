@@ -9,7 +9,8 @@ const uuid = require('uuid/v4')
 
 describe('Transaction Requests Response Handler', function () {
 
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const headers = {
@@ -42,6 +43,12 @@ describe('Transaction Requests Response Handler', function () {
     expiration: new Date(Date.now()).toUTCString(),
     authenticationType: 'OTP'
   }
+
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
 
   beforeEach(async () => {
     trx = await knex.transaction()

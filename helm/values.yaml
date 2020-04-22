@@ -1,0 +1,105 @@
+# Default values for lps-adapter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: donchangfoot/lps-adapter
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+containers:
+  api:
+    service:
+      ports:
+        api:
+          name: http
+          externalPort: 80
+          internalPort: 3000
+        tcp:
+          name: tcp-relay
+          externalPort: 3001
+          internalPort: 3001
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 60
+      periodSeconds: 15
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /health
+      initialDelaySeconds: 60
+      periodSeconds: 15
+
+init:
+  enabled: true
+  redis:
+    name: wait-for-redis
+    repository: redis
+    tag: latest
+    pullPolicy: Always
+    command: "until result=$(redis-cli -h $host -p $port ping | grep PONG) && if [ -z $result ]; then false; fi; do echo waiting for Redis; sleep 2; done;"
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: '/'
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: adapter.iso-demo.openafrica.network
+      paths: ["/"]
+
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+config:
+  log_level: 'silly'
+  http_port: 3000
+  tcp_port: 3001
+  redis_port: 6379
+  redis_host: '$release_name-redis-master'
+  transaction_requests_url: 'transaction-requests-service.local'
+  quote_requests_url: 'quotes-service.local'
+  transfers_url: 'transfers-service.local'
+  authorizations_url: 'transaction-requests-service.local'
+  account_lookup_url: 'account-lookup-service.local'
+  ilp_secret: 'secret'
+  knex_client: 'mysql'
+  mysql_host: '35.246.33.14'
+  mysql_user: 'test'
+  mysql_password: 'test'
+  mysql_database: 'testing'
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+redis:
+  usePassword: false

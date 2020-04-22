@@ -1,0 +1,76 @@
+version: "3.7"
+
+networks:
+  lps-adapter-net:
+    name: lps-adapter-net
+
+services:
+  lps-adapter:
+    build:
+      context: .
+    container_name: lps-adapter
+    command:
+      - "sh"
+      - "-c"
+      - "sh /usr/wait-for/wait-for-mysql.sh && npm start"
+    environment:
+      DB_CONFIG: integration
+      KNEX_CLIENT: mysql
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: testing
+      REDIS_HOST: redis
+      LOG_LEVEL: debug
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    networks:
+      - lps-adapter-net
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - ./docker:/usr/wait-for
+      - ./test:/usr/src/app/test
+      - ./migrations:/usr/src/app/migrations
+    healthcheck:
+      test: ["CMD", "sh", "-c" ,"apk --no-cache add curl", ";", "curl", "http://localhost:3000/health"]
+      timeout: 20s
+      retries: 10
+      interval: 30s
+  
+  mysql:
+    image: percona/percona-server:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/sql-init/:/docker-entrypoint-initdb.d/
+    networks:
+      - lps-adapter-net
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "mysql"]
+      timeout: 20s
+      retries: 10
+      start_period: 40s
+      interval: 30s
+
+  redis:
+    image: redis
+    container_name: redis
+    environment:
+      usePassword: "false"
+    ports:
+      - "6379:6379"
+    networks:
+      - lps-adapter-net
+    healthcheck:
+      test: ["CMD", "redis-cli" ,"ping"]
+      timeout: 20s
+      retries: 10
+      start_period: 40s
+      interval: 30s

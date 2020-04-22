@@ -10,7 +10,8 @@ const knexConfig = require('../../knexfile')
 const uuid = require('uuid/v4')
 
 describe('Legacy Financial Request Handler', () => {
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const transactionInfo = {
@@ -54,7 +55,9 @@ describe('Legacy Financial Request Handler', () => {
   }
 
   beforeAll(async () => {
-    await knex.migrate.latest()
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
   })
 
   beforeEach(async () => {

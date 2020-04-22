@@ -3,7 +3,7 @@ import Faker from 'faker'
 import { TransfersPostRequest } from '../../src/types/mojaloop'
 
 const sdk = require('@mojaloop/sdk-standard-components')
-const ilp = new sdk.Ilp({ secret: test })
+const ilp = new sdk.Ilp({ secret: 'test' })
 
 const quoteRequest = {
   quoteId: '20508493-1458-4ac0-a824-d4b07e37d7b3',

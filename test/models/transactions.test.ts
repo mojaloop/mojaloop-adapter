@@ -6,7 +6,8 @@ const uuid = require('uuid/v4')
 
 describe('Transactions', () => {
 
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
 
   const transactionInfo = {
@@ -37,6 +38,12 @@ describe('Transactions', () => {
       fspId: 'adaptor'
     }
   }
+
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
 
   beforeEach(async () => {
     trx = await knex.transaction()

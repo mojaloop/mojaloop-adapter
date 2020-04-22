@@ -15,7 +15,7 @@ export async function quoteResponseHandler ({ mojaClient, ilpService, logger }: 
 
     const transferId = uuid()
 
-    const fulfillment = await ilpService.caluclateFulfil(quoteResponse.ilpPacket)
+    const fulfillment = await ilpService.calculateFulfil(quoteResponse.ilpPacket)
     await Transfers.query().insertGraphAndFetch({
       id: transferId,
       transactionRequestId: quote.transactionRequestId,

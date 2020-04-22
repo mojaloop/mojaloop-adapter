@@ -13,5 +13,5 @@ export interface IlpServiceOptions {
 
 export interface IlpService {
   getQuoteResponseIlp(quoteRequest: any, quoteResponse: any): QuoteIlpResponse;
-  caluclateFulfil (ilpPacket: string): string;
+  calculateFulfil (ilpPacket: string): string;
 }

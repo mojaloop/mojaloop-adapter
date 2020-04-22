@@ -1,8 +1,8 @@
 module.exports = {
-  testing: {
+  integration: {
     client: 'mysql',
     connection: {
-      host: 'localhost',
+      host: 'mysql',
       user: 'root',
       password: 'root',
       database: 'testing'

@@ -11,7 +11,8 @@ const Logger = require('@mojaloop/central-services-logger')
 Logger.log = Logger.info
 
 describe('Authorization Request Handler', function () {
-  const knex = Knex(knexConfig.testing)
+  const dbConfig = process.env.DB_CONFIG || 'sqlite'
+  const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
   const services = AdaptorServicesFactory.build()
   const transactionInfo = {
@@ -53,6 +54,12 @@ describe('Authorization Request Handler', function () {
       expiration: new Date(Date.now() + 10000).toUTCString()
     }
   }
+
+  beforeAll(async () => {
+    if (dbConfig === 'sqlite') {      
+      await knex.migrate.latest()
+    }
+  })
 
   beforeEach(async () => {
     trx = await knex.transaction()

@@ -1,0 +1,51 @@
+sequenceDiagram
+    participant Payer FSP
+    participant Moja Switch
+    participant ALS
+    participant Orchestrator
+    participant Redis
+    participant TCP Relay
+    participant Legacy Switch
+    participant ATM
+
+Note right of ATM: User enters OTP
+ATM ->> Legacy Switch: Legacy Financial Request
+Legacy Switch ->> TCP Relay: Legacy Financial Request
+Note over TCP Relay: Convert to JSON <br> Field mapping
+
+TCP Relay ->> Redis: Queue message
+Redis ->> Orchestrator: Pick up message
+
+Note over Orchestrator, Redis: Find most recent QUOTED transaction
+
+Orchestrator ->> Moja Switch: PUT /authorizations/<ID> <br> OTP=1234
+Moja Switch -->> Orchestrator: 200 Ok
+Moja Switch ->> Payer FSP: PUT /authorizations/<ID> <br> OTP=1234
+Payer FSP -->> Moja Switch: 200 Ok
+
+Note left of Payer FSP: Validate OTP
+
+Payer FSP ->> Moja Switch: POST /transfers
+Moja Switch -->> Payer FSP: 202 Accepted
+Moja Switch ->> Orchestrator: POST /transfers
+Orchestrator -->> Moja Switch: 202 Accepted
+
+Note over Orchestrator, Redis: Find quote and transaction <br> Calculate fulfillment and <br> create transfer.
+
+Orchestrator ->> Moja Switch: PUT /transfers/<ID>
+Moja Switch -->> Orchestrator: 200 Ok
+Moja Switch ->> Payer FSP: Put /transfers/<ID>
+Payer FSP -->> Moja Switch: 200 Ok
+
+Moja Switch ->> Orchestrator: PUT /transfers/<ID>
+Orchestrator -->> Moja Switch: 200 Ok
+
+Note over Orchestrator: Find correct tcp relay
+
+Orchestrator ->> Redis: Queue message
+Redis ->> TCP Relay: Pick up message
+
+Note over TCP Relay, Legacy Switch: Convert to Legacy Financial Response
+TCP Relay ->> Legacy Switch: Legacy Financial Response
+Legacy Switch ->> ATM: Successful transaction
+Note right of ATM: Dispense cash

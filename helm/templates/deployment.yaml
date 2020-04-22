@@ -1,0 +1,108 @@
+{{- $redisHost := ( .Values.config.redis_host | replace "$release_name" .Release.Name ) -}}
+{{- $mysqlHost := ( .Values.config.mysql_host | replace "$release_name" .Release.Name ) -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lps-adapter.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "lps-adapter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.AppVersion | replace "+" "_" }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "lps-adapter.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "lps-adapter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.AppVersion | replace "+" "_" }}
+    spec:
+      {{- if .Values.init.enabled }}
+      initContainers:
+        - name: {{ .Values.init.redis.name }}
+          image: {{ .Values.init.redis.repository }}:{{ .Values.init.redis.tag }}
+          imagePullPolicy: {{ .Values.init.redis.pullPolicy }}
+          command:
+            - sh
+            - "-c"
+            - {{ (.Values.init.redis.command | replace "$host" ($redisHost) | replace "$port" (print .Values.config.redis_port) )| quote }}
+      {{- end }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          {{- range $port := .Values.containers.api.service.ports }}
+            - name: {{ $port.name }}
+              containerPort: {{ $port.internalPort }}
+              protocol: TCP
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.containers.api.service.ports.api.name }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.containers.api.service.ports.api.name }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+          - name: LOG_LEVEL
+            value: {{ .Values.config.log_level | quote }}
+          - name: HTTP_PORT
+            value: {{ .Values.config.http_port | quote }}
+          - name: TCP_PORT
+            value: {{ .Values.config.tcp_port | quote }}
+          - name: REDIS_PORT
+            value: {{ .Values.config.redis_port | quote }}
+          - name: REDIS_HOST
+            value: {{ $redisHost }}
+          - name: ADAPTOR_FSP_ID
+            value: {{ .Values.config.adaptor_fsp_id | quote }}
+          - name: TRANSACTION_REQUESTS_URL
+            value: {{ .Values.config.transaction_requests_url | quote }}
+          - name: QUOTE_REQUESTS_URL
+            value: {{ .Values.config.quote_requests_url | quote }}
+          - name: TRANSFERS_URL
+            value: {{ .Values.config.transfers_url | quote }}
+          - name: AUTHORIZATIONS_URL
+            value: {{ .Values.config.authorizations_url | quote }}
+          - name: ACCOUNT_LOOKUP_URL
+            value: {{ .Values.config.account_lookup_url | quote }}
+          - name: ILP_SECRET
+            value: {{ .Values.config.ilp_secret | quote }}
+          - name: KNEX_CLIENT
+            value: {{ .Values.config.knex_client | quote }}
+          - name: MYSQL_HOST
+            value: {{ $mysqlHost }}
+          - name: MYSQL_USER
+            value: {{ .Values.config.mysql_user | quote }}
+          - name: MYSQL_PASSWORD
+            value: {{ .Values.config.mysql_password | quote }}
+          - name: MYSQL_DATABASE
+            value: {{ .Values.config.mysql_database | quote }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
