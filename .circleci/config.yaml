@@ -352,6 +352,7 @@ workflows:
                 - /feature*/
                 - /bugfix*/
                 - /chore*/
+                - /performance*/
       - test-unit:
           context: org-global
           requires:
@@ -364,6 +365,7 @@ workflows:
                 - /feature*/
                 - /bugfix*/
                 - /chore*/
+                - /performance*/
       - test-coverage:
           context: org-global
           requires:
@@ -376,6 +378,7 @@ workflows:
                 - /feature*/
                 - /bugfix*/
                 - /chore*/
+                - /performance*/
       - vulnerability-check:
           context: org-global
           requires:
@@ -388,6 +391,7 @@ workflows:
                 - /feature*/
                 - /bugfix*/
                 - /chore*/
+                - /performance*/
       - audit-licenses:
           context: org-global
           requires:
@@ -400,6 +404,7 @@ workflows:
                 - /feature*/
                 - /bugfix*/
                 - /chore*/
+                - /performance*/
       - test-integration:
           context: org-global
           requires:
@@ -412,6 +417,7 @@ workflows:
                 - /feature*/
                 - /bugfix*/
                 - /chore*/
+                - /performance*/
       - build:
           context: org-global
           requires:
