@@ -1,23 +1,27 @@
-# LPS-Adapter
-## NB! This project is a WIP. 
+# Mojaloop Adapter (BETA)
 
-The Legacy Payments System (LPS) Adapter is a component that integrates an LPS to the Mojaloop network by providing message mapping and orchestration between the two systems. The ISO8583-87 protocol is currently supported and caters for Payee initiated payment scenarios such as ATM cash withdrawals and POS payments.
+The Mojaloop Adapter is a component that integrates a non-Mojaloop system to the Mojaloop network by providing message mapping and orchestration between the two systems. 
 
-## Important considerations
+It was initailly designed to provide integration between legacy ISO8583 payment networks and currently supports the ISO8583-87 and ISO8583-93 protocols for Payee initiated payment scenarios such as ATM cash withdrawals and POS payments.
+
+## Important considerations for terminal originated transactions
 - It is assumed that there is only one in-flight message coming from a particular device registered in the legacy payment system. Should another transaction initiation be received from a device whilst there is already an in-flight message, then the previous transaction will be cancelled.
 - The OTP is transmitted in the clear. Work is being done to securely encrypt it whilst it is in transit.
-- The LPS-Adapter hosts TCP servers in to which legacy systems can connect. Configurations where the LPS-Adapter is the client are not supported.
+- The adaptor hosts TCP servers in to which external systems can connect. Configurations where the adapter is the client are not supported.
 
 ## Ecosystem
-The LPS Adapter is setup to act as an aggregator for FSPs that are part of the LPS. i.e. The adapter is a participant in the Mojaloop system and FSPs in the Mojaloop system will settle with the adapter. The adapter operator then needs to arrange settlement with FSPs that are part of the LPS.
+The adaptor is currently setup to act as an aggregator for FSPs that are part of an external legacy payments system (LPS). i.e. The adapter operator is a participant in the Mojaloop system and FSPs in the Mojaloop system will settle with the adapter. The adapter operator then needs to arrange settlement with FSPs that are part of the external system.
 
 ## Design Decisions
-The ISO8583 standard has different versions (87, 93 and 2003) and each LPS may use a slightly different flavour of a specific version. In order to cater for these different cases, a logical LPS-Adapter is split into two different components viz. the TCP Relay and the Orchestrator. The former is responsible for de/encoding and field mapping and the latter for transaction state management and message orchestration. This allows for different types of the TCP Relay to be used to handle the different ISO8583 standards whilst leaving the transaction logic untouched. A redis-backed queueing service is used to persist and pass messages between the two.
+The ISO8583 standard has different versions (87, 93 and 2003) and each external network may use a slightly different flavour of a specific version. In order to cater for these different cases, a logical adapter is split into two different components viz. the TCP Relay and the Orchestrator. 
+
+The former is responsible for de/encoding and field mapping and the latter for transaction state management and message orchestration. This allows for different types of the TCP Relay to be used to handle the different ISO8583 standards whilst leaving the transaction logic untouched. A redis-backed queueing service is used to persist and pass messages between the two.
 
 <img src="./media/adapter-architecture.svg" style="background: white"/>
 
 ### TCP Relay
-This is a TCP server that accepts incoming connections from an LPS. This connection is given a manually configured LPS Id. Any messages received on this connection are decoded into JSON representation of the original message, mapped to a format that the Adapter will understand and tagged with the LPS Id. Any messages picked up off the queue are mapped to the appropriate ISO8583 message and encoded before being sent over the TCP connection. The relays have access to an LPSMessages service to store and read legacy messages from a MySQL database.
+
+This is a TCP server that accepts incoming connections from an external payment system. This connection is given a manually configured LPS Id. Any messages received on this connection are decoded into JSON representation of the original message, mapped to a format that the Adapter will understand and tagged with the LPS Id. Any messages picked up off the queue are mapped to the appropriate ISO8583 message and encoded before being sent over the TCP connection. The relays have access to an LPSMessages service to store and read legacy messages from a MySQL database.
 
 The queue setup can be found [here](./docs/queues.md).
 
