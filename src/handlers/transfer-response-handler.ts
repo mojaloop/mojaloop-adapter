@@ -1,13 +1,13 @@
 import { AdaptorServices } from '../adaptor'
 import { TransfersIDPutResponse } from '../types/mojaloop'
-import { LegacyFinancialResponse, ResponseType } from '../types/adaptor-relay-messages'
+import { LegacyFinancialResponse, ResponseType, LegacyReversalResponse } from '../types/adaptor-relay-messages'
 import { TransactionState, Transaction, TransferState, Transfers, LpsMessage, LegacyMessageType } from '../models'
 
 export async function transferResponseHandler ({ queueService, logger }: AdaptorServices, transferResponse: TransfersIDPutResponse, headers: { [k: string]: any }, transferId: string): Promise<void> {
   try {
-    if (transferResponse.transferState === TransferState.committed) {
-      const transfer = await Transfers.query().where({ id: transferId }).first().throwIfNotFound()
-      const transaction = await Transaction.query().where({ transactionRequestId: transfer.transactionRequestId }).first().throwIfNotFound()
+    const transfer = await Transfers.query().where({ id: transferId }).first().throwIfNotFound()
+    const transaction = await Transaction.query().where({ transactionRequestId: transfer.transactionRequestId }).first().throwIfNotFound()
+    if (!transaction.isRefund() && transferResponse.transferState === TransferState.committed) {      
       const legacyFinancialRequest = await transaction.$relatedQuery<LpsMessage>('lpsMessages').where({ type: LegacyMessageType.financialRequest }).first().throwIfNotFound()
       const legacyFinancialResponse: LegacyFinancialResponse = {
         lpsFinancialRequestMessageId: legacyFinancialRequest.id,
@@ -15,6 +15,19 @@ export async function transferResponseHandler ({ queueService, logger }: Adaptor
       }
 
       await queueService.addToQueue(`${transaction.lpsId}FinancialResponses`, legacyFinancialResponse)
+
+      await transaction.$query().update({ state: TransactionState.financialResponse, previousState: transaction.state })
+      await transfer.$query().update({ state: TransferState.committed })
+    }
+
+    if (transaction.isRefund() && transferResponse.transferState === TransferState.committed) {
+      const legacyReversalRequest = await transaction.$relatedQuery<LpsMessage>('lpsMessages').where({ type: LegacyMessageType.reversalRequest }).first().throwIfNotFound()
+      const legacyReversalResponse: LegacyReversalResponse = {
+        lpsReversalRequestMessageId: legacyReversalRequest.id,
+        response: ResponseType.approved
+      }
+
+      await queueService.addToQueue(`${transaction.lpsId}ReversalResponses`, legacyReversalResponse)
 
       await transaction.$query().update({ state: TransactionState.financialResponse, previousState: transaction.state })
       await transfer.$query().update({ state: TransferState.committed })

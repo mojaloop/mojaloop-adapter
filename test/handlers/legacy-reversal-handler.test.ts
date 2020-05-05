@@ -166,25 +166,6 @@ describe('Legacy Reversal Handler', () => {
     expect(services.mojaClient.postTransactionRequests).not.toHaveBeenCalled()
   })
 
-  test('queues approved legacy reversal request', async () => {
-    const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
-    const lpsMessage = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.financialRequest, content: iso0100 })
-    const lpsMessage2 = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
-    await originalTransaction.$relatedQuery<LpsMessage>('lpsMessages').relate(lpsMessage)
-    await originalTransaction.$relatedQuery<Transfers>('transfer').insert({ id: 'transfer123', amount: transactionInfo.amount, currency: transactionInfo.currency, quoteId: transactionInfo.quote.id, state: TransferState.aborted, fulfillment: 'fulfillment' })
-
-    await legacyReversalHandler(services, {
-      lpsFinancialRequestMessageId: lpsMessage.id,
-      lpsId: 'lps1',
-      lpsKey: 'lps1-001-abc',
-      lpsReversalRequestMessageId: lpsMessage2.id
-    })
-
-    expect(await Transaction.query().where({ scenario: 'REFUND' })).toHaveLength(0)
-    expect(services.mojaClient.postTransactionRequests).not.toHaveBeenCalled()
-    expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1ReversalResponses', { lpsReversalRequestMessageId: lpsMessage2.id, response: ResponseType.approved })
-  })
-
   describe('creates a refund transaction if a transfer for the original transaction has occurred', () => {
     test('maps the lpsReversalRequestMessage to the new transaction', async () => {
       const originalTransaction = await Transaction.query().insertGraphAndFetch(transactionInfo)
@@ -287,7 +268,7 @@ describe('Legacy Reversal Handler', () => {
 
       expect(await Transaction.query().resultSize()).toBe(2)
       expect(services.mojaClient.postQuotes).toHaveBeenCalledTimes(1)
-      expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1ReversalResponses', { lpsReversalRequestMessageId: lpsMessage2.id, response: ResponseType.approved })
+      expect(services.queueService.addToQueue).not.toHaveBeenCalled()
     })
 
     test('queues failed legacy reversal response if refund process fails', async () => {

@@ -2,7 +2,7 @@ import Knex, { Transaction as KnexTransaction } from 'knex'
 import { AdaptorServicesFactory } from '../factories/adaptor-services'
 import { transferResponseHandler } from '../../src/handlers/transfer-response-handler'
 import { LegacyFinancialResponse, ResponseType } from '../../src/types/adaptor-relay-messages'
-import { TransactionState, Transaction, TransferState, LpsMessage, LegacyMessageType, Transfers } from '../../src/models'
+import { TransactionState, Transaction, TransferState, LpsMessage, LegacyMessageType, Transfers, Quote } from '../../src/models'
 import { Model } from 'objection'
 import { ISO0200Factory } from '../factories/iso-messages'
 const knexConfig = require('../../knexfile')
@@ -18,6 +18,7 @@ describe('Transfer Response Handler', () => {
     lpsId: 'lps1',
     lpsKey: 'lps1-001-abc',
     transactionRequestId: uuid(),
+    transactionId: uuid(),
     initiator: 'PAYEE',
     initiatorType: 'DEVICE',
     scenario: 'WITHDRAWAL',
@@ -126,6 +127,61 @@ describe('Transfer Response Handler', () => {
     await transferResponseHandler(services, transferResponse, headers, transferResponse.transferId)
 
     expect((await Transfers.query().where('id', transactionInfo.transfer.id).first().throwIfNotFound()).state).toBe(TransferState.committed)
+  })
+
+  test('queues an approved legacy reversal response for a successful refund transfer', async () => {
+    const refundTransactionInfo = {
+      lpsId: 'lps1',
+      lpsKey: 'lps1-001-abc',
+      transactionRequestId: uuid(),
+      transactionId: uuid(),
+      initiator: 'PAYEE',
+      initiatorType: 'DEVICE',
+      scenario: 'WITHDRAWAL',
+      amount: '100',
+      currency: 'USD',
+      state: TransactionState.quoteResponded,
+      expiration: new Date(Date.now() + 10000).toUTCString(),
+      originalTransactionId: transactionInfo.transactionId,
+      authenticationType: 'OTP',
+    }
+    const legacyReversalRequest = await LpsMessage.query().insertGraphAndFetch({ lpsId: 'lps1', lpsKey: 'lps1-001-abc', type: LegacyMessageType.reversalRequest, content: {} })
+    const transaction = await Transaction.query().insertGraph(refundTransactionInfo)
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(legacyReversalRequest)
+    const refundQuote = await transaction.$relatedQuery<Quote>('quote').insertAndFetch({
+      id: uuid(),
+      transferAmount: '100',
+      transferAmountCurrency: 'USD',
+      amount: '100',
+      amountCurrency: 'USD',
+      feeAmount: '0',
+      feeCurrency: 'USD',
+      ilpPacket: 'ilppacket',
+      condition: 'condition',
+      expiration: new Date(Date.now() + 10000).toUTCString()
+    })
+    const refundTransfer = await transaction.$relatedQuery<Transfers>('transfer').insertAndFetch({
+      id: uuid(),
+      quoteId: refundQuote.id,
+      state: TransferState.reserved,
+      amount: '107',
+      currency: 'USD',
+      fulfillment: 'test-fulfillment'
+    })
+
+    const transferResponse = {
+      transferId: refundTransfer.id,
+      transferState: 'COMMITTED'
+    }
+    const headers = {
+      'fspiop-source': 'payerFSP',
+      'fspiop-destination': 'payeeFSP'
+    }
+
+    await transferResponseHandler(services, transferResponse, headers, transferResponse.transferId)
+
+    expect((await Transfers.query().where('id', refundTransfer.id).first().throwIfNotFound()).state).toBe(TransferState.committed)
+    expect(services.queueService.addToQueue).toHaveBeenCalledWith('lps1ReversalResponses', { lpsReversalRequestMessageId: legacyReversalRequest.id, response: ResponseType.approved })
   })
 
 })

@@ -11,7 +11,6 @@ export async function legacyReversalHandler ({ logger, mojaClient, queueService 
 
     if (assertExists<Transaction[]>(lpsMessage.transactions, 'No transactions found for legacy message.').filter(trx => trx.scenario === 'REFUND').length !== 0) {
       logger.debug(`Legacy Reversal Handler: Refund transaction already associated with legacy reversal message id: ${reversalRequest.lpsReversalRequestMessageId} from lpsKey: ${reversalRequest.lpsKey}`)
-      await queueService.addToQueue(`${reversalRequest.lpsId}ReversalResponses`, { lpsReversalRequestMessageId: reversalRequest.lpsReversalRequestMessageId, response: ResponseType.approved })
       return
     }
 
@@ -92,7 +91,6 @@ export async function legacyReversalHandler ({ logger, mojaClient, queueService 
       await mojaClient.postQuotes(quoteRequest, assertExists<string>(originalPayer.fspId, 'Original payer does not have an fspId'))
     }
 
-    await queueService.addToQueue(`${reversalRequest.lpsId}ReversalResponses`, { lpsReversalRequestMessageId: reversalRequest.lpsReversalRequestMessageId, response: ResponseType.approved })
   } catch (error) {
     logger.error(`Legacy Reversal Handler: Failed to process legacy reversal request. ${error.message}`)
     await queueService.addToQueue(`${reversalRequest.lpsId}ReversalResponses`, { lpsReversalRequestMessageId: reversalRequest.lpsReversalRequestMessageId, response: ResponseType.invalid })
