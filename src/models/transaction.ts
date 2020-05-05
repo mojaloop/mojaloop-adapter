@@ -143,4 +143,8 @@ export class Transaction extends Model {
   isValid (): boolean {
     return this.state !== TransactionState.transactionDeclined && this.state !== TransactionState.transactionCancelled && new Date(Date.now()) < new Date(this.expiration)
   }
+
+  isRefund (): boolean {
+    return !!this.originalTransactionId
+  }
 }

@@ -1,4 +1,4 @@
-import { PartiesTypeIDPutResponse, TransfersIDPutResponse, TransfersPostRequest, TransactionRequestsIDPutResponse, QuotesIDPutResponse } from './mojaloop'
+import { PartiesTypeIDPutResponse, TransfersIDPutResponse, TransfersPostRequest, TransactionRequestsIDPutResponse, QuotesIDPutResponse, ErrorInformation } from './mojaloop'
 
 export type PartiesResponseQueueMessage = {
   partiesResponse: PartiesTypeIDPutResponse;
@@ -31,4 +31,18 @@ export type QuoteResponseQueueMessage = {
   quoteId: string;
   quoteResponse: QuotesIDPutResponse;
   headers: { [k: string]: any };
+}
+
+export enum MojaloopError {
+  quote,
+  transfer,
+  parties,
+  transactionRequest,
+  authorization
+}
+
+export type MojaloopErrorQueueMessage = {
+  type: MojaloopError,
+  typeId: string,
+  errorInformation: ErrorInformation
 }

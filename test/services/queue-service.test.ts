@@ -21,6 +21,7 @@ describe('queueService', function () {
     expect(queue2).toBeTruthy()
     expect(queueSize).toEqual(2)
   })
+
   test('throws error if trying to add to a queue that does not exist', async () => {
     const queueName = 'someName'
     const quoteRequest = QuotesPostRequestFactory.build()
@@ -35,5 +36,14 @@ describe('queueService', function () {
     }
 
     await expect(queueService.addToQueue(queueName, quotesObject)).rejects.toThrowError(`Cannot find queue with name: ${queueName}`)
+  })
+
+  test('adds to queue if it exists', async () => {
+    const queues = await queueService.getQueues()
+    const addMock = queues.get('queue1')!.add = jest.fn().mockResolvedValue({})
+
+    await queueService.addToQueue('queue1', { data: 'hi' })
+
+    expect(addMock).toHaveBeenCalledWith('queue1', { data: 'hi' })
   })
 })

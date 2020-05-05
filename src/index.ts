@@ -58,6 +58,7 @@ Model.knex(knex)
 
 const redisConnection = { host: REDIS_HOST, port: Number(REDIS_PORT) }
 const queueService = new BullQueueService([
+  'ErrorResponses',
   'QuoteRequests',
   'QuoteResponses',
   'TransactionRequestResponses',
