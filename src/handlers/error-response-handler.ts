@@ -3,7 +3,20 @@ import { MojaloopErrorQueueMessage, MojaloopError } from '../types/queueMessages
 import { Quote, LpsMessage, LegacyMessageType, Transaction, TransactionState, Transfers } from '../models'
 import { LegacyAuthorizationResponse, ResponseType, LegacyFinancialResponse, LegacyReversalResponse } from '../types/adaptor-relay-messages'
 
-export async function errorResponseHandler ({ logger, mojaClient, queueService }: AdaptorServices, { type, typeId, errorInformation }: MojaloopErrorQueueMessage): Promise<void> {
+async function findTransaction (type: MojaloopError, typeId: string): Promise<Transaction> {
+  switch (type) {
+    case MojaloopError.quote:
+      const quote = await Quote.query().where({ id: typeId }).first().throwIfNotFound()
+      return Transaction.query().where({ transactionRequestId: quote.transactionRequestId }).first().throwIfNotFound()
+    case MojaloopError.transfer:
+      const transfer = await Transfers.query().where({ id: typeId }).first().throwIfNotFound()
+      return Transaction.query().where({ transactionRequestId: transfer.transactionRequestId }).first().throwIfNotFound()
+    default:
+      throw new Error('Error response handler: Could not find transaction.')
+  }
+}
+
+export async function errorResponseHandler ({ logger, queueService }: AdaptorServices, { type, typeId }: MojaloopErrorQueueMessage): Promise<void> {
   try {
     const transaction = await findTransaction(type, typeId)
 
@@ -29,7 +42,7 @@ export async function errorResponseHandler ({ logger, mojaClient, queueService }
 
     if (transaction.isRefund()) {
       logger.error('Mojaloop Error Handler: Failed to process refund transaction ' + transaction.transactionRequestId)
-      //TODO: add to some alerting system?
+      // TODO: add to some alerting system?
       const legacyReversalRequest = await transaction.$relatedQuery<LpsMessage>('lpsMessages').where({ type: LegacyMessageType.reversalRequest }).first().throwIfNotFound()
       const response: LegacyReversalResponse = {
         lpsReversalRequestMessageId: legacyReversalRequest.id,
@@ -40,18 +53,5 @@ export async function errorResponseHandler ({ logger, mojaClient, queueService }
 
   } catch (error) {
     logger.error('Mojaloop Error Handler: Failed to process error message.' + error.toString())
-  }
-}
-
-async function findTransaction (type: MojaloopError, typeId: string): Promise<Transaction> {
-  switch (type){
-    case MojaloopError.quote:
-      const quote = await Quote.query().where({ id: typeId }).first().throwIfNotFound()
-      return Transaction.query().where({ transactionRequestId: quote.transactionRequestId}).first().throwIfNotFound()
-    case MojaloopError.transfer:
-      const transfer = await Transfers.query().where({ id: typeId }).first().throwIfNotFound()
-      return Transaction.query().where({ transactionRequestId: transfer.transactionRequestId}).first().throwIfNotFound()
-    default:
-      throw new Error('Error response handler: Could not find transaction.')
   }
 }

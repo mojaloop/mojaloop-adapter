@@ -18,7 +18,7 @@ export async function create (request: Request, h: ResponseToolkit): Promise<Res
     request.server.app.logger.error(`Quote Errors Controller: Error handling quote error. ${error.message}`)
 
     return h.response({
-      errorInformation: { 
+      errorInformation: {
         errorCode: '2001',
         errorDescription: 'An internal error occurred.'
       }

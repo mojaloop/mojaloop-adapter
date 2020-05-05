@@ -42,7 +42,7 @@ export enum MojaloopError {
 }
 
 export type MojaloopErrorQueueMessage = {
-  type: MojaloopError,
-  typeId: string,
-  errorInformation: ErrorInformation
+  type: MojaloopError;
+  typeId: string;
+  errorInformation: ErrorInformation;
 }
