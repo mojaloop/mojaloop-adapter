@@ -127,4 +127,64 @@ describe('Legacy Financial Request Handler', () => {
 
     expect((await transaction.$relatedQuery<LpsMessage>('lpsMessages').where({ type: LegacyMessageType.financialRequest }).first().throwIfNotFound()).id).toBe(lpsFinancialRequest.id)
   })
+
+  test('fails if payer is not defined', async () => {
+    const lpsFinancialRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.financialRequest, content: ISO0200Factory.build() })
+    const transaction = await Transaction.query().insertAndFetch({
+      lpsId: 'lps1',
+      lpsKey: 'lps1-001-abc',
+      transactionRequestId: uuid(),
+      transactionId: uuid(),
+      initiator: 'PAYEE',
+      initiatorType: 'DEVICE',
+      scenario: 'WITHDRAWAL',
+      amount: '100',
+      currency: 'USD',
+      state: TransactionState.authSent,
+      expiration: new Date(Date.now()).toUTCString(),
+      authenticationType: 'OTP'
+    })
+    const legacyFinancialRequest: LegacyFinancialRequest = {
+      lpsFinancialRequestMessageId: lpsFinancialRequest.id,
+      lpsId: 'lps1',
+      lpsKey: 'lps1-001-abc',
+      authenticationInfo: {
+        authenticationType: 'OTP',
+        authenticationValue: '1515'
+      },
+      responseType: 'ENTERED'
+    }
+
+    await legacyFinancialRequestHandler(services, legacyFinancialRequest)
+
+    expect(services.logger.error).toHaveBeenCalledWith('Legacy Financial Request Handler: Failed to process legacy financial request. Transaction does not have payer')
+  })
+
+  test('fails if authenticationInfo is not defined', async () => {
+    const lpsFinancialRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.financialRequest, content: ISO0200Factory.build() })
+    const transaction = await Transaction.query().insertAndFetch({
+      lpsId: 'lps1',
+      lpsKey: 'lps1-001-abc',
+      transactionRequestId: uuid(),
+      transactionId: uuid(),
+      initiator: 'PAYEE',
+      initiatorType: 'DEVICE',
+      scenario: 'WITHDRAWAL',
+      amount: '100',
+      currency: 'USD',
+      state: TransactionState.authSent,
+      expiration: new Date(Date.now()).toUTCString(),
+      authenticationType: 'OTP'
+    })
+    const legacyFinancialRequest = {
+      lpsFinancialRequestMessageId: lpsFinancialRequest.id,
+      lpsId: 'lps1',
+      lpsKey: 'lps1-001-abc',
+      responseType: 'ENTERED'
+    }
+
+    await legacyFinancialRequestHandler(services, legacyFinancialRequest as LegacyFinancialRequest)
+
+    expect(services.logger.error).toHaveBeenCalledWith('Legacy Financial Request Handler: Failed to process legacy financial request. Missing authenticationInfo.')
+  })
 })

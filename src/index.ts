@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from 'axios'
 import { Worker, Job } from 'bullmq'
 import { createServer, Socket } from 'net'
 import { createApp, AdaptorServices } from './adaptor'
-import { DefaultIso8583TcpRelay } from './tcp-relay'
+import { DefaultIso8583_87TcpRelay } from './relays/default-iso8583-87'
 import { KnexAuthorizationsService } from './services/authorizations-service'
 import { BullQueueService } from './services/queue-service'
 import { MojaloopRequests, Money } from '@mojaloop/sdk-standard-components'
@@ -157,7 +157,7 @@ const start = async (): Promise<void> => {
   const tcpServer = createServer(async (socket) => {
     Logger.info('Connection received for lps1 relay.')
     sockets.push(socket)
-    const relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps1', redisConnection })
+    const relay = new DefaultIso8583_87TcpRelay({ decode, encode, logger: Logger, queueService, socket }, { lpsId: 'lps1', redisConnection })
     await relay.start()
 
     socket.on('close', async () => {

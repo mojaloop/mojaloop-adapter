@@ -20,6 +20,7 @@ module.exports = {
   collectCoverageFrom: [
     "src/**/*.ts",
     "!src/index.ts",
+    "!src/relays/*.ts",
     "!src/services/authorizations-service.ts",
     "!src/services/ilp-service.ts"
   ]

@@ -200,4 +200,17 @@ describe('Quote Requests Handler', function () {
     expect(services.mojaClient.putQuotesError).toHaveBeenCalledWith(quoteRequest.quoteId, { errorInformation: { errorCode: '3301', errorDescription: 'Transaction is no longer valid.' } }, headers['fspiop-source'])
     expect(services.queueService.addToQueue).toHaveBeenCalledWith(transactionInfo.lpsId + 'AuthorizationResponses', { lpsAuthorizationRequestMessageId: legacyAuthRequest.id, response: ResponseType.invalid })
   })
+
+  test('fails if quote request does not have transactionRequestId', async () => {
+    const transaction = await Transaction.query().insertGraph(transactionInfo)
+    const legacyAuthRequest = await LpsMessage.query().insertAndFetch({ lpsId: transactionInfo.lpsId, lpsKey: transactionInfo.lpsKey, type: LegacyMessageType.authorizationRequest, content: ISO0100Factory.build() })
+    await transaction.$relatedQuery<LpsMessage>('lpsMessages').relate(legacyAuthRequest)
+    const quoteRequest = QuotesPostRequestFactory.build({
+      transactionId: transactionInfo.transactionId
+    })
+    delete quoteRequest.transactionRequestId
+    await quotesRequestHandler(services, quoteRequest, headers)
+
+    expect(services.logger.error).toHaveBeenCalledWith(`Quote Request Handler: Failed to process quote request: ${quoteRequest.quoteId} from ${headers['fspiop-source']}. No transactionRequestId given for quoteRequest.`)
+  })
 })

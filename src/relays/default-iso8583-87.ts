@@ -1,54 +1,17 @@
 import { Server, Socket } from 'net'
 import { Worker, Job, ConnectionOptions } from 'bullmq'
 import { raw } from 'objection'
-import { QueueService } from './services/queue-service'
-import { Logger } from './adaptor'
-import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancialRequest, LegacyFinancialResponse, LegacyReversalRequest, ResponseType, LegacyReversalResponse } from './types/adaptor-relay-messages'
-import { LpsMessage, LegacyMessageType } from './models'
+import { QueueService } from '../services/queue-service'
+import { Logger } from '../adaptor'
+import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancialRequest, LegacyFinancialResponse, LegacyReversalRequest, ResponseType, LegacyReversalResponse } from '../types/adaptor-relay-messages'
+import { LpsMessage, LegacyMessageType } from '../models'
 import { Money } from '@mojaloop/sdk-standard-components'
-import { pad } from './utils/util'
+import { pad } from '../utils/util'
+import { TcpRelay, LegacyMessage } from '../types/tcpRelay'
+import { ResponseCodes, TcpRelayServices, TcpRelayConfig } from '../types/tcpRelay'
 const MlNumber = require('@mojaloop/ml-number')
 
-export type LegacyMessage = { [k: string]: any }
-
-export interface TcpRelay {
-  start: () => Promise<void>;
-  shutdown: () => Promise<void>;
-  getMessageType: (mti: string) => LegacyMessageType;
-  calculateFee: (legacyMessage: LegacyMessage) => Money;
-  getTransactionType: (legacyMessage: LegacyMessage) => { initiatorType: 'DEVICE' | 'AGENT'; scenario: 'WITHDRAWAL' | 'REFUND' };
-  mapFromAuthorizationRequest: (lpsMessageId: string, legacyMessage: LegacyMessage) => Promise<LegacyAuthorizationRequest>;
-  mapToAuthorizationResponse: (authorizationResponse: LegacyAuthorizationResponse) => Promise<LegacyMessage>;
-  mapFromFinancialRequest: (lpsMessageId: string, legacyMessage: LegacyMessage) => Promise<LegacyFinancialRequest>;
-  mapToFinancialResponse: (financialResponse: LegacyFinancialResponse) => Promise<LegacyMessage>;
-  mapFromReversalAdvice: (lpsMessageId: string, legacyMessage: LegacyMessage) => Promise<LegacyReversalRequest>;
-  mapToReversalAdviceResponse: (reversalResponse: LegacyReversalResponse) => Promise<LegacyMessage>;
-}
-
-export type TcpRelayServices = {
-  queueService: QueueService;
-  logger: Logger;
-  encode: (message: { [k: string]: any }) => Buffer;
-  decode: (message: Buffer) => { [k: string]: any };
-  socket: Socket;
-}
-
-export type TcpRelayConfig = {
-  lpsId: string;
-  transactionExpiryWindow?: number;
-  redisConnection?: ConnectionOptions;
-  responseCodes?: ResponseCodes;
-}
-
-export type ResponseCodes = {
-  approved: string;
-  invalidTransaction: string;
-  noAction: string;
-  noIssuer: string;
-  doNotHonour: string;
-}
-
-export class DefaultIso8583TcpRelay implements TcpRelay {
+export class DefaultIso8583_87TcpRelay implements TcpRelay {
 
   private _logger: Logger
   private _queueService: QueueService
@@ -56,7 +19,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   private _transactionExpiryWindow: number
   private _redisConnection: ConnectionOptions
   private _server?: Server
-  private _socket?: Socket
+  private _socket: Socket
 
   private _encode: (message: { [k: string]: any }) => Buffer
   private _decode: (message: Buffer) => { [k: string]: any }
@@ -67,6 +30,10 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   private _responseCodes: ResponseCodes
 
   constructor ({ logger, queueService, encode, decode, socket }: TcpRelayServices, { lpsId, transactionExpiryWindow, redisConnection, responseCodes }: TcpRelayConfig) {
+    if (!socket) {
+      throw new Error(`${lpsId} relay: Cannot be created as there is no socket registered.`)
+    }
+
     this._logger = logger
     this._queueService = queueService
     this._encode = encode
@@ -102,7 +69,7 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
             }
             break
           default:
-            throw new Error(this._lpsId + 'relay: Cannot handle legacy message with mti: ' + messageType)
+            this._logger.error(`${this._lpsId} relay: Cannot handle legacy message with mti: ${legacyMessage[0]}`)
         }
       } catch (error) {
         this._logger.error(`${this._lpsId} relay: Failed to handle iso message.`)
@@ -158,30 +125,18 @@ export class DefaultIso8583TcpRelay implements TcpRelay {
   }
 
   async handleAuthorizationResponse (authorizationResponse: LegacyAuthorizationResponse): Promise<void> {
-    if (!this._socket) {
-      throw new Error(`${this._lpsId} relay: Cannot handleAuthorizationResponse as there is no socket registered.`)
-    }
-
     const message = await this.mapToAuthorizationResponse(authorizationResponse)
 
     this._socket.write(this._encode(message))
   }
 
   async handleFinancialResponse (financialResponse: LegacyFinancialResponse): Promise<void> {
-    if (!this._socket) {
-      throw new Error(`${this._lpsId} relay: Cannot handleFinancialResponse as there is no socket registered.`)
-    }
-
     const message = await this.mapToFinancialResponse(financialResponse)
 
     this._socket.write(this._encode(message))
   }
 
   async handleReversalResponse (reversalResponse: LegacyReversalResponse): Promise<void> {
-    if (!this._socket) {
-      throw new Error(`${this._lpsId} relay: Cannot handleFinancialResponse as there is no socket registered.`)
-    }
-
     const message = await this.mapToReversalAdviceResponse(reversalResponse)
 
     this._socket.write(this._encode(message))

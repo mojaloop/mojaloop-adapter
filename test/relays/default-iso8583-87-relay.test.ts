@@ -1,21 +1,26 @@
 import Knex, { Transaction as KnexTransaction } from 'knex'
 import { Model } from 'objection'
 import { Socket } from 'net'
-import { DefaultIso8583TcpRelay, LegacyMessage } from '../src/tcp-relay'
-import { iso0100BinaryMessage, iso0200BinaryMessage, ISO0100Factory, ISO0420Factory } from './factories/iso-messages'
-import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse, ResponseType, LegacyReversalResponse } from '../src/types/adaptor-relay-messages'
-import { LpsMessage, LegacyMessageType } from '../src/models'
-const knexConfig = require('../knexfile')
+import { DefaultIso8583_87TcpRelay } from '../../src/relays/default-iso8583-87'
+import { iso0100BinaryMessage, iso0200BinaryMessage, ISO0100Factory, ISO0420Factory } from '../factories/iso-messages'
+import { LegacyAuthorizationRequest, LegacyFinancialRequest, LegacyAuthorizationResponse, LegacyFinancialResponse, ResponseType, LegacyReversalResponse } from '../../src/types/adaptor-relay-messages'
+import { LpsMessage, LegacyMessageType } from '../../src/models'
+import { LegacyMessage } from '../../src/types/tcpRelay'
+const knexConfig = require('../../knexfile')
 const IsoParser = require('iso_8583')
-const Logger = require('@mojaloop/central-services-logger')
-Logger.log = Logger.info
+const Logger = {
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  debug: jest.fn()
+}
 
 describe('TCP relay', function () {
 
   const dbConfig = process.env.DB_CONFIG || 'sqlite'
   const knex = Knex(knexConfig[dbConfig])
   let trx: KnexTransaction
-  let relay: DefaultIso8583TcpRelay
+  let relay: DefaultIso8583_87TcpRelay
   const client = new Socket()
   const encode = (message: LegacyMessage): Buffer => {
     return new IsoParser(message).getBufferMessage()
@@ -34,7 +39,7 @@ describe('TCP relay', function () {
     if (dbConfig === 'sqlite') {      
       await knex.migrate.latest()
     }
-    relay = new DefaultIso8583TcpRelay({ decode, encode, logger: Logger, queueService, socket: client }, { lpsId: 'lps1', transactionExpiryWindow })
+    relay = new DefaultIso8583_87TcpRelay({ decode, encode, logger: Logger, queueService, socket: client }, { lpsId: 'lps1', transactionExpiryWindow })
   })
 
   beforeEach(async () => {
@@ -290,5 +295,27 @@ describe('TCP relay', function () {
 
     expect(queueService.addToQueue).not.toHaveBeenCalled()
     expect(client.write).toHaveBeenCalledWith(encode({ ...iso0420, 0: '0430', 39: '21' }))
+  })
+
+  test('logs error if it fails to handle a message', async () => {
+    relay.getMessageType = jest.fn(() => { throw new Error('failed') })
+
+    const iso0420 = ISO0420Factory.build({
+      28: 'C00000100',
+      90: '010000000801300836360000000000000000000000'
+    })
+
+    client.emit('data', encode(iso0420))
+
+    await new Promise(resolve => { setTimeout(() => { resolve() }, 100) })
+    expect(Logger.error).toHaveBeenCalledWith('lps1 relay: Failed to handle iso message.')
+  })
+
+  test('logs error if an error is raised on the socket', async () => {
+    client.emit('error', { message: 'socket error' })
+
+    await new Promise(resolve => { setTimeout(() => { resolve() }, 100) })
+
+    expect(Logger.error).toHaveBeenCalledWith('lps1 relay: Error: socket error')
   })
 })
