@@ -45,4 +45,5 @@ export interface TcpRelay {
   mapToFinancialResponse: (financialResponse: LegacyFinancialResponse) => Promise<LegacyMessage>;
   mapFromReversalAdvice: (lpsMessageId: string, legacyMessage: LegacyMessage) => Promise<LegacyReversalRequest>;
   mapToReversalAdviceResponse: (reversalResponse: LegacyReversalResponse) => Promise<LegacyMessage>;
+  getLpsKey: (legacyMessage: LegacyMessage) => string;
 }

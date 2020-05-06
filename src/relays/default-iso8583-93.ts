@@ -3,41 +3,27 @@ import { LegacyAuthorizationRequest, LegacyAuthorizationResponse, LegacyFinancia
 import { LpsMessage, LegacyMessageType } from '../models'
 import { Money } from '@mojaloop/sdk-standard-components'
 import { pad } from '../utils/util'
-import { LegacyMessage } from '../types/tcpRelay'
+import { LegacyMessage, TcpRelayServices, TcpRelayConfig } from 'types/tcpRelay'
 import { BaseTcpRelay } from './base-tcp-relay'
 const MlNumber = require('@mojaloop/ml-number')
 
-export class DefaultIso8583_87TcpRelay extends BaseTcpRelay {
+export class DefaultIso8583_93TcpRelay extends BaseTcpRelay {
+
+  constructor ({ logger, queueService, encode, decode, socket }: TcpRelayServices, { lpsId, transactionExpiryWindow, redisConnection, responseCodes }: TcpRelayConfig) {
+    super({ logger, queueService, encode, decode, socket }, { lpsId, transactionExpiryWindow, redisConnection, responseCodes: responseCodes ?? { approved: '00', invalidTransaction: 'N0', noAction: '21', doNotHonour: '05', noIssuer: '15' } })
+  }
 
   getLpsKey(legacyMessage: LegacyMessage): string {
-    return this._lpsId + '-' + legacyMessage[41] + '-' + legacyMessage[42]
-  }
-
-  async handleAuthorizationResponse (authorizationResponse: LegacyAuthorizationResponse): Promise<void> {
-    const message = await this.mapToAuthorizationResponse(authorizationResponse)
-
-    this._socket.write(this._encode(message))
-  }
-
-  async handleFinancialResponse (financialResponse: LegacyFinancialResponse): Promise<void> {
-    const message = await this.mapToFinancialResponse(financialResponse)
-
-    this._socket.write(this._encode(message))
-  }
-
-  async handleReversalResponse (reversalResponse: LegacyReversalResponse): Promise<void> {
-    const message = await this.mapToReversalAdviceResponse(reversalResponse)
-
-    this._socket.write(this._encode(message))
+    return this._lpsId
   }
 
   getMessageType (mti: string): LegacyMessageType {
     switch (mti) {
-      case '0100':
+      case '1100':
         return LegacyMessageType.authorizationRequest
-      case '0200':
+      case '1200':
         return LegacyMessageType.financialRequest
-      case '0420':
+      case '1420':
         return LegacyMessageType.reversalRequest
       default:
         throw new Error(this._lpsId + 'relay: Cannot handle legacy message with mti: ' + mti)
@@ -47,10 +33,6 @@ export class DefaultIso8583_87TcpRelay extends BaseTcpRelay {
   calculateFee (legacyMessage: LegacyMessage): Money {
     const amount = legacyMessage[28] ? new MlNumber(legacyMessage[28].slice(1)).divide(100).toString() : '0'
     return { amount, currency: this.getMojaloopCurrency(legacyMessage[49]) }
-  }
-
-  getMojaloopCurrency (legacyCurrency: string): string {
-    return 'USD' // TODO: currency conversion from legacyMessage[49]
   }
 
   getTransactionType (legacyMessage: LegacyMessage): { initiatorType: 'DEVICE' | 'AGENT'; scenario: 'WITHDRAWAL' | 'REFUND' } {
@@ -93,7 +75,7 @@ export class DefaultIso8583_87TcpRelay extends BaseTcpRelay {
 
     return {
       lpsId: this._lpsId,
-      lpsKey: this._lpsId + '-' + legacyMessage[41] + '-' + legacyMessage[42],
+      lpsKey: this.getLpsKey(legacyMessage),
       lpsAuthorizationRequestMessageId: lpsMessageId,
       amount: {
         amount: new MlNumber(legacyMessage[4]).divide(100).toString(),
@@ -137,7 +119,7 @@ export class DefaultIso8583_87TcpRelay extends BaseTcpRelay {
     this._logger.debug(`${this._lpsId} relay: Mapping from financial request`)
     return {
       lpsId: this._lpsId,
-      lpsKey: this._lpsId + '-' + legacyMessage[41] + '-' + legacyMessage[42],
+      lpsKey: this.getLpsKey(legacyMessage),
       lpsFinancialRequestMessageId: lpsMessageId,
       responseType: 'ENTERED',
       authenticationInfo: {
@@ -166,16 +148,14 @@ export class DefaultIso8583_87TcpRelay extends BaseTcpRelay {
     const stan = originalDataElements.slice(4, 10)
     const date = originalDataElements.slice(10, 20)
     const acquiringId = originalDataElements.slice(20, 31).replace(/^0+/g, '')
-    const forwardingId = originalDataElements.slice(31, 42).replace(/^0+/g, '')
 
-    this._logger.debug(JSON.stringify({ originalDataElements, stan, mti, date, acquiringId, forwardingId }))
+    this._logger.debug(JSON.stringify({ originalDataElements, stan, mti, date, acquiringId }))
 
     const query = LpsMessage.query()
       .where(raw(`JSON_EXTRACT(content, '$."0"') = "${mti}"`))
       .where(raw(`JSON_EXTRACT(content, '$."7"') = "${date}"`))
       .where(raw(`JSON_EXTRACT(content, '$."11"') = "${stan}"`))
     if (acquiringId !== '') query.where(raw(`JSON_EXTRACT(content, '$."32"') = "${acquiringId}"`))
-    if (forwardingId !== '') query.where(raw(`JSON_EXTRACT(content, '$."33"') = "${forwardingId}"`))
 
     const prevLpsMessageId = await query.orderBy('created_at', 'desc').first().throwIfNotFound()
 
