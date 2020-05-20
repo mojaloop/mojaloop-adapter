@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "nginx-ingress.fullname" . }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    addonmanager.kubernetes.io/mode: Reconcile
+    app: {{ template "nginx-ingress.fullname" . }}-controller
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  {{- range $key, $value := .Values.tcp }}
+  - name: "{{ $key }}-tcp"
+    port: {{ $key }}
+    targetPort: {{ $key }}
+    protocol: TCP
+  {{- end }}
+  selector:
+    addonmanager.kubernetes.io/mode: Reconcile
+    app: {{ template "nginx-ingress.fullname" . }}-controller
+    release: {{ .Release.Name }}
+  sessionAffinity: None
+  type: LoadBalancer
