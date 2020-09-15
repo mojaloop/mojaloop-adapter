@@ -39,7 +39,7 @@ export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, 
     const otherFees = transaction.fees?.map(fee => fee.amount).reduce((total, current) => new MlNumber(total).add(current).toString(), '0')
     const totalFeeAmount = otherFees ? new MlNumber(otherFees).add(adaptorFees.amount).toString() : adaptorFees.amount
     const transferAmount = new MlNumber(totalFeeAmount).add(quoteRequest.amount.amount).toString()
-    const expiration = new Date(Date.now() + Number(QUOTE_EXPIRATION_WINDOW) * 1000).toUTCString()
+    const expiration = new Date(Date.now() + Number(QUOTE_EXPIRATION_WINDOW) * 1000).toISOString()
     const { ilpPacket, condition } = await ilpService.getQuoteResponseIlp(quoteRequest, { transferAmount: { amount: transferAmount, currency: transaction.currency } })
 
     await transaction.$relatedQuery<Quote>('quote').insertAndFetch({

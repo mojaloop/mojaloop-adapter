@@ -55,7 +55,7 @@ describe('Legacy Financial Request Handler', () => {
   }
 
   beforeAll(async () => {
-    if (dbConfig === 'sqlite') {      
+    if (dbConfig === 'sqlite') {
       await knex.migrate.latest()
     }
   })
@@ -93,8 +93,8 @@ describe('Legacy Financial Request Handler', () => {
     const headers = {
       'fspiop-destination': 'mojawallet',
       'fspiop-source': 'adaptor',
-      date: new Date().toUTCString(),
-      'content-type': 'application/vnd.interoperability.authorizations+json;version=1.0'
+      'content-type': 'application/vnd.interoperability.authorizations+json;version=1.0',
+      accept: 'application/vnd.interoperability.authorizations+json;version=1.0'
     }
     const authorizationsResponse: AuthorizationsIDPutResponse = {
       authenticationInfo: {
@@ -104,7 +104,7 @@ describe('Legacy Financial Request Handler', () => {
       responseType: 'ENTERED'
     }
     transaction = await transaction.$query()
-    expect(services.authorizationsService.sendAuthorizationsResponse).toHaveBeenCalledWith(transactionInfo.transactionRequestId, authorizationsResponse, headers)
+    expect(services.authorizationsService.sendAuthorizationsResponse).toHaveBeenCalledWith(transactionInfo.transactionRequestId, authorizationsResponse, expect.objectContaining(headers))
     expect(transaction.state).toEqual(TransactionState.financialRequestSent)
     expect(transaction.previousState).toEqual(TransactionState.authSent)
   })

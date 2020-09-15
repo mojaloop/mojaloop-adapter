@@ -31,11 +31,11 @@ const TCP_PORT = process.env.TCP_PORT || 3001
 const REDIS_PORT = process.env.REDIS_PORT || 6379
 const REDIS_HOST = process.env.REDIS_HOST || 'localhost'
 const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
-const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
-const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
-const TRANSFERS_URL = process.env.TRANSFERS_URL || 'http://transfers.local'
-const AUTHORIZATIONS_URL = process.env.AUTHORIZATIONS_URL || 'http://authorizations.local'
-const ACCOUNT_LOOKUP_URL = process.env.ACCOUNT_LOOKUP_URL || 'http://account-lookup-service.local'
+const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'transaction-request-service.mojaloop.app'
+const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'quoting-service.mojaloop.app'
+const TRANSFERS_URL = process.env.TRANSFERS_URL || 'ml-api-adapter.mojaloop.app'
+const AUTHORIZATIONS_URL = process.env.AUTHORIZATIONS_URL || 'transaction-request-service.mojaloop.app'
+const ACCOUNT_LOOKUP_URL = process.env.ACCOUNT_LOOKUP_URL || 'account-lookup-service.mojaloop.app'
 const ILP_SECRET = process.env.ILP_SECRET || 'secret'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({
@@ -73,7 +73,7 @@ const queueService = new BullQueueService([
   'lps1FinancialResponses',
   'lps1ReversalResponses'], redisConnection)
 const AuthorizationsClient: AxiosInstance = axios.create({
-  baseURL: AUTHORIZATIONS_URL,
+  baseURL: 'https://' + AUTHORIZATIONS_URL,
   timeout: 3000
 })
 const authorizationsService = new KnexAuthorizationsService({ knex, client: AuthorizationsClient, logger: Logger })
@@ -85,7 +85,7 @@ const mojaClient = new MojaloopRequests({
   transfersEndpoint: TRANSFERS_URL,
   transactionRequestsEndpoint: TRANSACTION_REQUESTS_URL,
   jwsSign: false,
-  tls: { outbound: { mutualTLS: { enabled: false } } },
+  tls: { outbound: { mutualTLS: { enabled: true } } },
   wso2Auth: {
     getToken: () => null
   },

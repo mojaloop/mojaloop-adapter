@@ -20,8 +20,9 @@ export async function legacyFinancialRequestHandler ({ authorizationsService, lo
     const headers = {
       'fspiop-destination': transaction.payer.fspId,
       'fspiop-source': process.env.ADAPTOR_FSP_ID || 'adaptor',
-      date: new Date().toUTCString(),
-      'content-type': 'application/vnd.interoperability.authorizations+json;version=1.0'
+      date: new Date().toISOString(),
+      'content-type': 'application/vnd.interoperability.authorizations+json;version=1.0',
+      accept: 'application/vnd.interoperability.authorizations+json;version=1.0'
     }
 
     const authorizationsResponse: AuthorizationsIDPutResponse = {
@@ -31,7 +32,7 @@ export async function legacyFinancialRequestHandler ({ authorizationsService, lo
       },
       responseType: 'ENTERED'
     }
-    await authorizationsService.sendAuthorizationsResponse(transaction.transactionRequestId, authorizationsResponse, headers)
+    await authorizationsService.sendAuthorizationsResponse(transaction.transactionRequestId, authorizationsResponse, headers).catch(error => { console.log(error.response) })
 
     await transaction.$query().update({ state: TransactionState.financialRequestSent, previousState: transaction.state })
   } catch (error) {
