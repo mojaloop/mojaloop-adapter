@@ -1,0 +1,16 @@
+box "TCIB"
+participant "TCIB Switch" as TCIB
+end box
+box "CNP"
+participant "CNP Server" as D1
+end box
+box "Mojaloop"
+    participant Switch as S
+    participant "ALS" as A
+end box
+box "DFSP A"
+    participant "DFSP A\n(CNP Sponsor)" as D2
+end box
+box "DFSP B"
+    participant "DFSP B\n(Payee)" as D3
+end box

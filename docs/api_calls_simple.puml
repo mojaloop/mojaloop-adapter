@@ -1,0 +1,57 @@
+@startuml
+
+title Cross Network Transfer from TCIB (ISO 20022)
+
+!include participants_api.iuml
+
+note over S
+This document aims to demonstrate the high level API Calls between the CNP, Mojaloop Hub and DFSPs.
+end note
+
+
+TCIB --> D1: ""POST (pacs.008 request)""
+
+== Discovery (Lookup) ==
+D1 -> S: ""GET /parties/MSISDN/+4412345678""
+... Get participants/parties flow not shown here ...
+S -> D3: ""GET /parties/MSISDN/+4412345678""
+D3 -> S: ""PUT /parties/MSISDN/+4412345678""
+S -> D1: ""PUT /parties/MSISDN/+4412345678""
+... CNP has found the payee and payee DFSP ...
+
+== Agreement Phase ==
+D1 -> S: ""POST /thirdpartyRequests/transactions""
+S -> D2: ""POST /thirdpartyRequests/transactions""
+
+D2 -> D2: Lookup this ""cnpId"". Verify that they exist, and are able to send.
+
+D2 -> S: ""POST /quotes""
+S -> D3: ""POST /quotes""
+D3 -> S: ""PUT /quotes/456""
+S -> D2: ""PUT /quotes/456""
+
+note left of D2
+  DFSPA has the quote, they can now ask
+  the CNP for authorization
+end note
+
+D2 -> S: ""POST /authorizations""
+S -> D1: ""POST /authorizations""
+
+note right of D1
+  CNP checks the quote and decides to continue
+end note
+
+D1 -> S: ""PUT /authorizations/123""
+S -> D2: ""PUT /authorizations/123""
+
+== Transfer Phase ==
+
+D2 -> S: ""POST /transfers""
+S -> D3: ""POST /transfers""
+D3 -> S: ""PUT /transfers/321""
+S -> D2: ""PUT /transfers/321""
+S -> D1: ""PATCH /thirdpartyRequests/transactions/123""
+D1 --> TCIB: ""POST (pacs.008 response)""
+
+@enduml
