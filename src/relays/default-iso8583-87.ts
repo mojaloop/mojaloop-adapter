@@ -119,6 +119,7 @@ export class DefaultIso8583_87TcpRelay extends BaseTcpRelay {
     const authorizationRequest = await LpsMessage.query().where({ id: authorizationResponse.lpsAuthorizationRequestMessageId }).first().throwIfNotFound()
 
     if (authorizationResponse.response === ResponseType.approved) {
+      console.log('Testing87')
       const approvalMessage: LegacyMessage = { ...authorizationRequest.content, 0: '0110', 39: this._responseCodes.approved }
       if (authorizationResponse.fees) approvalMessage[30] = 'D' + pad(new MlNumber(authorizationResponse.fees.amount).multiply(100).toString(), 8, '0')
       if (authorizationResponse.transferAmount) approvalMessage[48] = authorizationResponse.transferAmount.amount
@@ -150,7 +151,7 @@ export class DefaultIso8583_87TcpRelay extends BaseTcpRelay {
   async mapToFinancialResponse (financialResponse: LegacyFinancialResponse): Promise<LegacyMessage> {
     this._logger.debug(`${this._lpsId} relay: Mapping to financial request`)
     const financialRequest = await LpsMessage.query().where({ id: financialResponse.lpsFinancialRequestMessageId }).first().throwIfNotFound()
-
+    console.log('Testing0210')
     return {
       ...financialRequest.content,
       0: '0210',

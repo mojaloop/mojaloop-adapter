@@ -101,6 +101,7 @@ export class DefaultIso8583_93TcpRelay extends BaseTcpRelay {
     const authorizationRequest = await LpsMessage.query().where({ id: authorizationResponse.lpsAuthorizationRequestMessageId }).first().throwIfNotFound()
 
     if (authorizationResponse.response === ResponseType.approved) {
+      console.log('Testing93')
       const approvalMessage: LegacyMessage = { ...authorizationRequest.content, 0: '0110', 39: this._responseCodes.approved }
       if (authorizationResponse.fees) approvalMessage[30] = 'D' + pad(new MlNumber(authorizationResponse.fees.amount).multiply(100).toString(), 8, '0')
       if (authorizationResponse.transferAmount) approvalMessage[48] = authorizationResponse.transferAmount.amount

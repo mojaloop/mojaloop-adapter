@@ -18,12 +18,16 @@ const validate = async (transaction: Transaction): Promise<ErrorInformationRespo
 
 export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, ilpService, logger, queueService }: AdaptorServices, quoteRequest: QuotesPostRequest, headers: Request['headers']): Promise<void> {
   try {
+    console.log('quoteRequest.transactionRequestId',quoteRequest.transactionRequestId)
+   
     if (!quoteRequest.transactionRequestId) {
       throw new Error('No transactionRequestId given for quoteRequest.')
     }
+  
     const transaction = await Transaction.query().where('transactionRequestId', quoteRequest.transactionRequestId).withGraphFetched('fees').first().throwIfNotFound()
-
+    console.log('transaction',transaction)
     const error = await validate(transaction)
+    console.log('error',error)
 
     if (error) {
       await mojaClient.putQuotesError(quoteRequest.quoteId, error, headers['fspiop-source'])
@@ -59,7 +63,7 @@ export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, 
     const quoteResponse: QuotesIDPutResponse = {
       condition,
       ilpPacket,
-      expiration: expiration,
+      expiration: '2020-10-20T08:35:56.958Z',
       transferAmount: {
         amount: transferAmount,
         currency: transaction.currency

@@ -55,10 +55,9 @@ export async function transferRequestHandler ({ ilpService, mojaClient, logger, 
       completedTimestamp: (new Date(Date.now())).toISOString()
     }
     await mojaClient.putTransfers(transfer.id, transferResponse, transferRequest.payerFsp)
-
     await transaction.$query().update({ previousState: transaction.state, state: TransactionState.fulfillmentSent })
-
     await transfer.$query().update({ state: TransferState.reserved })
+    //await queueService.addToQueue(`${transaction.lpsId}FinancialResponses`, { lpsFinancialRequestMessageId: 1, response: 0 })
   } catch (error) {
     logger.error(`Transfer Request Handler: Failed to process transfer request ${transferRequest.transferId} from ${headers['fspiop-source']}. ${error.message}`)
     const errorInfo: ErrorInformation = {

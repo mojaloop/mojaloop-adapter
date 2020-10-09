@@ -8,11 +8,11 @@ services:
   lps-adapter:
     build:
       context: .
-    container_name: lps-adapter
+    container_name: lps-adapter    
     command:
       - "sh"
       - "-c"
-      - "sh /usr/wait-for/wait-for-mysql.sh && npm start"
+      - "sh /usr/wait/wait-for-mysql.sh && npm start"
     environment:
       DB_CONFIG: integration
       KNEX_CLIENT: mysql
@@ -22,19 +22,43 @@ services:
       MYSQL_PASSWORD: root
       MYSQL_DATABASE: testing
       REDIS_HOST: redis
-      LOG_LEVEL: debug
+      LOG_LEVEL: debug  
     ports:
       - "3000:3000"
-      - "3001:3001"
+      - "3001:3001"          
     networks:
       - lps-adapter-net
     depends_on:
       - mysql
-      - redis
+      - redis      
     volumes:
-      - ./docker:/usr/wait-for
+      - ./docker:/usr/wait
       - ./test:/usr/src/app/test
-      - ./migrations:/usr/src/app/migrations
+      - ./migrations:/usr/src/app/migrations          
+  mojaloop-testing-toolkit:
+    image: mojaloop/ml-testing-toolkit:v11.2.3
+    volumes:
+      - "./spec_files:/opt/mojaloop-testing-toolkit/spec_files"
+      - "./secrets:/opt/mojaloop-testing-toolkit/secrets"
+    ports:
+      - "5000:5000"
+      - "5050:5050"      
+    command:
+      - sh
+      - -c
+      - "npm start" 
+  mojaloop-testing-toolkit-ui:
+    image: mojaloop/ml-testing-toolkit-ui:v11.2.0
+    ports:
+      - "6060:6060"    
+    environment:
+      - API_BASE_URL=http://localhost:5050
+      - AUTH_ENABLED=FALSE
+    command:
+      - sh
+      - /usr/share/nginx/start.sh    
+            
+
     healthcheck:
       test: ["CMD", "sh", "-c" ,"apk --no-cache add curl", ";", "curl", "http://localhost:3000/health"]
       timeout: 20s
@@ -42,7 +66,7 @@ services:
       interval: 30s
   
   mysql:
-    image: percona/percona-server:8.0
+    image: percona/percona-server
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -52,12 +76,12 @@ services:
       - ./docker/sql-init/:/docker-entrypoint-initdb.d/
     networks:
       - lps-adapter-net
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "mysql"]
-      timeout: 20s
-      retries: 10
-      start_period: 40s
-      interval: 30s
+#    healthcheck:
+#      test: ["CMD", "mysqladmin" ,"ping", "-h", "mysql"]
+#      timeout: 20s
+#      retries: 10
+#      start_period: 40s
+#      interval: 30s
 
   redis:
     image: redis
@@ -74,3 +98,5 @@ services:
       retries: 10
       start_period: 40s
       interval: 30s
+      
+

@@ -26,7 +26,11 @@ export class KnexAuthorizationsService implements AuthorizationsService {
 
   async sendAuthorizationsResponse (transactionRequestId: string, request: AuthorizationsIDPutResponse, headers: { [k: string]: string }): Promise<void> {
     this._logger.debug('Authorizations Service: sending Authorizations Response: ' + transactionRequestId)
+    console.log('Inside send authorization'+transactionRequestId)
+    console.log(`/authorizations/${transactionRequestId}`, request, { headers })
+    console.log(this._client)
     await this._client.put(`/authorizations/${transactionRequestId}`, request, { headers })
+    console.log('After put');
   }
 
   async sendAuthorizationsErrorResponse (transactionRequestId: string, error: ErrorInformation, headers: { [k: string]: string | undefined }): Promise<void> {
