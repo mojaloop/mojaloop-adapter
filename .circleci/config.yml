@@ -405,26 +405,26 @@ workflows:
                 - /bugfix*/
                 - /chore*/
                 - /performance*/
-      - test-integration:
-          context: org-global
-          requires:
-            - setup
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              ignore:
-                - /feature*/
-                - /bugfix*/
-                - /chore*/
-                - /performance*/
+      # - test-integration:
+      #     context: org-global
+      #     requires:
+      #       - setup
+      #     filters:
+      #       tags:
+      #         only: /.*/
+      #       branches:
+      #         ignore:
+      #           - /feature*/
+      #           - /bugfix*/
+      #           - /chore*/
+      #           - /performance*/
       - build:
           context: org-global
           requires:
             - setup
             - test-unit
             - test-coverage
-            - test-integration
+            #- test-integration
             - vulnerability-check
             - audit-licenses
           filters:
