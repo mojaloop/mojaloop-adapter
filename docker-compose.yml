@@ -17,51 +17,57 @@ services:
       DB_CONFIG: integration
       KNEX_CLIENT: mysql
       MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
+      MYSQL_PORT: 3308
       MYSQL_USER: root
       MYSQL_PASSWORD: root
       MYSQL_DATABASE: testing
       REDIS_HOST: redis
       LOG_LEVEL: debug
+      ADAPTOR_FSP_ID: adaptorRse
+      # ACCOUNT_LOOKUP_URL: https://account-lookup-service.mojaloop.app
+      # TRANSACTION_REQUESTS_URL: https://transaction-request-service.mojaloop.app
+      # AUTHORIZATIONS_URL: https://transaction-request-service.mojaloop.app
+      # QUOTE_REQUESTS_URL: https://quoting-service.mojaloop.app
+      # TRANSFERS_URL: https://ml-api-adapter.mojaloop.app
     ports:
-      - "3000:3000"
-      - "3001:3001"
+      - "8000:8000"
+      - "8001:8001"
     networks:
       - lps-adapter-net
     depends_on:
-      - mysql
-      - redis
+      - mysql-mojaloop-adapter
+      - redis-mojaloop-adapter
     volumes:
       - ./docker:/usr/wait-for
       - ./test:/usr/src/app/test
       - ./migrations:/usr/src/app/migrations
     healthcheck:
-      test: ["CMD", "sh", "-c" ,"apk --no-cache add curl", ";", "curl", "http://localhost:3000/health"]
+      test: ["CMD", "sh", "-c" ,"apk --no-cache add curl", ";", "curl", "http://localhost:8000/health"]
       timeout: 20s
       retries: 10
       interval: 30s
-  
-  mysql:
+
+  mysql-mojaloop-adapter:
     image: percona/percona-server:8.0
     container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3308:3306"
     volumes:
       - ./docker/sql-init/:/docker-entrypoint-initdb.d/
     networks:
       - lps-adapter-net
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "mysql"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "mysql-mojaloop-adapter"]
       timeout: 20s
       retries: 10
       start_period: 40s
       interval: 30s
 
-  redis:
+  redis-mojaloop-adapter:
     image: redis
-    container_name: redis
+    container_name: redis-mojaloop-adapter
     environment:
       usePassword: "false"
     ports:

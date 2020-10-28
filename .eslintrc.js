@@ -1,35 +1,19 @@
- 
 module.exports = {
-  parser: '@typescript-eslint/parser',  // Specifies the ESLint parser
+  env: {
+    browser: true,
+    es2021: true
+  },
   extends: [
-    'standard',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/eslint-recommended',  // Uses the recommended rules from the @typescript-eslint/eslint-plugin
-    // 'prettier/@typescript-eslint',  // Uses eslint-config-prettier to disable ESLint rules from @typescript-eslint/eslint-plugin that would conflict with prettier
-    // 'plugin:prettier/recommended',  // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors. Make sure this is always the last configuration in the extends array.
+    'standard'
   ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2018,  // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module',  // Allows for the use of imports
+    ecmaVersion: 12,
+    sourceType: 'module'
   },
   plugins: [
-    "@typescript-eslint/eslint-plugin",
-    "import"
+    '@typescript-eslint'
   ],
   rules: {
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-var-requires': 'off',
-    'padded-blocks': 'off',
-    'no-useless-constructor': 'off',
-    'no-case-declarations': 'off'
-  },
-  overrides: [
-    {
-      // Disable some rules that we abuse in unit tests.
-      files: ['test/**/*.ts'],
-      rules: {
-        '@typescript-eslint/explicit-function-return-type': 'off',
-      },
-    },
-  ],
-};
+  }
+}
