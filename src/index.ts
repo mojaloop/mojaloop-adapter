@@ -8,15 +8,16 @@ app.use(bodyParser.urlencoded({ extended: true }))
 const port = 8000
 
 app.post('/pay', async (req, res) => {
-  // console.log(req.body.FIToFICstmrCdtTrf)
   try {
     const transactionRequestId = req.body.FIToFICstmrCdtTrf.GrpHdr.MsgId
-    const partyIdentifier = req.body.FIToFICstmrCdtTrf.CdtTrfTxInf.Cdtr.CtctDtls.MobNb
-    console.log('data', transactionRequestId, partyIdentifier)
+    const payeePartyIdentifier = req.body.FIToFICstmrCdtTrf.CdtTrfTxInf.Dbtr.CtctDtls.MobNb
+    const payerPartyIdentifier = req.body.FIToFICstmrCdtTrf.CdtTrfTxInf.Cdtr.CtctDtls.MobNb
+
+    // LOOKUP PHASE
     const lookupRequest = {
       payee: {
         partyIdType: 'MSISDN',
-        partyIdentifier: partyIdentifier
+        partyIdentifier: payeePartyIdentifier
       },
       transactionRequestId: transactionRequestId
     }
@@ -25,6 +26,9 @@ app.post('/pay', async (req, res) => {
       throw new Error('Party lookup error')
     }
 
+    // console.log('lookupResponse', lookupResponse.data)
+
+    // INITIATE PHASE
     const initiateURI = `http://pisp-thirdparty-scheme-adapter-outbound:7006/thirdpartyTransaction/${transactionRequestId}/initiate`
     const initiateRequest = {
       sourceAccountId: 'dfspa.alice.1234',
@@ -32,7 +36,7 @@ app.post('/pay', async (req, res) => {
       payee: {
         partyIdInfo: {
           partyIdType: 'MSISDN',
-          partyIdentifier: '+44 1234 5678',
+          partyIdentifier: payeePartyIdentifier,
           fspId: 'dfspb'
         }
       },
@@ -45,7 +49,7 @@ app.post('/pay', async (req, res) => {
         },
         partyIdInfo: {
           partyIdType: 'MSISDN',
-          partyIdentifier: '+44 8765 4321',
+          partyIdentifier: payerPartyIdentifier,
           fspId: 'dfspa'
         }
       },
@@ -68,6 +72,8 @@ app.post('/pay', async (req, res) => {
       throw new Error('Initial transation error')
     }
 
+    // console.log('initiateresponse', initiateresponse.data)
+
     const approveURI = `http://pisp-thirdparty-scheme-adapter-outbound:7006/thirdpartyTransaction/${transactionRequestId}/approve`
     const approveRequest = {
       authorizationResponse: {
@@ -87,12 +93,13 @@ app.post('/pay', async (req, res) => {
       throw new Error('Approve request error')
     }
 
-    // console.log('after', lookupResponse.data)
-    return res.send(lookupResponse.data)
+    // console.log('approveResponse', approveResponse.data)
+    // Need to return pacs.008 response
+    return res.send(approveResponse.data)
   } catch (error) {
     console.log('error', error)
     console.log('data', error.data)
-    return res.send(error.message)
+    return res.status(500).send(error.message)
   }
 })
 
