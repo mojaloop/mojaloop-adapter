@@ -31,11 +31,11 @@ const TCP_PORT = process.env.TCP_PORT || 3001
 const REDIS_PORT = process.env.REDIS_PORT || 6379
 const REDIS_HOST = process.env.REDIS_HOST || 'localhost'
 const ADAPTOR_FSP_ID = process.env.ADAPTOR_FSP_ID || 'adaptor'
-const TRANSACTION_REQUESTS_URL = '172.17.0.1:5000' || 'http://transaction-requests.local'
-const QUOTE_REQUESTS_URL = '172.17.0.1:5000' || 'http://quote-requests.local'
-const TRANSFERS_URL = '172.17.0.1:5000' || 'http://transfers.local'
-const AUTHORIZATIONS_URL = 'http://172.17.0.1:5000' || 'http://authorizations.local'
-const ACCOUNT_LOOKUP_URL = '172.17.0.1:5000' || 'http://account-lookup-service.local'
+const TRANSACTION_REQUESTS_URL = process.env.TRANSACTION_REQUESTS_URL || 'http://transaction-requests.local'
+const QUOTE_REQUESTS_URL = process.env.QUOTE_REQUESTS_URL || 'http://quote-requests.local'
+const TRANSFERS_URL = process.env.TRANSFERS_URL || 'http://transfers.local'
+const AUTHORIZATIONS_URL = process.env.AUTHORIZATIONS_URL || 'http://authorizations.local'
+const ACCOUNT_LOOKUP_URL = process.env.ACCOUNT_LOOKUP_URL || 'http://account-lookup-service.local'
 const ILP_SECRET = process.env.ILP_SECRET || 'secret'
 const KNEX_CLIENT = process.env.KNEX_CLIENT || 'sqlite3'
 const knex = KNEX_CLIENT === 'mysql' ? Knex({

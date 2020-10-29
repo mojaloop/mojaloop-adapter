@@ -151,7 +151,6 @@ export class DefaultIso8583_87TcpRelay extends BaseTcpRelay {
   async mapToFinancialResponse (financialResponse: LegacyFinancialResponse): Promise<LegacyMessage> {
     this._logger.debug(`${this._lpsId} relay: Mapping to financial request`)
     const financialRequest = await LpsMessage.query().where({ id: financialResponse.lpsFinancialRequestMessageId }).first().throwIfNotFound()
-    console.log('Testing0210')
     return {
       ...financialRequest.content,
       0: '0210',

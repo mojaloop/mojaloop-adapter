@@ -36,7 +36,7 @@ services:
       - ./test:/usr/src/app/test
       - ./migrations:/usr/src/app/migrations          
   mojaloop-testing-toolkit:
-    image: mojaloop/ml-testing-toolkit:v11.2.3
+    image: mojaloop/ml-testing-toolkit:v11.2.5
     volumes:
       - "./spec_files:/opt/mojaloop-testing-toolkit/spec_files"
       - "./secrets:/opt/mojaloop-testing-toolkit/secrets"
@@ -48,7 +48,7 @@ services:
       - -c
       - "npm start" 
   mojaloop-testing-toolkit-ui:
-    image: mojaloop/ml-testing-toolkit-ui:v11.2.0
+    image: mojaloop/ml-testing-toolkit-ui:v11.2.2
     ports:
       - "6060:6060"    
     environment:

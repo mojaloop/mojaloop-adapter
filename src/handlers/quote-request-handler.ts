@@ -25,7 +25,6 @@ export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, 
     }
   
     const transaction = await Transaction.query().where('transactionRequestId', quoteRequest.transactionRequestId).withGraphFetched('fees').first().throwIfNotFound()
-    console.log('transaction',transaction)
     const error = await validate(transaction)
     console.log('error',error)
 
@@ -43,7 +42,7 @@ export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, 
     const otherFees = transaction.fees?.map(fee => fee.amount).reduce((total, current) => new MlNumber(total).add(current).toString(), '0')
     const totalFeeAmount = otherFees ? new MlNumber(otherFees).add(adaptorFees.amount).toString() : adaptorFees.amount
     const transferAmount = new MlNumber(totalFeeAmount).add(quoteRequest.amount.amount).toString()
-    const expiration = new Date(Date.now() + Number(QUOTE_EXPIRATION_WINDOW) * 1000).toUTCString()
+    const expiration = new Date(Date.now() + Number(QUOTE_EXPIRATION_WINDOW) * 1000).toISOString()
     const { ilpPacket, condition } = await ilpService.getQuoteResponseIlp(quoteRequest, { transferAmount: { amount: transferAmount, currency: transaction.currency } })
 
     await transaction.$relatedQuery<Quote>('quote').insertAndFetch({
@@ -63,7 +62,7 @@ export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, 
     const quoteResponse: QuotesIDPutResponse = {
       condition,
       ilpPacket,
-      expiration: '2020-10-20T08:35:56.958Z',
+      expiration: expiration,
       transferAmount: {
         amount: transferAmount,
         currency: transaction.currency

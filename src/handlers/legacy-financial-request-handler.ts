@@ -32,15 +32,13 @@ export async function legacyFinancialRequestHandler ({ authorizationsService, lo
       },
       responseType: 'ENTERED'
     }
-    console.log (transaction.transactionRequestId,authorizationsResponse, headers)
+    
     await authorizationsService.sendAuthorizationsResponse(transaction.transactionRequestId, authorizationsResponse, headers)
     
     await transaction.$query().update({ state: TransactionState.financialRequestSent, previousState: transaction.state })
    
   } catch (error) {
     logger.error(`Legacy Financial Request Handler: Failed to process legacy financial request. ${error.message}`)
-    logger.error(error)
-    console.log(error)
     // TODO: send cancellation back to LPS switch
   }
 }
