@@ -1,17 +1,45 @@
 import express from 'express'
 import * as bodyParser from 'body-parser'
 import axios from 'axios'
+import xmlparser from 'express-xml-bodyparser'
+import xml from 'xml2js'
+const builder = new xml.Builder({
+  renderOpts: { pretty: false }
+})
+const bustHeaders = (request: any, response: any, next: any) => {
+  request.app.isXml = false
+
+  if (request.headers['content-type'] === 'application/xml' || request.headers.accept === 'application/xml'
+  ) {
+    request.app.isXml = true
+  }
+
+  next()
+}
+// XML Parser configurations, https://github.com/Leonidas-from-XIV/node-xml2js#options
+const xmlOptions = {
+  charkey: 'value',
+  trim: false,
+  explicitRoot: false,
+  explicitArray: false,
+  normalizeTags: false,
+  mergeAttrs: true
+}
 
 const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 const port = 8000
 
-app.post('/pay', async (req, res) => {
+const thirdpartySchemeAdapterOutbound = 'http://pisp-thirdparty-scheme-adapter-outbound:7006'
+
+app.post('/pay', bustHeaders, xmlparser(xmlOptions), async (req, res) => {
+  res.set('Content-Type', 'text/xml')
   try {
     const transactionRequestId = req.body.FIToFICstmrCdtTrf.GrpHdr.MsgId
-    const payeePartyIdentifier = req.body.FIToFICstmrCdtTrf.CdtTrfTxInf.Dbtr.CtctDtls.MobNb
-    const payerPartyIdentifier = req.body.FIToFICstmrCdtTrf.CdtTrfTxInf.Cdtr.CtctDtls.MobNb
+    const payerPartyIdentifier = req.body.FIToFICstmrCdtTrf.CdtTrfTxInf.Dbtr.CtctDtls.MobNb
+    const payeePartyIdentifier = req.body.FIToFICstmrCdtTrf.CdtTrfTxInf.Cdtr.CtctDtls.MobNb
+    const amount = req.body.FIToFICstmrCdtTrf.CdtTrfTxInf.IntrBkSttlmAmt.amount
 
     // LOOKUP PHASE
     const lookupRequest = {
@@ -21,15 +49,14 @@ app.post('/pay', async (req, res) => {
       },
       transactionRequestId: transactionRequestId
     }
-    const lookupResponse = await axios.post('http://pisp-thirdparty-scheme-adapter-outbound:7006/thirdpartyTransaction/partyLookup', lookupRequest)
+    const lookupResponse = await axios.post(`${thirdpartySchemeAdapterOutbound}/thirdpartyTransaction/partyLookup`, lookupRequest)
+    console.log('lookupResponse', lookupResponse.status, lookupResponse.data)
     if (lookupResponse.status !== 200 || lookupResponse.data.currentState !== 'partyLookupSuccess') {
-      throw new Error('Party lookup error')
+      throw new Error(lookupResponse.data.errorInformation.errorDescription)
     }
 
-    // console.log('lookupResponse', lookupResponse.data)
-
     // INITIATE PHASE
-    const initiateURI = `http://pisp-thirdparty-scheme-adapter-outbound:7006/thirdpartyTransaction/${transactionRequestId}/initiate`
+    const initiateURI = `${thirdpartySchemeAdapterOutbound}/thirdpartyTransaction/${transactionRequestId}/initiate`
     const initiateRequest = {
       sourceAccountId: 'dfspa.alice.1234',
       consentId: '8e34f91d-d078-4077-8263-2c047876fcf6',
@@ -55,7 +82,7 @@ app.post('/pay', async (req, res) => {
       },
       amountType: 'SEND',
       amount: {
-        amount: '100',
+        amount: amount,
         currency: 'USD'
       },
       transactionType: {
@@ -67,14 +94,12 @@ app.post('/pay', async (req, res) => {
     }
 
     const initiateresponse = await axios.post(initiateURI, initiateRequest)
-
+    console.log('initiateresponse', initiateresponse.data)
     if (initiateresponse.status !== 200 || initiateresponse.data.currentState !== 'authorizationReceived') {
       throw new Error('Initial transation error')
     }
 
-    // console.log('initiateresponse', initiateresponse.data)
-
-    const approveURI = `http://pisp-thirdparty-scheme-adapter-outbound:7006/thirdpartyTransaction/${transactionRequestId}/approve`
+    const approveURI = `${thirdpartySchemeAdapterOutbound}/thirdpartyTransaction/${transactionRequestId}/approve`
     const approveRequest = {
       authorizationResponse: {
         authenticationInfo: {
@@ -88,25 +113,31 @@ app.post('/pay', async (req, res) => {
       }
     }
     const approveResponse = await axios.post(approveURI, approveRequest)
-
+    console.log('approveResponse', approveResponse.data)
     if (approveResponse.status !== 200 || approveResponse.data.currentState !== 'transactionStatusReceived' || approveResponse.data.transactionStatus.transactionRequestState !== 'ACCEPTED') {
       throw new Error('Approve request error')
     }
 
-    // console.log('approveResponse', approveResponse.data)
-    // Need to return pacs.008 response
-    return res.send(approveResponse.data)
+    return res.send(builder.buildObject({
+      response: {
+        code: 3000,
+        message: 'Success'
+      }
+    }))
   } catch (error) {
-    console.log('error', error)
-    console.log('data', error.data)
-    return res.status(500).send(error.message)
+    return res.send(builder.buildObject({
+      response: {
+        code: 3032,
+        message: error.message
+      }
+    }))
   }
 })
 
 app.get('/hello', async (req, res) => {
   console.log('hello')
   try {
-    const lookupResponse = await axios.get('http://pisp-thirdparty-scheme-adapter-outbound:7006/hello')
+    const lookupResponse = await axios.get(`${thirdpartySchemeAdapterOutbound}/hello`)
     console.log(lookupResponse.data)
     return res.send(lookupResponse.data)
   } catch (error) {
