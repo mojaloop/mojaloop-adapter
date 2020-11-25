@@ -1,0 +1,57 @@
+{
+	"info": {
+		"_postman_id": "9cc05927-9e39-48d9-bcd1-a8feca53ebc0",
+		"name": "ISO-20022",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "ISO-20022 Request",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "6ec4b229-e4ab-4573-85ce-d9c95f549436",
+						"exec": [
+							"postman.setEnvironmentVariable(\"CreDtTm\", new Date(new Date().getTime() + 10000));",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/xml"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n   <FIToFICstmrCdtTrf>\n      <CdtTrfTxInf>\n         <Cdtr>\n            <CtctDtls>\n               <MobNb>123456789</MobNb>\n            </CtctDtls>\n            <Nm>SOAP</Nm>\n            <PstlAdr>\n               <Ctry>ZA</Ctry>\n               <PstCd>6725</PstCd>\n               <StrtNm>78 Strand Str</StrtNm>\n               <TwnNm>Cape Town</TwnNm>\n            </PstlAdr>\n         </Cdtr>\n         <CdtrAcct>\n            <Id>\n               <Other>\n                  <Id>123456789</Id>\n               </Other>\n            </Id>\n         </CdtrAcct>\n         <CdtrAgt>\n            <FinInstnId>\n               <BICFI>ISO0200Factory[100]</BICFI>\n            </FinInstnId>\n         </CdtrAgt>\n         <ChrgBr>SLEV</ChrgBr>\n         <Dbtr>\n            <CtctDtls>\n               <MobNb>987654321</MobNb>\n            </CtctDtls>\n            <Nm>Joe Soap</Nm>\n            <PstlAdr>\n               <PstlAdr>\n                  <Ctry>SZ</Ctry>\n                  <PstCd>4430</PstCd>\n                  <StrtNm>120 HIGH ROAD</StrtNm>\n                  <TwnNm>Manzini</TwnNm>\n               </PstlAdr>\n            </PstlAdr>\n         </Dbtr>\n         <DbtrAcct>\n            <Id>\n               <other>\n                  <Id>ISO0200Factory[102]</Id>\n               </other>\n            </Id>\n         </DbtrAcct>\n         <DbtrAgt>\n            <FinInstnId>\n               <BICFI>ISO0200Factory[32]</BICFI>\n            </FinInstnId>\n         </DbtrAgt>\n         <IntrBkSttlmAmt>\n            <Ccy>ISO0200Factory[49]</Ccy>\n            <amount>100</amount>\n         </IntrBkSttlmAmt>\n         <IntrBkSttlmDt>2020-01-01</IntrBkSttlmDt>\n         <PmtId>\n            <EndToEndId>KGB57799</EndToEndId>\n            <TxId>KGB57799</TxId>\n         </PmtId>\n         <PmtTpInf>\n            <SvcLvl>\n               <Cd>NURG</Cd>\n            </SvcLvl>\n         </PmtTpInf>\n         <RgltryRptg>\n            <Dtls>\n               <Cd>10402</Cd>\n            </Dtls>\n         </RgltryRptg>\n         <RmtInf>\n            <Ustrd>52363</Ustrd>\n         </RmtInf>\n      </CdtTrfTxInf>\n      <GrpHdr>\n         <CreDtTm>{{CreDtTm}}</CreDtTm>\n         <MsgId>7c23e80c-d078-4077-8263-2c047876fc03</MsgId>\n         <NbOfTxs>1</NbOfTxs>\n         <SttlmInf>\n            <SttlmMtd>CLRG</SttlmMtd>\n         </SttlmInf>\n      </GrpHdr>\n   </FIToFICstmrCdtTrf>\n   <xmlns>urn:iso:std:iso:20022:tech:xsd:pacs.008.001.05</xmlns>\n   <xsi>http://www.w3.org/2001/XMLSchema-instance</xsi>\n</root>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://lps-adapter:8000/pay",
+					"protocol": "http",
+					"host": [
+						"lps-adapter"
+					],
+					"port": "8000",
+					"path": [
+						"pay"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
