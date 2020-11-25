@@ -51,6 +51,25 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Consent",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://lps-adapter:8000/consent",
+					"protocol": "http",
+					"host": [
+						"lps-adapter"
+					],
+					"port": "8000",
+					"path": [
+						"consent"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"protocolProfileBehavior": {}

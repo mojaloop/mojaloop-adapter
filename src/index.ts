@@ -131,17 +131,13 @@ app.post('/pay', bustHeaders, xmlparser(xmlOptions), async (req, res) => {
   }
 })
 
-app.get('/hello', async (req, res) => {
-  console.log('hello')
-  try {
-    const lookupResponse = await axios.get(`${thirdpartySchemeAdapterOutbound}/hello`)
-    console.log(lookupResponse.data)
-    return res.send(lookupResponse.data)
-  } catch (error) {
-    console.log('error', error)
-    console.log('data', error.data)
-    return res.send(error.message)
-  }
+app.post('/consent', async (req, res) => {
+  /**
+   * Here we will need to get consent
+   * For now, we are assuming the consent is successful
+   * Simulating the webhook and returning a consent id
+   */
+  return res.send({ consentId: '8e34f91d-d078-4077-8263-2c047876fcf6' })
 })
 
 app.listen(port, () => {
