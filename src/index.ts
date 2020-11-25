@@ -8,12 +8,9 @@ const builder = new xml.Builder({
 })
 const bustHeaders = (request: any, response: any, next: any) => {
   request.app.isXml = false
-
-  if (request.headers['content-type'] === 'application/xml' || request.headers.accept === 'application/xml'
-  ) {
+  if (request.headers['content-type'] === 'application/xml' || request.headers.accept === 'application/xml') {
     request.app.isXml = true
   }
-
   next()
 }
 // XML Parser configurations, https://github.com/Leonidas-from-XIV/node-xml2js#options
