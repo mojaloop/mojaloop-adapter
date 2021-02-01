@@ -111,9 +111,10 @@ const decode = (data: Buffer): { [k: string]: any } => {
 
 const start = async (): Promise<void> => {
   let shuttingDown = false
-  console.log('LOG_LEVEL:', process.env.LOG_LEVEL)
+  console.log('LOG_LEVEL:', 'debug')
   console.log('REDIS_HOST:', REDIS_HOST, 'REDIS_PORT:', REDIS_PORT)
   console.log('TRANSACTION_REQUESTS_URL:', TRANSACTION_REQUESTS_URL)
+  console.log('AUTHORIZATIONS_URL:', AUTHORIZATIONS_URL)
 
   await knex.migrate.latest()
 

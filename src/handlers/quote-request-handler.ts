@@ -18,12 +18,15 @@ const validate = async (transaction: Transaction): Promise<ErrorInformationRespo
 
 export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, ilpService, logger, queueService }: AdaptorServices, quoteRequest: QuotesPostRequest, headers: Request['headers']): Promise<void> {
   try {
+    console.log('quoteRequest.transactionRequestId',quoteRequest.transactionRequestId)
+   
     if (!quoteRequest.transactionRequestId) {
       throw new Error('No transactionRequestId given for quoteRequest.')
     }
+  
     const transaction = await Transaction.query().where('transactionRequestId', quoteRequest.transactionRequestId).withGraphFetched('fees').first().throwIfNotFound()
-
     const error = await validate(transaction)
+    console.log('error',error)
 
     if (error) {
       await mojaClient.putQuotesError(quoteRequest.quoteId, error, headers['fspiop-source'])
@@ -39,7 +42,7 @@ export async function quotesRequestHandler ({ calculateAdaptorFees, mojaClient, 
     const otherFees = transaction.fees?.map(fee => fee.amount).reduce((total, current) => new MlNumber(total).add(current).toString(), '0')
     const totalFeeAmount = otherFees ? new MlNumber(otherFees).add(adaptorFees.amount).toString() : adaptorFees.amount
     const transferAmount = new MlNumber(totalFeeAmount).add(quoteRequest.amount.amount).toString()
-    const expiration = new Date(Date.now() + Number(QUOTE_EXPIRATION_WINDOW) * 1000).toUTCString()
+    const expiration = new Date(Date.now() + Number(QUOTE_EXPIRATION_WINDOW) * 1000).toISOString()
     const { ilpPacket, condition } = await ilpService.getQuoteResponseIlp(quoteRequest, { transferAmount: { amount: transferAmount, currency: transaction.currency } })
 
     await transaction.$relatedQuery<Quote>('quote').insertAndFetch({
