@@ -13,9 +13,9 @@ export async function transferResponseHandler ({ queueService, logger }: Adaptor
         lpsFinancialRequestMessageId: legacyFinancialRequest.id,
         response: ResponseType.approved
       }
-
+      
       await queueService.addToQueue(`${transaction.lpsId}FinancialResponses`, legacyFinancialResponse)
-
+      
       await transaction.$query().update({ state: TransactionState.financialResponse, previousState: transaction.state })
       await transfer.$query().update({ state: TransferState.committed })
     }
